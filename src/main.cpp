@@ -33,6 +33,16 @@ namespace manipulate
 	};
 }
 
+enum Object{
+    Box,
+    Cylinder,
+    Sphere,
+    Pyramid,
+    Model
+};
+
+
+
 manipulate::type manipulator;
 
 bool keys[256];
@@ -176,6 +186,30 @@ void menustatusfunc(int status, int x, int y)
 {
 	if (status == GLUT_MENU_IN_USE)
 		menu = true;
+}
+
+void handle_objects (Object obj){
+    
+    switch (obj){
+        case Object::Box :
+            
+            break;
+        case Object::Cylinder :
+            
+            break;
+        case Object::Sphere :
+            
+            break;
+        case Object::Pyramid :
+            
+            break;
+        case Object::Model :
+            
+            break;
+        default:
+            
+            break;
+    }
 }
 
 void create_menu()

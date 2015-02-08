@@ -368,6 +368,7 @@
 				CONFIGURATION_TEMP_DIR = assignment.build;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LD_MAP_FILE_PATH = "assignment.build/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = assignment.build;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = "$(BUILD_DIR)";
@@ -381,6 +382,7 @@
 				CONFIGURATION_TEMP_DIR = assignment.build;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LD_MAP_FILE_PATH = "assignment.build/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = assignment.build;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = "$(BUILD_DIR)";
