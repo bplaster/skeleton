@@ -50,7 +50,9 @@
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
       <PathRunnable
-         FilePath = "/Users/Alap/Documents/Cornell Tech/Computer Graphics/Assignment 1/skeleton/build/assignment">
+
+<!--         FilePath = "/Users/Alap/Documents/Cornell Tech/Computer Graphics/Assignment 1/skeleton/build/assignment">-->
+         FilePath = "$PROJECT_DIR/build/assignment"
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference
