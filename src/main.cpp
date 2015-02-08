@@ -178,6 +178,11 @@ void menustatusfunc(int status, int x, int y)
 		menu = true;
 }
 
+void handle_menu(int val)
+{
+    
+}
+
 void create_menu()
 {
 	/* TODO Assignment 1: Implement a menu that allows the following operations:
@@ -195,6 +200,55 @@ void create_menu()
 	 * - Set the active camera
 	 * - quit
 	 */
+    
+    // Add object menu items
+    int object_menu_id = glutCreateMenu(handle_menu);
+    glutAddMenuEntry("Box", 0);
+    glutAddMenuEntry("Cylinder", 1);
+    glutAddMenuEntry("Sphere", 2);
+    glutAddMenuEntry("Pyramid", 3);
+    glutAddMenuEntry("Model", 4);
+    
+    // Add camera menu items
+    int camera_menu_id = glutCreateMenu(handle_menu);
+    glutAddMenuEntry("Fovy", 0);
+    glutAddMenuEntry("Aspect", 1);
+    glutAddMenuEntry("Width", 2);
+    glutAddMenuEntry("Height", 3);
+    glutAddMenuEntry("Near", 4);
+    glutAddMenuEntry("Far", 5);
+    glutAddMenuEntry("Toggle Draw", 6);
+    glutAddMenuEntry("Clear Focus", 7);
+    glutAddMenuEntry("Ortho", 8);
+    glutAddMenuEntry("Frustum", 9);
+    glutAddMenuEntry("Perspective", 10);
+
+    // Add polygon menu items
+    int polygon_menu_id = glutCreateMenu(handle_menu);
+    glutAddMenuEntry("Point", 0);
+    glutAddMenuEntry("Line", 1);
+
+    // Add culling menu items
+    int culling_menu_id = glutCreateMenu(handle_menu);
+    glutAddMenuEntry("None", 0);
+    glutAddMenuEntry("Back", 1);
+    glutAddMenuEntry("Front", 2);
+    
+    // Add normals menu items
+    int normals_menu_id = glutCreateMenu(handle_menu);
+    glutAddMenuEntry("None", 0);
+    glutAddMenuEntry("Face", 1);
+    glutAddMenuEntry("Vertex", 2);
+    
+    // Add submenus to menu
+    int menu_id = glutCreateMenu(handle_menu);
+    glutAddSubMenu("Objects", object_menu_id);
+    glutAddSubMenu("Cameras", camera_menu_id);
+    glutAddSubMenu("Polygon", polygon_menu_id);
+    glutAddSubMenu("Culling", culling_menu_id);
+    glutAddSubMenu("Normals", normals_menu_id);
+    glutAddMenuEntry("Quit", 5);
+
 
 	/* TODO Assignment 2: Add to the menu the following operations:
 	 * - create directional, point, or spot lights
