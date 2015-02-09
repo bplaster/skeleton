@@ -33,7 +33,7 @@ namespace manipulate
 	};
 }
 
-enum Object{
+enum class Object{
     Box,
     Cylinder,
     Sphere,
@@ -41,7 +41,36 @@ enum Object{
     Model
 };
 
+enum class Camera{
+    Fovy,
+    Aspect,
+    Width,
+    Height,
+    Near,
+    Far,
+    ToggleDraw,
+    ClearFocus,
+    Ortho,
+    Frustum,
+    Perspective
+};
 
+enum class Polygon{
+    Point,
+    Line
+};
+
+enum class Culling{
+    None,
+    Back,
+    Front
+};
+
+enum class Normal{
+    None,
+    Face,
+    Vertex
+};
 
 manipulate::type manipulator;
 
@@ -189,18 +218,21 @@ void menustatusfunc(int status, int x, int y)
 }
 
 
-void handle_objects (Object obj){
-    
-    switch (obj){
+void handle_objects (int val){
+
+    switch ((Object)val){
         case Object::Box :
             
             break;
         case Object::Cylinder :
             
             break;
-        case Object::Sphere :
+        case Object::Sphere : {
+            spherehdl sphere = spherehdl(1.0, 5.0, 5.0);
+            scene.objects.push_back(&sphere);
             
             break;
+        }
         case Object::Pyramid :
             
             break;
@@ -213,9 +245,106 @@ void handle_objects (Object obj){
     }
 }
 
+void handle_cameras (int val){
+    
+    switch ((Camera)val){
+        case Camera::Fovy :
+            
+            break;
+        case Camera::Aspect :
+            
+            break;
+        case Camera::Width :
+            
+            break;
+        case Camera::Height :
+            
+            break;
+        case Camera::Near :
+            
+            break;
+        case Camera::Far :
+            
+            break;
+        case Camera::ToggleDraw :
+            
+            break;
+        case Camera::ClearFocus :
+            
+            break;
+        case Camera::Ortho :
+            
+            break;
+        case Camera::Frustum :
+            
+            break;
+        case Camera::Perspective :
+            
+            break;
+        default:
+            
+            break;
+    }
+}
+
+void handle_polygons (int val){
+    
+    switch ((Polygon)val){
+        case Polygon::Point :
+            
+            break;
+        case Polygon::Line :
+            
+            break;
+        default:
+            
+            break;
+    }
+}
+
+void handle_culling (int val){
+    
+    switch ((Culling)val){
+        case Culling::None :
+            
+            break;
+        case Culling::Back :
+            
+            break;
+        case Culling::Front :
+            
+            break;
+        default:
+            
+            break;
+    }
+}
+
+void handle_normal (int val){
+    
+    switch ((Normal)val){
+        case Normal::None :
+            
+            break;
+        case Normal::Face :
+            
+            break;
+        case Normal::Vertex :
+            
+            break;
+        default:
+            
+            break;
+    }
+}
+
+
 void handle_menu(int val)
 {
-    
+    if (val == 5){
+        glutDestroyWindow(window_id);
+        exit(0);
+    }
 
 }
 
@@ -238,7 +367,7 @@ void create_menu()
 	 */
     
     // Add object menu items
-    int object_menu_id = glutCreateMenu(handle_menu);
+    int object_menu_id = glutCreateMenu(handle_objects);
     glutAddMenuEntry("Box", 0);
     glutAddMenuEntry("Cylinder", 1);
     glutAddMenuEntry("Sphere", 2);
@@ -246,7 +375,7 @@ void create_menu()
     glutAddMenuEntry("Model", 4);
     
     // Add camera menu items
-    int camera_menu_id = glutCreateMenu(handle_menu);
+    int camera_menu_id = glutCreateMenu(handle_cameras);
     glutAddMenuEntry("Fovy", 0);
     glutAddMenuEntry("Aspect", 1);
     glutAddMenuEntry("Width", 2);
@@ -260,18 +389,18 @@ void create_menu()
     glutAddMenuEntry("Perspective", 10);
 
     // Add polygon menu items
-    int polygon_menu_id = glutCreateMenu(handle_menu);
+    int polygon_menu_id = glutCreateMenu(handle_polygons);
     glutAddMenuEntry("Point", 0);
     glutAddMenuEntry("Line", 1);
 
     // Add culling menu items
-    int culling_menu_id = glutCreateMenu(handle_menu);
+    int culling_menu_id = glutCreateMenu(handle_culling);
     glutAddMenuEntry("None", 0);
     glutAddMenuEntry("Back", 1);
     glutAddMenuEntry("Front", 2);
     
     // Add normals menu items
-    int normals_menu_id = glutCreateMenu(handle_menu);
+    int normals_menu_id = glutCreateMenu(handle_normal);
     glutAddMenuEntry("None", 0);
     glutAddMenuEntry("Face", 1);
     glutAddMenuEntry("Vertex", 2);
