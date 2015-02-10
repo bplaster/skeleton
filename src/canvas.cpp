@@ -171,7 +171,11 @@ vec3f canvashdl::to_window(vec2i pixel)
 	/* TODO Assignment 1: Given a pixel coordinate (x from 0 to width and y from 0 to height),
 	 * convert it into window coordinates (x from -1 to 1 and y from -1 to 1).
 	 */
-	return vec3f();
+    float x = 2*pixel[0]/width - 1;
+    float y = 2*pixel[1]/height - 1;
+    float z = 0;
+    
+	return vec3f(x,y,z);
 }
 
 /* unproject
@@ -299,6 +303,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
 	 */
+
 }
 
 
