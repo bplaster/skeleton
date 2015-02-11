@@ -18,6 +18,7 @@ rigidhdl::~rigidhdl()
 void rigidhdl::draw(canvashdl *canvas)
 {
 	// TODO Assignment 1: Send the rigid body geometry to the renderer
+    canvas->draw_triangles(geometry, indices);
 }
 
 objecthdl::objecthdl()
