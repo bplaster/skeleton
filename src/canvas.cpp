@@ -267,7 +267,7 @@ void canvashdl::plot_point(vec8f v)
 void canvashdl::plot_line(vec8f v1, vec8f v2)
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
-    
+    std::cout << "line";
     // Convert to Pixel coordinates here
     vec2i vp1 = to_pixel(vec3f(v1[0],v1[1],v1[2]));
     vec2i vp2 = to_pixel(vec3f(v2[0],v2[1],v2[2]));
@@ -394,10 +394,12 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
  */
 void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> &indices)
 {
+    cout << "triangles";
 	/* TODO Assignment 1: Clip the triangles against the frustum, call the vertex shader,
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
 	 */
+    
     for (int i = 0; i < geometry.size(); i++) {
         shade_vertex(geometry[i]);
     }

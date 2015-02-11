@@ -26,6 +26,7 @@ scenehdl::~scenehdl()
  */
 void scenehdl::draw()
 {
+    std::cout << "draw" << std::endl;
 	/* TODO Assignment 1: Draw all of the objects, and
 	 * if enabled, draw the normals and the cameras.
 	 */

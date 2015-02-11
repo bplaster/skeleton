@@ -243,6 +243,7 @@ void handle_objects (int val){
             
             break;
     }
+    glutPostRedisplay();
 }
 
 void handle_cameras (int val){
