@@ -29,9 +29,11 @@ void scenehdl::draw()
 	/* TODO Assignment 1: Draw all of the objects, and
 	 * if enabled, draw the normals and the cameras.
 	 */
-    for (int i = 0; i < objects.size(); i++) {
-        objecthdl *object = objects[i];
-        object->draw(canvas);
+    for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
+        if (*iter) {
+            (*iter)->draw(canvas);
+            cout << "scene draw" << endl;
+        }
     }
 
 	/* TODO Assignment 2: Pass the lights to the shaders through canvashdl::uniform.

@@ -19,6 +19,7 @@ canvashdl::canvashdl(int w, int h)
 
 	active_matrix = modelview_matrix;
 
+    // TODO: I think this is just loading the identity matrix, and so can be replaced by the function
 	for (int i = 0; i < 3; i++)
 		matrices[i] = identity<float, 4, 4>();
 
@@ -79,6 +80,7 @@ void canvashdl::resize(int w, int h)
 void canvashdl::set_matrix(matrix_id matid)
 {
 	// TODO Assignment 1: Change which matrix is active.
+    active_matrix = matid;
 }
 
 /* load_identity
@@ -89,6 +91,8 @@ void canvashdl::set_matrix(matrix_id matid)
 void canvashdl::load_identity()
 {
 	// TODO Assignment 1: Set the active matrix to the identity matrix.
+    for (int i = 0; i < 3; i++)
+        matrices[i] = identity<float, 4, 4>();
 }
 
 /* rotate
@@ -178,6 +182,18 @@ vec3f canvashdl::to_window(vec2i pixel)
 	return vec3f(x,y,z);
 }
 
+/* to_pixel
+ *
+ * Window coordinates to pixel coordinates.
+ */
+vec2i canvashdl::to_pixel(vec3f window)
+{
+    int x = width*(window[0]+1)/2;
+    int y = height*(window[1]+1)/2;
+    
+    return vec2i(x,y);
+}
+
 /* unproject
  *
  * Unproject a window coordinate into world coordinates.
@@ -192,27 +208,40 @@ vec3f canvashdl::unproject(vec3f window)
 /* shade_vertex
  *
  * This is the vertex shader.
+ * v[0] to v[2] is position
+ * v[3] to v[5] is normal
+ * v[7] to v[8] is texture coordinates
+ * The result from this function is interpolated and passed on to the fragment shader
+ * (its also used to draw the geometry during rasterization)
+ * Note that the only requirements for the returned values are that the first 3 components
+ * be a projected position. The rest are yours to decide what to do with.
  */
 vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
+    vec4f vt = vec4f(v[0],v[1],v[2],1);
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
-	return vec8f();
+	return v;
 }
 
 /* shade_fragment
  *
  * This is the fragment shader. The pixel color is determined here.
+ * the values for v are the interpolated result of whatever you returned from the vertex shader
  */
 vec3f canvashdl::shade_fragment(vec8f v)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
+    vec3f color;
+    color[red] = 100;
+    color[green] = 100;
+    color[blue] = 100;
 
 	/* TODO Assignment 2: Figure out the pixel color due to lighting and materials
 	 * and implement phong shading.
 	 */
-	return vec3f();
+	return color;
 }
 
 /* plot
@@ -222,7 +251,12 @@ vec3f canvashdl::shade_fragment(vec8f v)
 void canvashdl::plot(vec2i xy, vec8f v)
 {
 	// TODO Assignment 1: Plot a pixel, calling the fragment shader.
-
+    vec3f color = shade_fragment(v);
+    if (xy[0] >= 0 && xy[1] >=0) {
+        color_buffer[width*xy[1]+xy[0]+0] = color[red];
+        color_buffer[width*xy[1]+xy[0]+1] = color[green];
+        color_buffer[width*xy[1]+xy[0]+2] = color[blue];
+    }
 	// TODO Assignment 2: Check the pixel depth against the depth buffer.
 }
 
@@ -242,7 +276,73 @@ void canvashdl::plot_point(vec8f v)
 void canvashdl::plot_line(vec8f v1, vec8f v2)
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
-
+    // Convert to Pixel coordinates here
+    vec2i vp1 = to_pixel(vec3f(v1[0],v1[1],v1[2]));
+    vec2i vp2 = to_pixel(vec3f(v2[0],v2[1],v2[2]));
+    
+    // Variables
+    vec2i xy, xy_max;
+    vec8f v;
+    int dy = vp2[1] - vp1[1];
+    int dx = vp2[0] - vp1[0];
+    int dx1=fabs(dx);
+    int dy1=fabs(dy);
+    
+    // Check cases
+    if(dy1<=dx1){
+        if(dx>=0){
+            xy = vp1;
+            xy_max = vp2;
+            v = v1;
+        } else {
+            xy = vp2;
+            xy_max = vp1;
+            v = v2;
+        }
+        plot(xy, v);
+        int d = 2*dy1-dx1;
+        while (xy[0] <= xy_max[0]){
+            xy[0]++;
+            if(d < 0){
+                d+=2*dy1;
+            } else {
+                if((dx<0 && dy<0) || (dx>0 && dy>0)){
+                    xy[1]++;
+                } else {
+                    xy[1]--;
+                }
+                d+=2*(dy1-dx1);
+            }
+            plot(xy, v);
+        }
+    } else {
+        if(dy>=0) {
+            xy = vp1;
+            xy_max = vp2;
+            v = v1;
+        } else {
+            xy = vp2;
+            xy_max = vp1;
+            v = v2;
+        }
+        plot(xy, v);
+        int d = 2*dx1-dy1;
+        while (xy[1] <= xy_max[1]){
+            xy[1]++;
+            if(d<=0){
+                d+=2*dx1;
+            } else {
+                if((dx<0 && dy<0) || (dx>0 && dy>0)){
+                    xy[0]++;
+                } else {
+                    xy[0]--;
+                }
+                d+=2*(dx1-dy1);
+            }
+            plot(xy, v);
+        }
+    }
+    
 	// TODO Assignment 2: Add interpolation for the normals and texture coordinates as well.
 }
 
@@ -269,6 +369,9 @@ void canvashdl::plot_triangle(vec8f v1, vec8f v2, vec8f v3)
 	 * take into account the polygon mode. You should be able to render the
 	 * triangle as 3 points or 3 lines.
 	 */
+    plot_line(v1, v2);
+    plot_line(v2, v3);
+    plot_line(v3, v1);
 
 	// TODO Assignment 2: Add in the fill polygon mode.
 }
@@ -303,6 +406,19 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
 	 */
+    vector<vec8f> new_geometry = geometry;
+    
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+        
+        *iter = shade_vertex(*iter);
+    }
+    
+    for (int i = 0; i < indices.size()-2; i++) {
+        plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
+    }
+    
+    cout << "triangles draw" << endl;
+
 
 }
 

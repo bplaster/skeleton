@@ -80,6 +80,7 @@ public:
 	void look_at(vec3f eye, vec3f at, vec3f up);
 	vec3f to_window(vec2i pixel);
 	vec3f unproject(vec3f window);
+    vec2i to_pixel(vec3f window);
 
 	// Drawing and Shading
 	enum
@@ -94,6 +95,13 @@ public:
 		backface = 1,
 		frontface = 2
 	} culling;
+    
+    enum
+    {
+        red = 0,
+        green = 1,
+        blue = 2
+    } color;
 
 	// Values to pass into the shaders that are uniform across all vertices and fragments
 	map<string, const void*> uniform;
