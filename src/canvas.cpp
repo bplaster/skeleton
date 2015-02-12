@@ -212,7 +212,7 @@ vec3f canvashdl::unproject(vec3f window)
 vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
-    v[2] = 0;
+    vec4f vt = vec4f(v[0],v[1],v[2],1);
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return v;
