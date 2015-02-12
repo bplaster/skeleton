@@ -212,6 +212,7 @@ vec3f canvashdl::unproject(vec3f window)
 vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
+    v[2] = 0;
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return v;
@@ -267,7 +268,6 @@ void canvashdl::plot_point(vec8f v)
 void canvashdl::plot_line(vec8f v1, vec8f v2)
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
-    std::cout << "line";
     // Convert to Pixel coordinates here
     vec2i vp1 = to_pixel(vec3f(v1[0],v1[1],v1[2]));
     vec2i vp2 = to_pixel(vec3f(v2[0],v2[1],v2[2]));
@@ -394,19 +394,23 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
  */
 void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> &indices)
 {
-    cout << "triangles";
 	/* TODO Assignment 1: Clip the triangles against the frustum, call the vertex shader,
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
 	 */
+    vector<vec8f> new_geometry = geometry;
     
-    for (int i = 0; i < geometry.size(); i++) {
-        shade_vertex(geometry[i]);
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+        
+        *iter = shade_vertex(*iter);
     }
     
-    for (int i = 0; i < geometry.size()-2; i++) {
-        plot_triangle(geometry[i], geometry[i+1], geometry[i+2]);
+    for (int i = 0; i < indices.size()-2; i++) {
+        plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
     }
+    
+    cout << "triangles draw" << endl;
+
 
 }
 

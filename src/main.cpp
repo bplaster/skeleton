@@ -228,8 +228,8 @@ void handle_objects (int val){
             
             break;
         case Object::Sphere : {
-            spherehdl sphere = spherehdl(1.0, 5.0, 5.0);
-            scene.objects.push_back(&sphere);
+            spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
+            scene.objects.push_back(sphere);
             
             break;
         }
