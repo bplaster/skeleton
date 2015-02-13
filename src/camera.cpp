@@ -41,6 +41,7 @@ orthohdl::~orthohdl()
 void orthohdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::ortho function to set up an orthographic projection
+    canvas->ortho(left, right, bottom, top, front, back);
 }
 
 frustumhdl::frustumhdl()
@@ -62,6 +63,7 @@ frustumhdl::~frustumhdl()
 void frustumhdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::frustum function to set up a perspective projection
+    canvas->frustum(left, right, bottom, top, front, back);
 }
 
 perspectivehdl::perspectivehdl()

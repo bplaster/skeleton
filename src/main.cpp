@@ -275,10 +275,11 @@ void handle_cameras (int val){
             
             break;
         case Camera::Ortho :
+            
             canvas.ortho(-10, 10, -10, 10, -10, 10);
             break;
         case Camera::Frustum :
-            
+            canvas.frustum(-10, 10, -10, 10, -10, 10);
             break;
         case Camera::Perspective :
             
