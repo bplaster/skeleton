@@ -143,6 +143,13 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
 void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by a frustum projection matrix.
+    mat4f projection(2*n/(r-l), 0, (r+l)/(r-l), 0,
+                     0, 2*n/(t-b), (t+b)/(t-b), 0,
+                     0, 0, -(f+n)/(f-n), -2*f*n/(f-n),
+                     0, 0, -1, 0);
+    for(int i = 0; i < 3; i++) {
+        matrices[i] *= projection;
+    }
 }
 
 /* ortho
@@ -153,12 +160,12 @@ void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by an orthographic projection matrix.
-    mat4f orth(2/(r-l), 0, 0, -(r+l)/(r-l),
-               0, 2/(t-b), 0, -(t+b)/(t-b),
-               0, 0, -2/(f-n), (f+n)/(f-n),
-               0, 0, 0, 1);
+    mat4f projection(2/(r-l), 0, 0, -(r+l)/(r-l),
+                     0, 2/(t-b), 0, -(t+b)/(t-b),
+                     0, 0, -2/(f-n), (f+n)/(f-n),
+                     0, 0, 0, 1);
     for(int i = 0; i < 3; i++) {
-        matrices[i] *= orth;
+        matrices[i] *= projection;
     }
 }
 
@@ -227,7 +234,7 @@ vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1);
-    vt = matrices[0]*vt;
+    vt = matrices[active_matrix]*vt;
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return vt;
@@ -415,8 +422,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 	 * culling, and then draw the remaining triangles.
 	 */
     
-    cout << "triangles draw" << endl;
-
     vector<vec8f> new_geometry = geometry;
     
     for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {

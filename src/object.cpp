@@ -18,7 +18,6 @@ rigidhdl::~rigidhdl()
 void rigidhdl::draw(canvashdl *canvas)
 {
 	// TODO Assignment 1: Send the rigid body geometry to the renderer
-    cout << "rigid draw" << endl;
     canvas->draw_triangles(geometry, indices);
 }
 
@@ -44,7 +43,6 @@ void objecthdl::draw(canvashdl *canvas)
 {
 	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); iter++) {
-        cout << "object draw" << endl;
         (*iter).draw(canvas);
     }
 }
