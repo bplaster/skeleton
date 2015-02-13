@@ -20,9 +20,9 @@ canvashdl::canvashdl(int w, int h)
 	active_matrix = modelview_matrix;
 
     // TODO: I think this is just loading the identity matrix, and so can be replaced by the function
-	for (int i = 0; i < 3; i++)
-		matrices[i] = identity<float, 4, 4>();
-
+//	for (int i = 0; i < 3; i++)
+//		matrices[i] = identity<float, 4, 4>();
+    load_identity();
 	polygon_mode = line;
 	culling = backface;
 }
@@ -153,6 +153,13 @@ void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by an orthographic projection matrix.
+    mat4f orth(2/(r-l), 0, 0, -(r+l)/(r-l),
+               0, 2/(t-b), 0, -(t+b)/(t-b),
+               0, 0, -2/(f-n), (f+n)/(f-n),
+               0, 0, 0, 1);
+    for(int i = 0; i < 3; i++) {
+        matrices[i] *= orth;
+    }
 }
 
 /* look_at
@@ -220,9 +227,10 @@ vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1);
+    vt = matrices[0]*vt;
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
-	return v;
+	return vt;
 }
 
 /* shade_fragment
@@ -253,9 +261,9 @@ void canvashdl::plot(vec2i xy, vec8f v)
 	// TODO Assignment 1: Plot a pixel, calling the fragment shader.
     vec3f color = shade_fragment(v);
     if (xy[0] >= 0 && xy[1] >=0) {
-        color_buffer[width*xy[1]+xy[0]+0] = color[red];
-        color_buffer[width*xy[1]+xy[0]+1] = color[green];
-        color_buffer[width*xy[1]+xy[0]+2] = color[blue];
+        color_buffer[3*(width*xy[1]+xy[0])+0] = color[red];
+        color_buffer[3*(width*xy[1]+xy[0])+1] = color[green];
+        color_buffer[3*(width*xy[1]+xy[0])+2] = color[blue];
     }
 	// TODO Assignment 2: Check the pixel depth against the depth buffer.
 }
@@ -406,6 +414,9 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
 	 */
+    
+    cout << "triangles draw" << endl;
+
     vector<vec8f> new_geometry = geometry;
     
     for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
@@ -417,7 +428,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
         plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
     }
     
-    cout << "triangles draw" << endl;
 
 
 }
