@@ -274,7 +274,7 @@ void handle_cameras (int val){
             
             break;
         case Camera::Ortho :
-            
+            canvas.ortho(-10, 10, -10, 10, -10, 10);
             break;
         case Camera::Frustum :
             
@@ -286,6 +286,7 @@ void handle_cameras (int val){
             
             break;
     }
+    glutPostRedisplay();
 }
 
 void handle_polygons (int val){
@@ -301,6 +302,7 @@ void handle_polygons (int val){
             
             break;
     }
+    glutPostRedisplay();
 }
 
 void handle_culling (int val){
@@ -319,6 +321,7 @@ void handle_culling (int val){
             
             break;
     }
+    glutPostRedisplay();
 }
 
 void handle_normal (int val){
@@ -337,6 +340,7 @@ void handle_normal (int val){
             
             break;
     }
+    glutPostRedisplay();
 }
 
 
@@ -346,7 +350,6 @@ void handle_menu(int val)
         glutDestroyWindow(window_id);
         exit(0);
     }
-
 }
 
 void create_menu()

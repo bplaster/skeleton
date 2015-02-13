@@ -29,10 +29,10 @@ void scenehdl::draw()
 	/* TODO Assignment 1: Draw all of the objects, and
 	 * if enabled, draw the normals and the cameras.
 	 */
+    cout << "scene draw" << endl;
     for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
         if (*iter) {
             (*iter)->draw(canvas);
-            cout << "scene draw" << endl;
         }
     }
 
