@@ -283,6 +283,8 @@ void canvashdl::plot(vec2i xy, vec8f v)
 void canvashdl::plot_point(vec8f v)
 {
 	// TODO Assignment 1: Plot a point given in window coordinates.
+    vec2i vp = to_pixel(vec3f(v[0],v[1],v[2]));
+    plot(vp,v);
 }
 
 /* plot_line
@@ -395,9 +397,13 @@ void canvashdl::plot_triangle(vec8f v1, vec8f v2, vec8f v3)
 	 * take into account the polygon mode. You should be able to render the
 	 * triangle as 3 points or 3 lines.
 	 */
+    
+    // 3 Line implementation
     plot_line(v1, v2);
     plot_line(v2, v3);
     plot_line(v3, v1);
+    
+    // 3 Point implementation
 
 	// TODO Assignment 2: Add in the fill polygon mode.
 }
