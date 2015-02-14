@@ -21,15 +21,16 @@ void camerahdl::view(canvashdl *canvas)
 	/* TODO Assignment 1: Do the necessary modelview transformations to move
 	 * the camera into place.
 	 */
+    canvas->load_identity();
     project(canvas);
 }
 
 orthohdl::orthohdl()
 {
-	left = -10.0;
-	right = 10.0;
-	bottom = -10.0;
-	top = 10.0;
+	left = -5.0;
+	right = 5.0;
+	bottom = -5.0;
+	top = 5.0;
 	front = 2.0;
 	back = 101.0;
 	type = "ortho";
@@ -47,10 +48,10 @@ void orthohdl::project(canvashdl *canvas)
 
 frustumhdl::frustumhdl()
 {
-	left = -1.0;
-	right = 1.0;
-	bottom = -1.0;
-	top = 1.0;
+	left = -5.0;
+	right = 5.0;
+	bottom = -5.0;
+	top = 5.0;
 	front = 2.0;
 	back = 101.0;
 	type = "frustum";
