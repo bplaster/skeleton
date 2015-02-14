@@ -9,6 +9,59 @@ boxhdl::boxhdl(float width, float height, float depth)
 	/* TODO Assignment 1: Generate the geometry and indices required to make a box.
 	 * Calculate its bounding box.
 	 */
+    rigid.push_back(rigidhdl());
+    
+    rigid[0].geometry.reserve(24);
+    
+    // Near Face
+    rigid[0].geometry.push_back(vec8f((width/2), (height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
+    
+    // Far face
+    rigid[0].geometry.push_back(vec8f((width/2), (height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
+    
+    // Left face
+    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), (depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), -(depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), (depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), -(depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
+    
+    // Right face
+    rigid[0].geometry.push_back(vec8f((width/2), (height/2), (depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), (height/2), -(depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), (depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), -(depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
+    
+    // Top face
+    rigid[0].geometry.push_back(vec8f((width/2), (height/2), (depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), (height/2), -(depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), (depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), -(depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
+    
+    // Bottom face
+    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), (depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), -(depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), (depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), -(depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
+    
+    // Indices
+    for (int i = 0; i < 24; i += 4) {
+        rigid[0].indices.push_back(i);
+        rigid[0].indices.push_back(i + 1);
+        rigid[0].indices.push_back(i + 2);
+        
+        rigid[0].indices.push_back(i + 1);
+        rigid[0].indices.push_back(i + 2);
+        rigid[0].indices.push_back(i + 3);
+    }
+    
+    // Bounding box (same as box in this case)
+    bound = vec6f(-(width/2), (width/2), -(height/2), (height/2), -(depth/2), (depth/2));
 }
 
 boxhdl::~boxhdl()
