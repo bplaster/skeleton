@@ -229,18 +229,24 @@ void menustatusfunc(int status, int x, int y)
 void handle_objects (int val){
 
     switch ((Object)val){
-        case Object::Box :
+        case Object::Box : {
             
+            // Create dynamic box object
+            boxhdl *box = new boxhdl(10.0, 20.0, 30.0);
+            scene.objects.push_back(box);
             break;
+            
+        }
         case Object::Cylinder :
             
             break;
         case Object::Sphere : {
+            
             // Create dynamic sphere object
             spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
             scene.objects.push_back(sphere);
-            
             break;
+            
         }
         case Object::Pyramid :
             
