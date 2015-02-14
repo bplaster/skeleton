@@ -144,6 +144,7 @@ void pmotionfunc(int x, int y)
 		/* TODO Assignment 1: Figure out which object the mouse pointer is hovering over and make
 		 * that the active object.
 		 */
+        vec3f mouse_window = canvas.to_window(vec2i(mousex,mousey));
 	}
 }
 
@@ -232,7 +233,7 @@ void handle_objects (int val){
         case Object::Box : {
             
             // Create dynamic box object
-            boxhdl *box = new boxhdl(1.0, 2.0, 3.0);
+            boxhdl *box = new boxhdl(1.0, 1.0, 1.0);
             scene.objects.push_back(box);
             
             break;

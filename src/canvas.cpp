@@ -416,6 +416,13 @@ void canvashdl::plot_triangle(vec8f v1, vec8f v2, vec8f v3)
 void canvashdl::draw_points(const vector<vec8f> &geometry)
 {
 	// TODO Assignment 1: Clip the points against the frustum, call the vertex shader, and then draw them.
+    vector<vec8f> new_geometry = geometry;
+    
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+        
+        *iter = shade_vertex(*iter);
+        plot_point(*iter);
+    }
 }
 
 /* Draw a set of 3D lines on the canvas. Each point in geometry
@@ -424,6 +431,17 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
 void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &indices)
 {
 	// TODO Assignment 1: Clip the lines against the frustum, call the vertex shader, and then draw them.
+    vector<vec8f> new_geometry = geometry;
+    
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+        
+        *iter = shade_vertex(*iter);
+    }
+    
+    for (int i = 0; i < indices.size()-1; i+=2) {
+        plot_line(new_geometry[indices[i]], new_geometry[indices[i+1]]);
+    }
+    
 }
 
 /* Draw a set of 3D triangles on the canvas. Each point in geometry is
@@ -449,8 +467,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     for (int i = 0; i < indices.size()-2; i+=3) {
         plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
     }
-    
-
 
 }
 
