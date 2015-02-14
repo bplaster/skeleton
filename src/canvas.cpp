@@ -143,10 +143,10 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
 void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by a frustum projection matrix.
-    mat4f projection(2*n/(r-l), 0, (r+l)/(r-l), 0,
-                     0, 2*n/(t-b), (t+b)/(t-b), 0,
-                     0, 0, -(f+n)/(f-n), -2*f*n/(f-n),
-                     0, 0, -1, 0);
+    mat4f projection(2.*n/(r-l), 0., (r+l)/(r-l), 0.,
+                     0., 2.*n/(t-b), (t+b)/(t-b), 0.,
+                     0., 0., -(f+n)/(f-n), -2.*f*n/(f-n),
+                     0., 0., -1., 0.);
     for(int i = 0; i < 3; i++) {
         matrices[i] *= projection;
     }
@@ -160,10 +160,11 @@ void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by an orthographic projection matrix.
-    mat4f projection(2/(r-l), 0, 0, -(r+l)/(r-l),
-                     0, 2/(t-b), 0, -(t+b)/(t-b),
-                     0, 0, -2/(f-n), (f+n)/(f-n),
-                     0, 0, 0, 1);
+    mat4f projection(2./(r-l), 0., 0., -(r+l)/(r-l),
+                     0., 2./(t-b), 0., -(t+b)/(t-b),
+                     0., 0., -2./(f-n), (f+n)/(f-n),
+                     0., 0., 0., 1.);
+    
     for(int i = 0; i < 3; i++) {
         matrices[i] *= projection;
     }
@@ -189,9 +190,9 @@ vec3f canvashdl::to_window(vec2i pixel)
 	/* TODO Assignment 1: Given a pixel coordinate (x from 0 to width and y from 0 to height),
 	 * convert it into window coordinates (x from -1 to 1 and y from -1 to 1).
 	 */
-    float x = 2*pixel[0]/width - 1;
-    float y = 2*pixel[1]/height - 1;
-    float z = 0;
+    float x = 2.*pixel[0]/width - 1.;
+    float y = 2.*pixel[1]/height - 1.;
+    float z = 0.;
     
 	return vec3f(x,y,z);
 }
@@ -202,8 +203,8 @@ vec3f canvashdl::to_window(vec2i pixel)
  */
 vec2i canvashdl::to_pixel(vec3f window)
 {
-    int x = width*(window[0]+1)/2;
-    int y = height*(window[1]+1)/2;
+    int x = roundf(width*(window[0]+1)/2);
+    int y = roundf(height*(window[1]+1)/2);
     
     return vec2i(x,y);
 }
@@ -233,9 +234,9 @@ vec3f canvashdl::unproject(vec3f window)
 vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
-    vec4f vt = vec4f(v[0],v[1],v[2],1);
+    vec4f vt = vec4f(v[0],v[1],v[2],1.);
     vt = matrices[active_matrix]*vt;
-
+    
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return vt;
 }
@@ -249,9 +250,9 @@ vec3f canvashdl::shade_fragment(vec8f v)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
     vec3f color;
-    color[red] = 100;
-    color[green] = 100;
-    color[blue] = 100;
+    color[red] = 100.;
+    color[green] = 100.;
+    color[blue] = 100.;
 
 	/* TODO Assignment 2: Figure out the pixel color due to lighting and materials
 	 * and implement phong shading.
@@ -267,7 +268,7 @@ void canvashdl::plot(vec2i xy, vec8f v)
 {
 	// TODO Assignment 1: Plot a pixel, calling the fragment shader.
     vec3f color = shade_fragment(v);
-    if (xy[0] >= 0 && xy[1] >=0) {
+    if ((xy[0] >= 0 && xy[0] < width) && (xy[1] >=0 && xy[1] < height)) {
         color_buffer[3*(width*xy[1]+xy[0])+0] = color[red];
         color_buffer[3*(width*xy[1]+xy[0])+1] = color[green];
         color_buffer[3*(width*xy[1]+xy[0])+2] = color[blue];
@@ -298,14 +299,14 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
     // Variables
     vec2i xy, xy_max;
     vec8f v;
-    int dy = vp2[1] - vp1[1];
-    int dx = vp2[0] - vp1[0];
-    int dx1=fabs(dx);
-    int dy1=fabs(dy);
+    int dy = abs(vp2[1] - vp1[1]);
+    int dx = abs(vp2[0] - vp1[0]);
     
     // Check cases
-    if(dy1<=dx1){
-        if(dx>=0){
+    // abs(slope) < 1
+    if(dy<=dx){
+        // orient points for E/NE/SE movement
+        if(vp2[0]>=vp1[0]){
             xy = vp1;
             xy_max = vp2;
             v = v1;
@@ -315,23 +316,30 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
             v = v2;
         }
         plot(xy, v);
-        int d = 2*dy1-dx1;
+        int d = 2*dy-dx;
+        // step through each pixel
         while (xy[0] <= xy_max[0]){
             xy[0]++;
+            // E
             if(d < 0){
-                d+=2*dy1;
-            } else {
-                if((dx<0 && dy<0) || (dx>0 && dy>0)){
+                d+=2*dy;
+            }
+            // NE/SE
+            else {
+                if(xy_max[1]>xy[1]){
                     xy[1]++;
                 } else {
                     xy[1]--;
                 }
-                d+=2*(dy1-dx1);
+                d+=2*(dy-dx);
             }
             plot(xy, v);
         }
-    } else {
-        if(dy>=0) {
+    }
+    // abs(slope) > 1
+    else {
+        // orient points for E/NE/SE movement
+        if(vp2[1]>=vp1[1]) {
             xy = vp1;
             xy_max = vp2;
             v = v1;
@@ -341,23 +349,26 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
             v = v2;
         }
         plot(xy, v);
-        int d = 2*dx1-dy1;
+        int d = 2*dx-dy;
+        // step through each pixel
         while (xy[1] <= xy_max[1]){
             xy[1]++;
+            // E
             if(d<=0){
-                d+=2*dx1;
-            } else {
-                if((dx<0 && dy<0) || (dx>0 && dy>0)){
+                d+=2*dx;
+            }
+            // NE/SE
+            else {
+                if(xy_max[0]>xy[0]){
                     xy[0]++;
                 } else {
                     xy[0]--;
                 }
-                d+=2*(dx1-dy1);
+                d+=2*(dx-dy);
             }
             plot(xy, v);
         }
     }
-    
 	// TODO Assignment 2: Add interpolation for the normals and texture coordinates as well.
 }
 
@@ -429,7 +440,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
         *iter = shade_vertex(*iter);
     }
     
-    for (int i = 0; i < indices.size()-2; i++) {
+    for (int i = 0; i < indices.size()-2; i+=3) {
         plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
     }
     

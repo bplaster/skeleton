@@ -29,6 +29,17 @@ void scenehdl::draw()
 	/* TODO Assignment 1: Draw all of the objects, and
 	 * if enabled, draw the normals and the cameras.
 	 */
+    
+    // Draw cameras
+    if (render_cameras) {
+        for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); iter++) {
+            if ((*iter)->model) {
+                (*iter)->model->draw(canvas);
+            }
+        }
+    }
+    
+    // Draw objects
     for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
         if (*iter) {
             (*iter)->draw(canvas);
@@ -39,6 +50,7 @@ void scenehdl::draw()
 	 * If enabled, draw the lights.
 	 */
 }
+
 
 bool scenehdl::active_camera_valid()
 {
