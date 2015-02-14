@@ -232,21 +232,26 @@ void handle_objects (int val){
         case Object::Box : {
             
             // Create dynamic box object
-            boxhdl *box = new boxhdl(10.0, 20.0, 30.0);
+            boxhdl *box = new boxhdl(1.0, 2.0, 3.0);
             scene.objects.push_back(box);
-            break;
             
+            break;
         }
-        case Object::Cylinder :
+        case Object::Cylinder : {
+            
+            // Create dynamic sphere object
+            cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 4.0);
+            scene.objects.push_back(cylinder);
             
             break;
+        }
         case Object::Sphere : {
             
             // Create dynamic sphere object
             spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
             scene.objects.push_back(sphere);
-            break;
             
+            break;
         }
         case Object::Pyramid :
             
