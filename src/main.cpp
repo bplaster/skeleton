@@ -84,6 +84,14 @@ void init(string working_directory)
     canvas.working_directory = working_directory;
 	scene.canvas = &canvas;
 	// TODO Assignment 1: Initialize the Scene as necessary.
+    
+    // Create camera
+    camerahdl *camera = new orthohdl;
+    scene.cameras.push_back(camera);
+    scene.active_camera = (int)scene.cameras.size() - 1;
+    camera->view(scene.canvas);
+    
+
 }
 
 void displayfunc()
@@ -274,13 +282,24 @@ void handle_cameras (int val){
         case Camera::ClearFocus :
             
             break;
-        case Camera::Ortho :
+        case Camera::Ortho : {
             
-            canvas.ortho(-10, 10, -10, 10, -10, 10);
+            camerahdl *camera = new orthohdl;
+            scene.cameras.push_back(camera);
+            scene.active_camera = (int)scene.cameras.size() - 1;
+            camera->view(scene.canvas);
+
+            
             break;
-        case Camera::Frustum :
-            canvas.frustum(-10, 10, -10, 10, -10, 10);
+        }
+        case Camera::Frustum : {
+            camerahdl *camera = new frustumhdl;
+            scene.cameras.push_back(camera);
+            scene.active_camera = (int)scene.cameras.size() - 1;
+            camera->view(scene.canvas);
+
             break;
+        }
         case Camera::Perspective :
             
             break;
