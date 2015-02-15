@@ -133,6 +133,88 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
 	/* TODO Assignment 1: Generate the geometry and indices required to make a cylinder.
 	 * Calculate its bounding box.
 	 */
+    rigid.push_back(rigidhdl());
+    rigid[0].geometry.reserve(2 + 4*slices);
+    rigid[0].geometry.push_back(vec8f(0.0, -(height/2), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(0.0, (height/2), 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
+    
+    vector<vec2f> dir (slices);
+    
+    // Calculate directions along X and Z axes
+    for (int i = 0; i < slices; i ++){
+        vec2f temp(sin(2.0*m_pi*((float)i/(float)slices)), cos(2.0*m_pi*((float)i/(float)slices)));
+        dir[i] = temp;
+    };
+    
+    // Enter geometry for all faces of cylinder
+    for (int i = 0; i < 3; i++){
+        
+        for (int j = 0; j < slices; j++){
+            
+            if (i == 0)
+            {
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], 0.0, -1.0, 0.0, 0.0, 0.0));
+            }
+            else if (i == 1)
+            {
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], (height/2), radius*dir[j][1], 0.0, 1.0, 0.0, 0.0, 0.0));
+            }
+            else if (i == 2)
+            {
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], (height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
+            }
+        }
+    }
+    
+    // Indices
+    
+    for (int i = 0; i < 2*slices - 2; i++){
+        
+        // Lateral surface area
+        rigid[0].indices.push_back(i);
+        rigid[0].indices.push_back(i + 1);
+        rigid[0].indices.push_back(i + 2);
+    }
+    
+    // Wrap around Lateral surface area
+    rigid[0].indices.push_back(0);
+    rigid[0].indices.push_back(2*slices - 2);
+    rigid[0].indices.push_back(2*slices - 1);
+    
+    rigid[0].indices.push_back(0);
+    rigid[0].indices.push_back(1);
+    rigid[0].indices.push_back(2*slices - 1);
+    
+    // Top and Bottom surfaces
+    for (int i = 0; i < slices; i ++){
+        
+        if (i < slices - 1){
+            
+            // Top surface
+            rigid[0].indices.push_back(2*slices + i);
+            rigid[0].indices.push_back(2*slices + i + 1);
+            rigid[0].indices.push_back(4*slices);
+            
+            // Bottom surface
+            rigid[0].indices.push_back(3*slices + i);
+            rigid[0].indices.push_back(3*slices + i + 1);
+            rigid[0].indices.push_back(4*slices + 1);
+        }
+        else if (i == slices - 1) {
+            // Wrap around top surface
+            rigid[0].indices.push_back(2*slices + i);
+            rigid[0].indices.push_back(2*slices);
+            rigid[0].indices.push_back(4*slices);
+            
+            // Wrap around bottom surface
+            rigid[0].indices.push_back(3*slices + i);
+            rigid[0].indices.push_back(3*slices);
+            rigid[0].indices.push_back(4*slices + 1);
+        }
+                
+    }
+    
 }
 
 cylinderhdl::~cylinderhdl()

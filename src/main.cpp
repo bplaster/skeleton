@@ -240,20 +240,24 @@ void handle_objects (int val){
             // Create dynamic box object
             boxhdl *box = new boxhdl(1.0, 1.0, 1.0);
             scene.objects.push_back(box);
-            break;
             
+            break;
         }
-        case Object::Cylinder :
+        case Object::Cylinder : {
             
+            // Create dynamic sphere object
+            cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 4.0);
+            scene.objects.push_back(cylinder);
+            scene.active_object = int(scene.objects.size())-1; // Debug
             break;
+        }
         case Object::Sphere : {
             
             // Create dynamic sphere object
             spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
             scene.objects.push_back(sphere);
-            scene.active_object = int(scene.objects.size())-1;
+            scene.active_object = int(scene.objects.size())-1; // Debug
             break;
-            
         }
         case Object::Pyramid :
             
