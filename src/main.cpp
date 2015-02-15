@@ -145,6 +145,11 @@ void pmotionfunc(int x, int y)
 		 * that the active object.
 		 */
         vec3f mouse_window = canvas.to_window(vec2i(mousex,mousey));
+        
+        if(scene.active_object_valid()){
+
+        }
+
 	}
 }
 
@@ -246,6 +251,7 @@ void handle_objects (int val){
             // Create dynamic sphere object
             spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
             scene.objects.push_back(sphere);
+            scene.active_object = int(scene.objects.size())-1;
             break;
             
         }

@@ -57,6 +57,55 @@ void objecthdl::draw_bound(canvashdl *canvas)
 	/* TODO Assignment 1: Generate the geometry for the bounding box and send the necessary
 	 * transformations and geometry to the renderer
 	 */
+    bound_geometry.reserve(8);
+    bound_indices.reserve(24);
+    
+    // Box geometry
+    // bound(left, right, bottom, top, front, back)
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTF 0
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBF 1
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTB 2
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBB 3
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTF 4
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBF 5
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTB 6
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBB 7
+
+    
+    // Indices
+    bound_indices.push_back(0);
+    bound_indices.push_back(1);
+    bound_indices.push_back(0);
+    bound_indices.push_back(2);
+    bound_indices.push_back(0);
+    bound_indices.push_back(4);
+    
+    bound_indices.push_back(1);
+    bound_indices.push_back(3);
+    bound_indices.push_back(1);
+    bound_indices.push_back(5);
+    
+    bound_indices.push_back(2);
+    bound_indices.push_back(3);
+    bound_indices.push_back(2);
+    bound_indices.push_back(6);
+    
+    bound_indices.push_back(3);
+    bound_indices.push_back(7);
+    
+    bound_indices.push_back(4);
+    bound_indices.push_back(5);
+    bound_indices.push_back(4);
+    bound_indices.push_back(6);
+    
+    bound_indices.push_back(5);
+    bound_indices.push_back(7);
+    
+    bound_indices.push_back(6);
+    bound_indices.push_back(7);
+
+    // Draw bounding lines
+    canvas->draw_lines(bound_geometry, bound_indices);
 }
 
 /* draw_normals

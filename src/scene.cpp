@@ -45,6 +45,10 @@ void scenehdl::draw()
             (*iter)->draw(canvas);
         }
     }
+    
+    if(active_object_valid()){
+        objects[active_object]->draw_bound(canvas);
+    }
 
 	/* TODO Assignment 2: Pass the lights to the shaders through canvashdl::uniform.
 	 * If enabled, draw the lights.

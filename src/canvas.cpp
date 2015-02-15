@@ -113,6 +113,14 @@ void canvashdl::rotate(float angle, vec3f axis)
 void canvashdl::translate(vec3f direction)
 {
 	// TODO Assignment 1: Multiply the active matrix by a translation matrix.
+    mat4f projection(1., 0., 0., direction[0],
+                     0., 1., 0., direction[1],
+                     0., 0., 1., direction[2],
+                     0., 0., 0., 1.);
+    for(int i = 0; i < 3; i++) {
+        matrices[i] *= projection;
+    }
+
 }
 
 /* scale
@@ -123,6 +131,13 @@ void canvashdl::translate(vec3f direction)
 void canvashdl::scale(vec3f size)
 {
 	// TODO Assignment 1: Multiply the active matrix by a scaling matrix.
+    mat4f projection(size[0], 0., 0., 0.,
+                     0., size[1], 0., 0.,
+                     0., 0., size[2], 0.,
+                     0., 0., 0., 1.);
+    for(int i = 0; i < 3; i++) {
+        matrices[i] *= projection;
+    }
 }
 
 /* perspective
