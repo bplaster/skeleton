@@ -144,12 +144,12 @@ void pmotionfunc(int x, int y)
 		/* TODO Assignment 1: Figure out which object the mouse pointer is hovering over and make
 		 * that the active object.
 		 */
-        vec3f mouse_window = canvas.to_window(vec2i(mousex,mousey));
-        
-        if(scene.active_object_valid()){
-
-        }
-
+        vec3f mouse_window = canvas.to_window(vec2i(x,y));
+        vec3f mouse_world = canvas.unproject(mouse_window);
+                
+        int object_index = scene.object_index_at_point(mouse_world);
+        scene.active_object = object_index;
+        glutPostRedisplay();
 	}
 }
 
@@ -163,11 +163,22 @@ void motionfunc(int x, int y)
 {
 	if (!bound && !menu)
 	{
+        vec3f old_mouse_window = canvas.to_window(vec2i(mousex,mousey));
+        vec3f old_mouse_world = canvas.unproject(old_mouse_window);
+        
 		int deltax = x - mousex;
 		int deltay = mousey - y;
 
 		mousex = x;
 		mousey = y;
+        
+        vec3f mouse_window = canvas.to_window(vec2i(x,y));
+        vec3f mouse_world = canvas.unproject(mouse_window);
+        
+        if (scene.active_object_valid() && scene.objects[scene.active_object]->contains_point(mouse_world)) {
+            scene.objects[scene.active_object]->position[0] += mouse_world[0] - old_mouse_world[0];
+            scene.objects[scene.active_object]->position[1] += old_mouse_world[1] - mouse_world[1];
+        }
 
 		/* TODO Assignment 1: Implement the functionality for the following operations here:
 		 * translation, rotation, and scaling of an object
@@ -240,7 +251,6 @@ void handle_objects (int val){
             // Create dynamic box object
             boxhdl *box = new boxhdl(1.0, 1.0, 1.0);
             scene.objects.push_back(box);
-            
             break;
         }
         case Object::Cylinder : {
@@ -248,7 +258,6 @@ void handle_objects (int val){
             // Create dynamic sphere object
             cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 4.0);
             scene.objects.push_back(cylinder);
-            scene.active_object = int(scene.objects.size())-1; // Debug
             break;
         }
         case Object::Sphere : {
@@ -256,7 +265,6 @@ void handle_objects (int val){
             // Create dynamic sphere object
             spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
             scene.objects.push_back(sphere);
-            scene.active_object = int(scene.objects.size())-1; // Debug
             break;
         }
         case Object::Pyramid :

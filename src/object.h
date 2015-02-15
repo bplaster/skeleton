@@ -45,6 +45,7 @@ struct objecthdl
 	vec6f bound;
     vector<vec8f> bound_geometry;
     vector<int> bound_indices;
+    bool contains_point(vec3f point);
 
 	void draw(canvashdl *canvas);
 	void draw_bound(canvashdl *canvas);

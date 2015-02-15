@@ -46,6 +46,7 @@ void scenehdl::draw()
         }
     }
     
+    // Draw bound
     if(active_object_valid()){
         objects[active_object]->draw_bound(canvas);
     }
@@ -53,6 +54,19 @@ void scenehdl::draw()
 	/* TODO Assignment 2: Pass the lights to the shaders through canvashdl::uniform.
 	 * If enabled, draw the lights.
 	 */
+}
+
+int scenehdl::object_index_at_point(vec3f point)
+{
+    int index = -1;
+    for (int i = 0; i < objects.size(); i++) {
+        if (objects[i]) {
+            if (objects[i]->contains_point(point)) {
+                index = i;
+            }
+        }
+    }
+    return index;
 }
 
 
