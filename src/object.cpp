@@ -50,32 +50,9 @@ void objecthdl::draw(canvashdl *canvas)
         new_rigid.geometry.reserve(iter->geometry.size());
         
         for (vector<vec8f>::iterator iter2 = iter->geometry.begin(); iter2 != iter->geometry.end(); ++iter2) {
-            
-            vec4f loc = vec4f(0.,0.,0.,1.);
-            vec4f axis = vec3f(0.,0.,1.,1.);
-            loc.set(0, 3, (*iter2)(0,3));
-            
-            // Rotate about Z
-            loc = rotate_point(loc, orientation[0], axis(0,3));
-            
-            // Rotate about rotated X
-            axis = rotate_point(vec4f(1.,0.,0.,1.), orientation[0], axis(0,3));
-            loc = rotate_point(loc, orientation[1], axis);
-            
-            // Rotate about rotated Z
-            axis = rotate_point(vec4f(0.,0.,1.,1.), orientation[1], axis(0,3));
-            loc = rotate_point(loc, orientation[2], axis);
-
-            // Scale
-            loc = scale_point(loc, vec3f(scale,scale,scale));
-            
-            // Translate
-            loc = translate_point(loc, position);
-            
-            // Add point
-            vec8f new_vec;
-            new_vec.set(0, 3, loc(0,3));
-            new_vec.set(3, 8, (*iter2)(3,8));
+            // Transform and add point
+            vec8f new_vec = *iter2;
+            new_vec = transform_point(new_vec);
             new_rigid.geometry.push_back(new_vec);
         }
         
@@ -101,16 +78,14 @@ void objecthdl::draw_bound(canvashdl *canvas)
     
     // Box geometry
     // bound(left, right, bottom, top, front, back)
-    bound *= scale;
-    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTF 0
-    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBF 1
-    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTB 2
-    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBB 3
-    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTF 4
-    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBF 5
-    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTB 6
-    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBB 7
-    bound /= scale;
+    bound_geometry.push_back(transform_point(vec8f(bound[0], bound[3], bound[4], 0.0, 0.0, 0.0, 0.0, 0.0))); // LTF 0
+    bound_geometry.push_back(transform_point(vec8f(bound[0], bound[2], bound[4], 0.0, 0.0, 0.0, 0.0, 0.0))); // LBF 1
+    bound_geometry.push_back(transform_point(vec8f(bound[0], bound[3], bound[5], 0.0, 0.0, 0.0, 0.0, 0.0))); // LTB 2
+    bound_geometry.push_back(transform_point(vec8f(bound[0], bound[2], bound[5], 0.0, 0.0, 0.0, 0.0, 0.0))); // LBB 3
+    bound_geometry.push_back(transform_point(vec8f(bound[1], bound[3], bound[4], 0.0, 0.0, 0.0, 0.0, 0.0))); // RTF 4
+    bound_geometry.push_back(transform_point(vec8f(bound[1], bound[2], bound[4], 0.0, 0.0, 0.0, 0.0, 0.0))); // RBF 5
+    bound_geometry.push_back(transform_point(vec8f(bound[1], bound[3], bound[5], 0.0, 0.0, 0.0, 0.0, 0.0))); // RTB 6
+    bound_geometry.push_back(transform_point(vec8f(bound[1], bound[2], bound[5], 0.0, 0.0, 0.0, 0.0, 0.0))); // RBB 7
 
     // Indices
     bound_indices.push_back(0);
@@ -203,3 +178,45 @@ vec4f objecthdl::rotate_point(vec4f point, float angle, vec3f axis){
         return projection * point;
     }
 }
+
+vec4f objecthdl::euler_project(vec4f point){
+    vec4f axis = vec3f(0.,0.,1.,1.);
+    
+    // Rotate about Z
+    point = rotate_point(point, orientation[0], axis(0,3));
+    
+    // Rotate about rotated X
+    axis = rotate_point(vec4f(1.,0.,0.,1.), orientation[0], axis(0,3));
+    point = rotate_point(point, orientation[1], axis);
+    
+    // Rotate about rotated Z
+    axis = rotate_point(vec4f(0.,0.,1.,1.), orientation[1], axis(0,3));
+    point = rotate_point(point, orientation[2], axis);
+    
+    return point;
+};
+
+vec8f objecthdl::transform_point(vec8f point){
+    
+    vec4f new_point = vec4f(0.,0.,0.,1.);
+    new_point.set(0, 3, point(0,3));
+    
+    // Euler rotation
+    new_point = euler_project(new_point);
+    
+    // Scale
+    new_point = scale_point(new_point, vec3f(scale,scale,scale));
+    
+    // Translate
+    new_point = translate_point(new_point, position);
+    
+    // Create point
+    vec8f new_vec;
+    new_vec.set(0, 3, new_point(0,3));
+    new_vec.set(3, 8, point(3,8));
+    
+    return new_vec;
+};
+
+
+
