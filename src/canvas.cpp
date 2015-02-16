@@ -19,9 +19,6 @@ canvashdl::canvashdl(int w, int h)
 
 	active_matrix = modelview_matrix;
 
-    // TODO: I think this is just loading the identity matrix, and so can be replaced by the function
-//	for (int i = 0; i < 3; i++)
-//		matrices[i] = identity<float, 4, 4>();
     load_identity();
 	polygon_mode = line;
 	culling = backface;
@@ -113,6 +110,14 @@ void canvashdl::rotate(float angle, vec3f axis)
 void canvashdl::translate(vec3f direction)
 {
 	// TODO Assignment 1: Multiply the active matrix by a translation matrix.
+    mat4f projection(1., 0., 0., direction[0],
+                     0., 1., 0., direction[1],
+                     0., 0., 1., direction[2],
+                     0., 0., 0., 1.);
+    for(int i = 0; i < 3; i++) {
+        matrices[i] *= projection;
+    }
+
 }
 
 /* scale
@@ -123,6 +128,13 @@ void canvashdl::translate(vec3f direction)
 void canvashdl::scale(vec3f size)
 {
 	// TODO Assignment 1: Multiply the active matrix by a scaling matrix.
+    mat4f projection(size[0], 0., 0., 0.,
+                     0., size[1], 0., 0.,
+                     0., 0., size[2], 0.,
+                     0., 0., 0., 1.);
+    for(int i = 0; i < 3; i++) {
+        matrices[i] *= projection;
+    }
 }
 
 /* perspective
@@ -217,7 +229,11 @@ vec2i canvashdl::to_pixel(vec3f window)
 vec3f canvashdl::unproject(vec3f window)
 {
 	// TODO Assignment 1: Unproject a window coordinate into world coordinates.
-	return vec3f();
+    vec4f vt  = vec4f(window[0], window[1], window[2], 1);
+    
+    vt = (mat<float, 4, 4>)::inverse(matrices[active_matrix])*vt;
+    
+	return vec3f(vt[0],vt[1],vt[2]);
 }
 
 /* shade_vertex

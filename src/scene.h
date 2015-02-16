@@ -17,6 +17,7 @@ struct scenehdl
 
 	int active_camera;
 	int active_object;
+    int object_index_at_point(vec3f point);
 
 	// Whether and how to render the normals
 	enum

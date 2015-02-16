@@ -17,7 +17,7 @@ rigidhdl::~rigidhdl()
  */
 void rigidhdl::draw(canvashdl *canvas)
 {
-	// TODO Assignment 1: Send the rigid body geometry to the renderer
+    // TODO Assignment 1: Send the rigid body geometry to the renderer
     canvas->draw_triangles(geometry, indices);
 }
 
@@ -43,7 +43,22 @@ void objecthdl::draw(canvashdl *canvas)
 {
 	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); iter++) {
-        (*iter).draw(canvas);
+        
+        rigidhdl new_rigid;
+        new_rigid.indices = (*iter).indices;
+        new_rigid.geometry.reserve(iter->geometry.size());
+        
+        for (vector<vec8f>::iterator iter2 = iter->geometry.begin(); iter2 != iter->geometry.end(); iter2++) {
+            new_rigid.geometry.push_back(vec8f((*iter2)[0] + position[0],
+                                               (*iter2)[1] + position[1],
+                                               (*iter2)[2] + position[2],
+                                               (*iter2)[3],
+                                               (*iter2)[4],
+                                               (*iter2)[5],
+                                               (*iter2)[6],
+                                               (*iter2)[7]));
+        }
+        new_rigid.draw(canvas);
     }
 }
 
@@ -57,6 +72,57 @@ void objecthdl::draw_bound(canvashdl *canvas)
 	/* TODO Assignment 1: Generate the geometry for the bounding box and send the necessary
 	 * transformations and geometry to the renderer
 	 */
+    vector<vec8f> bound_geometry;
+    vector<int> bound_indices;
+
+    bound_geometry.reserve(8);
+    bound_indices.reserve(24);
+    
+    // Box geometry
+    // bound(left, right, bottom, top, front, back)
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTF 0
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBF 1
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTB 2
+    bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBB 3
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTF 4
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBF 5
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTB 6
+    bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBB 7
+
+    // Indices
+    bound_indices.push_back(0);
+    bound_indices.push_back(1);
+    bound_indices.push_back(0);
+    bound_indices.push_back(2);
+    bound_indices.push_back(0);
+    bound_indices.push_back(4);
+    
+    bound_indices.push_back(1);
+    bound_indices.push_back(3);
+    bound_indices.push_back(1);
+    bound_indices.push_back(5);
+    
+    bound_indices.push_back(2);
+    bound_indices.push_back(3);
+    bound_indices.push_back(2);
+    bound_indices.push_back(6);
+    
+    bound_indices.push_back(3);
+    bound_indices.push_back(7);
+    
+    bound_indices.push_back(4);
+    bound_indices.push_back(5);
+    bound_indices.push_back(4);
+    bound_indices.push_back(6);
+    
+    bound_indices.push_back(5);
+    bound_indices.push_back(7);
+    
+    bound_indices.push_back(6);
+    bound_indices.push_back(7);
+
+    // Draw bounding lines
+    canvas->draw_lines(bound_geometry, bound_indices);
 }
 
 /* draw_normals
@@ -71,3 +137,15 @@ void objecthdl::draw_normals(canvashdl *canvas, bool face)
 	 * transformations and geometry to the renderer
 	 */
 }
+
+bool objecthdl::contains_point(vec3f point)
+{
+    if ((point[0] > position[0] + bound[0]) &&
+        (point[0] < position[0] + bound[1]) &&
+        (point[1] > -position[1] + bound[2]) &&
+        (point[1] < -position[1] + bound[3])) {
+        return true;
+    }
+    return false;
+}
+

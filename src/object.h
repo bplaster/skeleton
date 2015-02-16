@@ -22,6 +22,7 @@ struct rigidhdl
 
 	vector<vec8f> geometry;
 	vector<int> indices;
+    
 	// TODO Assignment 2: Add a material name here
 
 	void draw(canvashdl *canvas);
@@ -42,6 +43,7 @@ struct objecthdl
 	// The bounding box of this object
 	// (left, right, bottom, top, front, back)
 	vec6f bound;
+    bool contains_point(vec3f point);
 
 	void draw(canvashdl *canvas);
 	void draw_bound(canvashdl *canvas);
