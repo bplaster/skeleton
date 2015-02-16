@@ -32,7 +32,7 @@ void scenehdl::draw()
     
     // Draw cameras
     if (render_cameras) {
-        for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); iter++) {
+        for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); ++iter) {
             if ((*iter)->model) {
                 (*iter)->model->draw(canvas);
             }
@@ -40,7 +40,7 @@ void scenehdl::draw()
     }
     
     // Draw objects
-    for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
+    for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
         if (*iter) {
             (*iter)->draw(canvas);
         }

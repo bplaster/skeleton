@@ -139,7 +139,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
     vector<vec2f> dir (slices);
     
     // Calculate directions along X and Z axes
-    for (int i = 0; i < slices; i ++){
+    for (int i = 0; i < slices; i++){
         vec2f temp(sin(2.0*m_pi*((float)i/(float)slices)), cos(2.0*m_pi*((float)i/(float)slices)));
         dir[i] = temp;
     };
@@ -188,7 +188,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
     rigid[0].indices.push_back(2*slices - 1);
     
     // Top and Bottom surfaces
-    for (int i = 0; i < slices; i ++){
+    for (int i = 0; i < slices; i++){
         
         if (i < slices - 1){
             
