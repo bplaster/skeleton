@@ -72,6 +72,9 @@ void objecthdl::draw_bound(canvashdl *canvas)
 	/* TODO Assignment 1: Generate the geometry for the bounding box and send the necessary
 	 * transformations and geometry to the renderer
 	 */
+    vector<vec8f> bound_geometry;
+    vector<int> bound_indices;
+
     bound_geometry.reserve(8);
     bound_indices.reserve(24);
     
@@ -86,7 +89,6 @@ void objecthdl::draw_bound(canvashdl *canvas)
     bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTB 6
     bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBB 7
 
-    
     // Indices
     bound_indices.push_back(0);
     bound_indices.push_back(1);
@@ -140,8 +142,8 @@ bool objecthdl::contains_point(vec3f point)
 {
     if ((point[0] > position[0] + bound[0]) &&
         (point[0] < position[0] + bound[1]) &&
-        (point[1] > position[1] + bound[2]) &&
-        (point[1] < position[1] + bound[3])) {
+        (point[1] > -position[1] + bound[2]) &&
+        (point[1] < -position[1] + bound[3])) {
         return true;
     }
     return false;
