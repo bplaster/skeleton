@@ -1,6 +1,5 @@
 #include <OpenGL/OpenGL.h>
 #include <GLUI/GLUI.h>
-
 #include "standard.h"
 #include "canvas.h"
 #include "scene.h"
