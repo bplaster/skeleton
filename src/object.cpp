@@ -1,5 +1,6 @@
 #include "object.h"
 #include "canvas.h"
+#include "core/geometry.h"
 
 rigidhdl::rigidhdl()
 {
@@ -49,14 +50,17 @@ void objecthdl::draw(canvashdl *canvas)
         new_rigid.geometry.reserve(iter->geometry.size());
         
         for (vector<vec8f>::iterator iter2 = iter->geometry.begin(); iter2 != iter->geometry.end(); iter2++) {
-            new_rigid.geometry.push_back(vec8f((*iter2)[0] + position[0],
-                                               (*iter2)[1] + position[1],
-                                               (*iter2)[2] + position[2],
-                                               (*iter2)[3],
-                                               (*iter2)[4],
-                                               (*iter2)[5],
-                                               (*iter2)[6],
-                                               (*iter2)[7]));
+            
+            vec4f loc = vec4f(0,0,0,1);
+            loc.set(0, 3, (*iter2)(0,3));
+            loc = scale_point(loc, vec3f(scale,scale,scale));
+            loc = translate_point(loc, position);
+            vec8f new_vec;
+            new_vec.set(0, 3, loc(0,3));
+            new_vec.set(3, 8, (*iter2)(3,8));
+            
+            new_rigid.geometry.push_back(new_vec);
+
         }
         new_rigid.draw(canvas);
     }
@@ -80,6 +84,7 @@ void objecthdl::draw_bound(canvashdl *canvas)
     
     // Box geometry
     // bound(left, right, bottom, top, front, back)
+    bound *= scale;
     bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTF 0
     bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // LBF 1
     bound_geometry.push_back(vec8f(position[0]+bound[0], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // LTB 2
@@ -88,6 +93,7 @@ void objecthdl::draw_bound(canvashdl *canvas)
     bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[4], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBF 5
     bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[3], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RTB 6
     bound_geometry.push_back(vec8f(position[0]+bound[1], position[1]+bound[2], position[2]+bound[5], 0.0, 0.0, 0.0, 0.0, 0.0)); // RBB 7
+    bound /= scale;
 
     // Indices
     bound_indices.push_back(0);
@@ -140,12 +146,38 @@ void objecthdl::draw_normals(canvashdl *canvas, bool face)
 
 bool objecthdl::contains_point(vec3f point)
 {
-    if ((point[0] > position[0] + bound[0]) &&
-        (point[0] < position[0] + bound[1]) &&
-        (point[1] > -position[1] + bound[2]) &&
-        (point[1] < -position[1] + bound[3])) {
+    if ((point[0] > position[0] + scale*bound[0]) &&
+        (point[0] < position[0] + scale*bound[1]) &&
+        (point[1] > -position[1] + scale*bound[2]) &&
+        (point[1] < -position[1] + scale*bound[3])) {
         return true;
     }
     return false;
 }
 
+vec4f objecthdl::translate_point(vec4f point, vec3f direction){
+    mat4f projection(1., 0., 0., direction[0],
+                     0., 1., 0., direction[1],
+                     0., 0., 1., direction[2],
+                     0., 0., 0., 1.);
+    return projection * point;
+}
+
+vec4f objecthdl::scale_point(vec4f point, vec3f size){
+    mat4f projection(size[0], 0., 0., 0.,
+                     0., size[1], 0., 0.,
+                     0., 0., size[2], 0.,
+                     0., 0., 0., 1.);
+    return projection * point;
+}
+
+vec4f objecthdl::rotate_point(vec4f point, float angle, vec3f axis){
+    float c = cosf(angle);
+    float cp = 1 - c;
+    float s = sinf(angle);
+    mat4f projection(c + pow(axis[0],2)*cp, axis[0]*axis[1]*cp - axis[2]*s, axis[0]*axis[2]*cp + axis[1]*s, 0,
+                     axis[0]*axis[1]*cp + axis[2]*s, c + pow(axis[1],2)*cp, axis[1]*axis[2]*cp - axis[0]*s, 0,
+                     axis[0]*axis[2]*cp - axis[1]*s, axis[1]*axis[2]*cp + axis[0]*s, c + pow(axis[2],2)*cp, 0,
+                     0, 0, 0, 1);
+    return projection * point;
+}

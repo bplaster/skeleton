@@ -78,6 +78,7 @@ bool keys[256];
 
 // GLUI Variables
 int current_camera = 0;
+int current_manipulation = 0;
 int window_id;
 
 void init(string working_directory)
@@ -94,7 +95,6 @@ void init(string working_directory)
     scene.cameras.push_back(camera);
     scene.active_camera = (int)scene.cameras.size() - 1;
     camera->view(scene.canvas);
-    
 
 }
 
@@ -172,16 +172,34 @@ void motionfunc(int x, int y)
         
 		int deltax = x - mousex;
 		int deltay = mousey - y;
-
+        
 		mousex = x;
 		mousey = y;
         
         vec3f mouse_window = canvas.to_window(vec2i(x,y));
         vec3f mouse_world = canvas.unproject(mouse_window);
+        vec3f delta_world = vec3f(mouse_world[0] - old_mouse_world[0],
+                                  old_mouse_world[1] - mouse_world[1],
+                                  mouse_world[2] - old_mouse_world[2]);
         
         if (scene.active_object_valid() && scene.objects[scene.active_object]->contains_point(mouse_world)) {
-            scene.objects[scene.active_object]->position[0] += mouse_world[0] - old_mouse_world[0];
-            scene.objects[scene.active_object]->position[1] += old_mouse_world[1] - mouse_world[1];
+            switch (current_manipulation) {
+                case manipulate::translate:
+                    scene.objects[scene.active_object]->position += delta_world;
+                    break;
+                case manipulate::rotate:
+                    break;
+                case manipulate::scale: {
+                    vec3f old_diff = old_mouse_world - scene.objects[scene.active_object]->position;
+                    vec3f new_diff = mouse_world - scene.objects[scene.active_object]->position;
+                    float delta_scale = mag(new_diff)/mag(old_diff) - 1.;
+                    scene.objects[scene.active_object]->scale += delta_scale;
+                    break;
+                }
+                default:
+                    break;
+            }
+            
         }
 
 		/* TODO Assignment 1: Implement the functionality for the following operations here:
@@ -249,6 +267,10 @@ void menustatusfunc(int status, int x, int y)
 		menu = true;
 }
 
+void toggle_cameras (int val){
+    if (val)
+        scene.render_cameras = !scene.render_cameras;
+}
 
 void handle_objects (int val){
 
@@ -528,6 +550,19 @@ int main(int argc, char **argv)
 	glutKeyboardUpFunc(keyupfunc);
     
     // Setup GLUI
+    /* TODO Assignment 1: Implement a menu that allows the following operations:
+     * - change the fovy, aspect, width, height, near or far values of the active camera
+     * - create an orthographic, frustum, or perspective camera
+     * - set the polygon mode to point or line
+     * - enable culling for front or back face or disable culling
+     * - enable rendering of vertex or face normals, or disabe both
+     * - Set an object or camera as the focus of the active camera (using canvashdl::look_at)
+     * - Unset the focus of the active camera
+     * - Translate, rotate, or scale an object or camera
+     * - delete an object or camera
+     * - Set the active camera
+     * - quit
+     */
     GLUI *glui = GLUI_Master.create_glui("GLUI",0,800,0);
     glui->add_statictext("Create Object");
     glui->add_button("Box",         (int)Object::Box,       handle_objects);
@@ -535,6 +570,11 @@ int main(int argc, char **argv)
     glui->add_button("Sphere",      (int)Object::Sphere,    handle_objects);
     glui->add_button("Pyramid",     (int)Object::Pyramid,   handle_objects);
     glui->add_button("Model",       (int)Object::Model,     handle_objects);
+    GLUI_Listbox *list_manipulate = glui->add_listbox("Manipulation", &current_manipulation);
+    list_manipulate->add_item(manipulate::translate,"Translate");
+    list_manipulate->add_item(manipulate::rotate,   "Rotate");
+    list_manipulate->add_item(manipulate::scale,    "Scale");
+
     glui->add_separator();
     GLUI_Listbox *list_camera = glui->add_listbox("Camera");
     list_camera->add_item(1,"Ortho");
@@ -543,7 +583,9 @@ int main(int argc, char **argv)
     GLUI_Listbox *list_polygon = glui->add_listbox("Polygon");
     list_polygon->add_item(1,"Line");
     list_polygon->add_item(2,"Point");
-    
+    glui->add_checkbox("Draw Cameras", NULL, 1, toggle_cameras);
+    glui->add_separator();
+    glui->add_button("Quit", 0, exit);
     
     glui->set_main_gfx_window(window_id);
     GLUI_Master.set_glutIdleFunc(idlefunc);
