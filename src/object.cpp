@@ -148,8 +148,8 @@ bool objecthdl::contains_point(vec3f point)
 {
     if ((point[0] > position[0] + scale*bound[0]) &&
         (point[0] < position[0] + scale*bound[1]) &&
-        (point[1] > -position[1] + scale*bound[2]) &&
-        (point[1] < -position[1] + scale*bound[3])) {
+        (point[1] > position[1] + scale*bound[2]) &&
+        (point[1] < position[1] + scale*bound[3])) {
         return true;
     }
     return false;

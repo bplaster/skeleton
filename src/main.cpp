@@ -150,7 +150,7 @@ void pmotionfunc(int x, int y)
 		 */
         vec3f mouse_window = canvas.to_window(vec2i(x,y));
         vec3f mouse_world = canvas.unproject(mouse_window);
-                
+        
         int object_index = scene.object_index_at_point(mouse_world);
         scene.active_object = object_index;
         glutPostRedisplay();
@@ -170,17 +170,12 @@ void motionfunc(int x, int y)
         vec3f old_mouse_window = canvas.to_window(vec2i(mousex,mousey));
         vec3f old_mouse_world = canvas.unproject(old_mouse_window);
         
-		int deltax = x - mousex;
-		int deltay = mousey - y;
-        
 		mousex = x;
 		mousey = y;
         
         vec3f mouse_window = canvas.to_window(vec2i(x,y));
         vec3f mouse_world = canvas.unproject(mouse_window);
-        vec3f delta_world = vec3f(mouse_world[0] - old_mouse_world[0],
-                                  old_mouse_world[1] - mouse_world[1],
-                                  mouse_world[2] - old_mouse_world[2]);
+        vec3f delta_world = mouse_world - old_mouse_world;
         
         if (scene.active_object_valid() && scene.objects[scene.active_object]->contains_point(mouse_world)) {
             switch (current_manipulation) {

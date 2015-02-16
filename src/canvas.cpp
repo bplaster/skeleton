@@ -203,7 +203,7 @@ vec3f canvashdl::to_window(vec2i pixel)
 	 * convert it into window coordinates (x from -1 to 1 and y from -1 to 1).
 	 */
     float x = 2.*pixel[0]/width - 1.;
-    float y = 2.*pixel[1]/height - 1.;
+    float y = 1. - 2.*pixel[1]/height;
     float z = 0.;
     
 	return vec3f(x,y,z);
