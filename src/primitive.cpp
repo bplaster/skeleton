@@ -135,8 +135,6 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
 	 */
     rigid.push_back(rigidhdl());
     rigid[0].geometry.reserve(2 + 4*slices);
-    rigid[0].geometry.push_back(vec8f(0.0, -(height/2), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(0.0, (height/2), 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
     
     vector<vec2f> dir (slices);
     
@@ -153,7 +151,8 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
             
             if (i == 0)
             {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], 0.0, -1.0, 0.0, 0.0, 0.0));
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], (height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
             }
             else if (i == 1)
             {
@@ -161,11 +160,13 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
             }
             else if (i == 2)
             {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], (height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], 0.0, -1.0, 0.0, 0.0, 0.0));
             }
         }
     }
+    
+    rigid[0].geometry.push_back(vec8f(0.0, (height/2), 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(0.0, -(height/2), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
     
     // Indices
     
