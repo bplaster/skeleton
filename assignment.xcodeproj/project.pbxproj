@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A70A44F1A91927D004544C5 /* GLUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A70A44E1A91927D004544C5 /* GLUI.framework */; };
 		C5EE0A6E1A71517000FAF23F /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5EE0A531A71517000FAF23F /* camera.cpp */; };
 		C5EE0A6F1A71517000FAF23F /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5EE0A551A71517000FAF23F /* canvas.cpp */; };
 		C5EE0A701A71517000FAF23F /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5EE0A581A71517000FAF23F /* color.cpp */; };
@@ -35,6 +36,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1A70A44E1A91927D004544C5 /* GLUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUI.framework; path = ../../../../../../Library/Frameworks/GLUI.framework; sourceTree = "<group>"; };
 		C5EE0A261A71506700FAF23F /* assignment */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = assignment; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5EE0A301A71517000FAF23F /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
 		C5EE0A321A71517000FAF23F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A70A44F1A91927D004544C5 /* GLUI.framework in Frameworks */,
 				C5EE0A7C1A71524D00FAF23F /* OpenGL.framework in Frameworks */,
 				C5EE0A7A1A71524600FAF23F /* GLUT.framework in Frameworks */,
 			);
@@ -112,6 +115,7 @@
 		C5EE0A1D1A71506700FAF23F = {
 			isa = PBXGroup;
 			children = (
+				1A70A44E1A91927D004544C5 /* GLUI.framework */,
 				C5EE0A7B1A71524D00FAF23F /* OpenGL.framework */,
 				C5EE0A791A71524600FAF23F /* GLUT.framework */,
 				C5EE0A301A71517000FAF23F /* COPYRIGHT.txt */,
@@ -366,6 +370,10 @@
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				CONFIGURATION_TEMP_DIR = assignment.build;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LD_MAP_FILE_PATH = "assignment.build/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -380,6 +388,10 @@
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				CONFIGURATION_TEMP_DIR = assignment.build;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LD_MAP_FILE_PATH = "assignment.build/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;

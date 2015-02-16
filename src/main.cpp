@@ -1,4 +1,6 @@
-#include "opengl.h"
+#include <OpenGL/OpenGL.h>
+#include <GLUI/GLUI.h>
+
 #include "standard.h"
 #include "canvas.h"
 #include "scene.h"
@@ -6,8 +8,6 @@
 #include "model.h"
 #include "primitive.h"
 #include "tinyfiledialogs.h"
-
-int window_id;
 
 canvashdl canvas(750, 750);
 scenehdl scene;
@@ -75,6 +75,10 @@ enum class Normal{
 manipulate::type manipulator;
 
 bool keys[256];
+
+// GLUI Variables
+int current_camera = 0;
+int window_id;
 
 void init(string working_directory)
 {
@@ -229,6 +233,9 @@ void keyupfunc(unsigned char key, int x, int y)
 void idlefunc()
 {
 	bool change = false;
+    
+    if ( glutGetWindow() != window_id )
+        glutSetWindow(window_id);
 
 	// TODO Assignment 1: handle continuous keyboard inputs
 
@@ -511,14 +518,37 @@ int main(int argc, char **argv)
 
 	glutReshapeFunc(reshapefunc);
 	glutDisplayFunc(displayfunc);
-	glutIdleFunc(idlefunc);
+	//glutIdleFunc(idlefunc);
 
 	glutPassiveMotionFunc(pmotionfunc);
 	glutMotionFunc(motionfunc);
-	glutMouseFunc(mousefunc);
+	//glutMouseFunc(mousefunc);
 
 	glutKeyboardFunc(keydownfunc);
 	glutKeyboardUpFunc(keyupfunc);
-
+    
+    // Setup GLUI
+    GLUI *glui = GLUI_Master.create_glui("GLUI",0,800,0);
+    glui->add_statictext("Create Object");
+    glui->add_button("Box",         (int)Object::Box,       handle_objects);
+    glui->add_button("Cylinder",    (int)Object::Cylinder,  handle_objects);
+    glui->add_button("Sphere",      (int)Object::Sphere,    handle_objects);
+    glui->add_button("Pyramid",     (int)Object::Pyramid,   handle_objects);
+    glui->add_button("Model",       (int)Object::Model,     handle_objects);
+    glui->add_separator();
+    GLUI_Listbox *list_camera = glui->add_listbox("Camera");
+    list_camera->add_item(1,"Ortho");
+    list_camera->add_item(2,"Frustum");
+    list_camera->add_item(3,"Perspective");
+    GLUI_Listbox *list_polygon = glui->add_listbox("Polygon");
+    list_polygon->add_item(1,"Line");
+    list_polygon->add_item(2,"Point");
+    
+    
+    glui->set_main_gfx_window(window_id);
+    GLUI_Master.set_glutIdleFunc(idlefunc);
+    GLUI_Master.set_glutMouseFunc(mousefunc);
+    
+    // Start GLUT loop
 	glutMainLoop();
 }
