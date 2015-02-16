@@ -183,6 +183,7 @@ void motionfunc(int x, int y)
                     break;
                 case manipulate::rotate:
                     scene.objects[scene.active_object]->orientation[0] += delta_world[0];
+                    scene.objects[scene.active_object]->orientation[1] += delta_world[1];
                     break;
                 case manipulate::scale: {
                     vec3f old_diff = old_mouse_world - scene.objects[scene.active_object]->position;
