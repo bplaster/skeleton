@@ -434,7 +434,7 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
 	// TODO Assignment 1: Clip the points against the frustum, call the vertex shader, and then draw them.
     vector<vec8f> new_geometry = geometry;
     
-    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
         
         *iter = shade_vertex(*iter);
         plot_point(*iter);
@@ -449,7 +449,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
 	// TODO Assignment 1: Clip the lines against the frustum, call the vertex shader, and then draw them.
     vector<vec8f> new_geometry = geometry;
     
-    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
         
         *iter = shade_vertex(*iter);
     }
@@ -475,7 +475,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     
     vector<vec8f> new_geometry = geometry;
     
-    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); iter++) {
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
         
         *iter = shade_vertex(*iter);
     }

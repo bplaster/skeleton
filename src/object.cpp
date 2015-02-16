@@ -43,25 +43,42 @@ objecthdl::~objecthdl()
 void objecthdl::draw(canvashdl *canvas)
 {
 	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
-    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); iter++) {
+    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
         
         rigidhdl new_rigid;
         new_rigid.indices = (*iter).indices;
         new_rigid.geometry.reserve(iter->geometry.size());
         
-        for (vector<vec8f>::iterator iter2 = iter->geometry.begin(); iter2 != iter->geometry.end(); iter2++) {
+        for (vector<vec8f>::iterator iter2 = iter->geometry.begin(); iter2 != iter->geometry.end(); ++iter2) {
             
-            vec4f loc = vec4f(0,0,0,1);
+            vec4f loc = vec4f(0.,0.,0.,1.);
+            vec4f axis = vec3f(0.,0.,1.,1.);
             loc.set(0, 3, (*iter2)(0,3));
+            
+            // Rotate about Z
+            loc = rotate_point(loc, orientation[0], axis(0,3));
+            
+            // Rotate about rotated X
+            axis = rotate_point(vec4f(1.,0.,0.,1.), orientation[0], axis(0,3));
+            loc = rotate_point(loc, orientation[1], axis);
+            
+            // Rotate about rotated Z
+            axis = rotate_point(vec4f(0.,0.,1.,1.), orientation[1], axis(0,3));
+            loc = rotate_point(loc, orientation[2], axis);
+
+            // Scale
             loc = scale_point(loc, vec3f(scale,scale,scale));
+            
+            // Translate
             loc = translate_point(loc, position);
+            
+            // Add point
             vec8f new_vec;
             new_vec.set(0, 3, loc(0,3));
             new_vec.set(3, 8, (*iter2)(3,8));
-            
             new_rigid.geometry.push_back(new_vec);
-
         }
+        
         new_rigid.draw(canvas);
     }
 }
@@ -172,12 +189,17 @@ vec4f objecthdl::scale_point(vec4f point, vec3f size){
 }
 
 vec4f objecthdl::rotate_point(vec4f point, float angle, vec3f axis){
-    float c = cosf(angle);
-    float cp = 1 - c;
-    float s = sinf(angle);
-    mat4f projection(c + pow(axis[0],2)*cp, axis[0]*axis[1]*cp - axis[2]*s, axis[0]*axis[2]*cp + axis[1]*s, 0,
-                     axis[0]*axis[1]*cp + axis[2]*s, c + pow(axis[1],2)*cp, axis[1]*axis[2]*cp - axis[0]*s, 0,
-                     axis[0]*axis[2]*cp - axis[1]*s, axis[1]*axis[2]*cp + axis[0]*s, c + pow(axis[2],2)*cp, 0,
-                     0, 0, 0, 1);
-    return projection * point;
+    if (angle == 0.0) {
+        return point;
+    } else {
+        float c = cosf(angle);
+        float cp = 1. - c;
+        float s = sinf(angle);
+        axis = norm(axis);
+        mat4f projection(c + pow(axis[0],2)*cp, axis[0]*axis[1]*cp - axis[2]*s, axis[0]*axis[2]*cp + axis[1]*s, 0.,
+                         axis[0]*axis[1]*cp + axis[2]*s, c + pow(axis[1],2)*cp, axis[1]*axis[2]*cp - axis[0]*s, 0.,
+                         axis[0]*axis[2]*cp - axis[1]*s, axis[1]*axis[2]*cp + axis[0]*s, c + pow(axis[2],2)*cp, 0.,
+                         0., 0., 0., 1.);
+        return projection * point;
+    }
 }
