@@ -165,6 +165,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
         }
     }
     
+    // Add points representing centre of top and bottom surfaces
     rigid[0].geometry.push_back(vec8f(0.0, (height/2), 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
     rigid[0].geometry.push_back(vec8f(0.0, -(height/2), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
     
@@ -235,6 +236,73 @@ pyramidhdl::pyramidhdl(float radius, float height, int slices)
 	/* TODO Assignment 1: Generate the geometry and indices required to make a pyramid.
 	 * Calculate its bounding box.
 	 */
+    rigid.push_back(rigidhdl());
+    rigid[0].geometry.reserve(1 + 3*slices);
+    
+    vector<vec3f> dir (slices);
+    float cone_angle = atan2f(radius, height);
+    
+    // Calculate directions along X, Y and Z axes
+    for (int i = 0; i < slices; i ++){
+        vec3f temp(cos(cone_angle)*sin(2.0*m_pi*((float)i/(float)slices)), sin(cone_angle),
+                   cos(cone_angle)*cos(2.0*m_pi*((float)i/(float)slices)));
+        dir[i] = temp;
+    };
+    
+    // Enter geometry for all faces of pyramid
+    for (int i = 0; i < 2; i++){
+        for (int j = 0; j < slices; j++){
+            
+            if (i == 0)
+            {
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/3), radius*dir[j][2], dir[j][0], dir[j][1], dir[j][2], 0.0, 0.0));
+                rigid[0].geometry.push_back(vec8f(0.0, 2*(height/3), 0.0, dir[j][0], dir[j][1], dir[j][2], 0.0, 0.0));
+            }
+            else if (i == 1)
+            {
+                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/3), radius*dir[j][2], 0.0, -1.0, 0.0, 0.0, 0.0));
+            }
+        }
+    }
+    
+    // Add point representing centre of bottom of pyramid
+    rigid[0].geometry.push_back(vec8f(0.0, -(height/3), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
+    
+    // Indices
+    
+    for (int i = 0; i < 2*slices - 2; i += 2){
+        
+        // Curved surface area
+        rigid[0].indices.push_back(i);
+        rigid[0].indices.push_back(i + 1);
+        rigid[0].indices.push_back(i + 2);
+    }
+    
+    // Wrap around curved surface area
+    rigid[0].indices.push_back(2*slices - 2);
+    rigid[0].indices.push_back(2*slices - 1);
+    rigid[0].indices.push_back(0);
+    
+    for (int i = 0; i < slices; i++){
+        if (i < slices - 1){
+            
+            // Bottom surface
+            rigid[0].indices.push_back(2*slices + i);
+            rigid[0].indices.push_back(2*slices + i + 1);
+            rigid[0].indices.push_back(3*slices);
+        }
+        else if (i == slices - 1) {
+            
+            // Wrap around bottom surface
+            rigid[0].indices.push_back(2*slices + i);
+            rigid[0].indices.push_back(2*slices);
+            rigid[0].indices.push_back(3*slices);
+        }
+        
+    }
+    
+    // Bounding box
+    bound = vec6f(-radius, radius, -(height/3), 2*(height/3), -radius, radius);
 }
 
 pyramidhdl::~pyramidhdl()

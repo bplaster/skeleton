@@ -292,9 +292,13 @@ void handle_objects (int val){
             scene.objects.push_back(sphere);
             break;
         }
-        case Object::Pyramid :
+        case Object::Pyramid : {
             
+            // Create dynamic sphere object
+            pyramidhdl *pyramid = new pyramidhdl(1.0, 4.0, 12.0);
+            scene.objects.push_back(pyramid);
             break;
+        }
         case Object::Model :
             
             break;
