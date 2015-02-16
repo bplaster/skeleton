@@ -215,6 +215,9 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                 
     }
     
+    // Bounding box
+    bound = vec6f(-radius, radius, -(height/2), (height/2), -radius, radius);
+    
 }
 
 cylinderhdl::~cylinderhdl()
