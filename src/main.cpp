@@ -7,6 +7,8 @@
 #include "model.h"
 #include "primitive.h"
 #include "tinyfiledialogs.h"
+#include "core/geometry.h"
+
 
 canvashdl canvas(750, 750);
 scenehdl scene;
@@ -147,9 +149,11 @@ void pmotionfunc(int x, int y)
 		/* TODO Assignment 1: Figure out which object the mouse pointer is hovering over and make
 		 * that the active object.
 		 */
+        canvas.set_matrix(canvashdl::modelview_matrix);
+        canvas.load_identity();
+        
         vec3f mouse_window = canvas.to_window(vec2i(x,y));
         vec3f mouse_world = canvas.unproject(mouse_window);
-        
         int object_index = scene.object_index_at_point(mouse_world);
         scene.active_object = object_index;
         glutPostRedisplay();
@@ -166,8 +170,14 @@ void motionfunc(int x, int y)
 {
 	if (!bound && !menu)
 	{
+        canvas.set_matrix(canvashdl::modelview_matrix);
+        canvas.load_identity();
+        
         vec3f old_mouse_window = canvas.to_window(vec2i(mousex,mousey));
         vec3f old_mouse_world = canvas.unproject(old_mouse_window);
+        
+        int deltax = x - mousex;
+        int deltay = y - mousey;
         
 		mousex = x;
 		mousey = y;
@@ -175,21 +185,24 @@ void motionfunc(int x, int y)
         vec3f mouse_window = canvas.to_window(vec2i(x,y));
         vec3f mouse_world = canvas.unproject(mouse_window);
         vec3f delta_world = mouse_world - old_mouse_world;
+
         
-        if (scene.active_object_valid() && scene.objects[scene.active_object]->contains_point(mouse_world)) {
+        if (scene.active_object_valid()) {
             switch (current_manipulation) {
-                case manipulate::translate:
+                case manipulate::translate: {
                     scene.objects[scene.active_object]->position += delta_world;
                     break;
-                case manipulate::rotate:
-                    scene.objects[scene.active_object]->orientation[0] += delta_world[0];
-                    scene.objects[scene.active_object]->orientation[1] += delta_world[1];
+                }
+                case manipulate::rotate: {
+                    delta_world *= vec3f(1.0, -1.0, 1.0);
+                    scene.objects[scene.active_object]->orientation += delta_world.swap(0, 1);
                     break;
+                }
                 case manipulate::scale: {
                     vec3f old_diff = old_mouse_world - scene.objects[scene.active_object]->position;
                     vec3f new_diff = mouse_world - scene.objects[scene.active_object]->position;
                     float delta_scale = mag(new_diff)/mag(old_diff) - 1.;
-                    scene.objects[scene.active_object]->scale += delta_scale;
+                    scene.objects[scene.active_object]->scale += delta_scale/2.;
                     break;
                 }
                 default:
@@ -281,7 +294,7 @@ void handle_objects (int val){
         case Object::Cylinder : {
             
             // Create dynamic sphere object
-            cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 16.0);
+            cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 10.0);
             scene.objects.push_back(cylinder);
             break;
         }

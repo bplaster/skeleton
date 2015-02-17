@@ -40,11 +40,11 @@ struct objecthdl
 	vec3f orientation;
 	float scale;
     
-    vec4f translate_point(vec4f point, vec3f direction);
-    vec4f scale_point(vec4f point, vec3f size);
-    vec4f rotate_point(vec4f point, float angle, vec3f axis);
-    vec4f euler_project(vec4f point);
-    vec8f transform_point(vec8f point);
+//    vec4f translate_point(vec4f point, vec3f direction);
+//    vec4f scale_point(vec4f point, vec3f size);
+//    vec4f rotate_point(vec4f point, float angle, vec3f axis);
+//    vec4f euler_project(vec4f point);
+//    vec8f transform_point(vec8f point);
     
 	// The bounding box of this object
 	// (left, right, bottom, top, front, back)
