@@ -281,7 +281,7 @@ void handle_objects (int val){
         case Object::Cylinder : {
             
             // Create dynamic sphere object
-            cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 4.0);
+            cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 16.0);
             scene.objects.push_back(cylinder);
             break;
         }
