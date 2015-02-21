@@ -43,17 +43,23 @@ objecthdl::~objecthdl()
 void objecthdl::draw(canvashdl *canvas)
 {
 	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
-    canvas->set_matrix(canvashdl::modelview_matrix);
-    canvas->load_identity();
-    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
-    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-    canvas->scale(vec3f(scale, scale, scale));
     canvas->translate(position);
+    canvas->scale(vec3f(scale, scale, scale));
+    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
     
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
         (*iter).draw(canvas);
     }
+    
+    // Undo transformations
+    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+    canvas->translate(-position);
+
 }
 
 /* draw_bound
@@ -66,13 +72,12 @@ void objecthdl::draw_bound(canvashdl *canvas)
 	/* TODO Assignment 1: Generate the geometry for the bounding box and send the necessary
 	 * transformations and geometry to the renderer
 	 */
-    canvas->set_matrix(canvashdl::modelview_matrix);
-    canvas->load_identity();
-    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
-    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-    canvas->scale(vec3f(scale, scale, scale));
+
     canvas->translate(position);
+    canvas->scale(vec3f(scale, scale, scale));
+    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
     
     vector<vec8f> bound_geometry;
     vector<int> bound_indices;
@@ -125,6 +130,13 @@ void objecthdl::draw_bound(canvashdl *canvas)
 
     // Draw bounding lines
     canvas->draw_lines(bound_geometry, bound_indices);
+    
+    // Undo transformations
+    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+    canvas->translate(-position);
 }
 
 /* draw_normals

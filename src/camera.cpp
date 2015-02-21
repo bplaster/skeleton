@@ -3,7 +3,7 @@
 
 camerahdl::camerahdl()
 {
-	position = vec3f(0.0, 0.0, 0.0);
+	position = vec3f(0., 0., -5.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	model = NULL;
 	type = "camera";
@@ -21,14 +21,11 @@ void camerahdl::view(canvashdl *canvas)
 	/* TODO Assignment 1: Do the necessary modelview transformations to move
 	 * the camera into place.
 	 */
-    canvas->set_matrix(canvashdl::modelview_matrix);
-    canvas->load_identity();
-    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
-    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-    //canvas->scale(vec3f(scale, scale, scale));
-    canvas->translate(position);
-    project(canvas);
+    canvas->rotate(-orientation[2], vec3f(1.,0.,0.));
+    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(-orientation[0], vec3f(0.,0.,1.));
+    canvas->translate(-position);
+
 }
 
 orthohdl::orthohdl()

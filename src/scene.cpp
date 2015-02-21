@@ -30,6 +30,20 @@ void scenehdl::draw()
 	 * if enabled, draw the normals and the cameras.
 	 */
     
+    // Set projection matrix
+    canvas->set_matrix(canvashdl::projection_matrix);
+    canvas->load_identity();
+    if (active_camera_valid()) {
+        cameras[active_camera]->project(canvas);
+    }
+    
+    // Set modelview matrix
+    canvas->set_matrix(canvashdl::modelview_matrix);
+    canvas->load_identity();
+    if (active_camera_valid()) {
+        cameras[active_camera]->view(canvas);
+    }
+    
     // Draw cameras
     if (render_cameras) {
         for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); ++iter) {

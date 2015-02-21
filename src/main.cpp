@@ -138,6 +138,10 @@ void pmotionfunc(int x, int y)
 			glutWarpPointer(mousex, mousey);
 
 		// TODO Assignment 1: Use the mouse delta to change the orientation of the active camera
+        if (scene.active_camera_valid()) {
+            scene.cameras[scene.active_camera]->orientation[1] += (float)deltax/100.;
+            //scene.cameras[scene.active_camera]->orientation[1] += (float)deltay/100.;
+        }
 
 		glutPostRedisplay();
 	}
@@ -167,6 +171,7 @@ void motionfunc(int x, int y)
 {
 	if (!bound && !menu)
 	{
+        // TODO: Do we need to set the perspective matrix to Ortho before object selection
         canvas.set_matrix(canvashdl::modelview_matrix);
         canvas.load_identity();
         
