@@ -49,8 +49,6 @@ orthohdl::~orthohdl()
 void orthohdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::ortho function to set up an orthographic projection
-    canvas->set_matrix(canvashdl::projection_matrix);
-    canvas->load_identity();
     canvas->ortho(left, right, bottom, top, front, back);
 }
 
@@ -73,8 +71,6 @@ frustumhdl::~frustumhdl()
 void frustumhdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::frustum function to set up a perspective projection
-    canvas->set_matrix(canvashdl::projection_matrix);
-    canvas->load_identity();
     canvas->frustum(left, right, bottom, top, front, back);
 }
 
@@ -95,7 +91,5 @@ perspectivehdl::~perspectivehdl()
 void perspectivehdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::perspective function to set up a perspective projection
-    canvas->set_matrix(canvashdl::projection_matrix);
-    canvas->load_identity();
     canvas->perspective(fovy, aspect, front, back);
 }

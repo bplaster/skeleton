@@ -363,7 +363,6 @@ void handle_cameras (int val){
             scene.active_camera = index;
             current_cameras->add_item(index, "Ortho");
 
-            camera->view(scene.canvas);
             break;
         }
         case Camera::Frustum : {
@@ -373,7 +372,6 @@ void handle_cameras (int val){
             scene.active_camera = index;
             current_cameras->add_item(index, "Frustum");
 
-            camera->view(scene.canvas);
             break;
         }
         case Camera::Perspective : {
@@ -383,7 +381,6 @@ void handle_cameras (int val){
             scene.active_camera = index;
             current_cameras->add_item(index, "Perspective");
 
-            camera->view(scene.canvas);
             break;
         }
         default:
@@ -397,12 +394,15 @@ void handle_cameras (int val){
 void handle_polygons (int val){
     
     switch ((Polygon)val){
+            
         case Polygon::Point :
-            
+            canvas.polygon_mode = canvashdl::point;
             break;
+            
         case Polygon::Line :
-            
+            canvas.polygon_mode = canvashdl::line;
             break;
+            
         default:
             
             break;
