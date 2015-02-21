@@ -154,6 +154,14 @@ void canvashdl::scale(vec3f size)
 void canvashdl::perspective(float fovy, float aspect, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by a perspective projection matrix.
+    float fov = tanf(M_PI_2 - fovy/2.);
+    
+    mat4f projection(fov/aspect, 0., 0., 0.,
+                     0., fov, 0., 0.,
+                     0., 0., f/(f- n), 0.,
+                     0., 0., 0., -(f*n/(f-n)));
+    
+    matrices[active_matrix] = projection * matrices[active_matrix];
 }
 
 /* frustum
