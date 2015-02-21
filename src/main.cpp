@@ -81,6 +81,9 @@ bool keys[256];
 int current_camera = 0;
 int current_manipulation = 0;
 int window_id;
+GLUI *glui;
+GLUI_Listbox *current_objects;
+GLUI_Listbox *current_cameras;
 
 void init(string working_directory)
 {
@@ -90,12 +93,6 @@ void init(string working_directory)
     canvas.working_directory = working_directory;
 	scene.canvas = &canvas;
 	// TODO Assignment 1: Initialize the Scene as necessary.
-    
-    // Create camera
-    camerahdl *camera = new orthohdl;
-    scene.cameras.push_back(camera);
-    scene.active_camera = (int)scene.cameras.size() - 1;
-    camera->view(scene.canvas);
 
 }
 
@@ -282,13 +279,15 @@ void toggle_cameras (int val){
 }
 
 void handle_objects (int val){
-
+    int index = -1;
     switch ((Object)val){
         case Object::Box : {
             
             // Create dynamic box object
             boxhdl *box = new boxhdl(1.0, 1.0, 1.0);
             scene.objects.push_back(box);
+            index = (int)scene.objects.size()-1;
+            current_objects->add_item(index, "Box");
             break;
         }
         case Object::Cylinder : {
@@ -296,6 +295,8 @@ void handle_objects (int val){
             // Create dynamic sphere object
             cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 10.0);
             scene.objects.push_back(cylinder);
+            index = (int)scene.objects.size()-1;
+            current_objects->add_item(index, "Cylinder");
             break;
         }
         case Object::Sphere : {
@@ -303,6 +304,8 @@ void handle_objects (int val){
             // Create dynamic sphere object
             spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
             scene.objects.push_back(sphere);
+            index = (int)scene.objects.size()-1;
+            current_objects->add_item(index, "Sphere");
             break;
         }
         case Object::Pyramid : {
@@ -310,6 +313,8 @@ void handle_objects (int val){
             // Create dynamic sphere object
             pyramidhdl *pyramid = new pyramidhdl(1.0, 4.0, 12.0);
             scene.objects.push_back(pyramid);
+            index = (int)scene.objects.size()-1;
+            current_objects->add_item(index, "Pyramid");
             break;
         }
         case Object::Model :
@@ -319,11 +324,13 @@ void handle_objects (int val){
             
             break;
     }
+    current_objects->set_int_val(index);
     glutPostRedisplay();
 }
 
 void handle_cameras (int val){
-    
+    int index = -1;
+
     switch ((Camera)val){
         case Camera::Fovy :
             
@@ -350,30 +357,40 @@ void handle_cameras (int val){
             
             break;
         case Camera::Ortho : {
-            
             camerahdl *camera = new orthohdl;
             scene.cameras.push_back(camera);
-            scene.active_camera = (int)scene.cameras.size() - 1;
-            camera->view(scene.canvas);
+            index = (int)scene.cameras.size() - 1;
+            scene.active_camera = index;
+            current_cameras->add_item(index, "Ortho");
 
-            
+            camera->view(scene.canvas);
             break;
         }
         case Camera::Frustum : {
             camerahdl *camera = new frustumhdl;
             scene.cameras.push_back(camera);
-            scene.active_camera = (int)scene.cameras.size() - 1;
-            camera->view(scene.canvas);
+            index = (int)scene.cameras.size() - 1;
+            scene.active_camera = index;
+            current_cameras->add_item(index, "Frustum");
 
+            camera->view(scene.canvas);
             break;
         }
-        case Camera::Perspective :
-            
+        case Camera::Perspective : {
+            camerahdl *camera = new perspectivehdl;
+            scene.cameras.push_back(camera);
+            index = (int)scene.cameras.size() - 1;
+            scene.active_camera = index;
+            current_cameras->add_item(index, "Perspective");
+
+            camera->view(scene.canvas);
             break;
+        }
         default:
             
             break;
     }
+    current_cameras->set_int_val(index);
     glutPostRedisplay();
 }
 
@@ -431,13 +448,32 @@ void handle_normal (int val){
     glutPostRedisplay();
 }
 
-
 void handle_menu(int val)
 {
     if (val == 5){
         glutDestroyWindow(window_id);
         exit(0);
     }
+}
+
+void handle_delete(int val)
+{
+    if (val == 0) {
+        int obj_ind = current_objects->get_int_val();
+        if (obj_ind < scene.objects.size() && obj_ind >= 0) {
+            scene.objects[obj_ind] = NULL; // TODO: list will keep getting bigger if you only set pointer to null
+            current_objects->delete_item(obj_ind);
+            current_objects->set_int_val(-1);
+        }
+    } else if (val == 1) {
+        int obj_ind = current_cameras->get_int_val();
+        if (obj_ind < scene.cameras.size() && obj_ind >= 0) {
+            scene.cameras[obj_ind] = NULL; // TODO: list will keep getting bigger if you only set pointer to null
+            current_cameras->delete_item(obj_ind);
+            current_cameras->set_int_val(-1);
+        }
+    }
+    glutPostRedisplay();
 }
 
 void create_menu()
@@ -521,6 +557,64 @@ void create_menu()
     glutMenuStatusFunc(menustatusfunc);
 }
 
+/* TODO Assignment 1: Implement a menu that allows the following operations:
+ * - change the fovy, aspect, width, height, near or far values of the active camera
+ * - create an orthographic, frustum, or perspective camera
+ * - set the polygon mode to point or line
+ * - enable culling for front or back face or disable culling
+ * - enable rendering of vertex or face normals, or disabe both
+ * - Set an object or camera as the focus of the active camera (using canvashdl::look_at)
+ * - Unset the focus of the active camera
+ * - Translate, rotate, or scale an object or camera
+ * - delete an object or camera
+ * - Set the active camera
+ */
+void setup_glui() {
+    glui = GLUI_Master.create_glui("Controls",0,800,0);
+    GLUI_Panel *scene_panel = glui->add_panel("Current Scene");
+    
+    current_objects = glui->add_listbox_to_panel(scene_panel, "Objects");
+    current_objects->add_item(-1, "");
+    glui->add_button_to_panel(scene_panel, "Delete", 0, handle_delete);
+
+    glui->add_separator_to_panel(scene_panel);
+    current_cameras = glui->add_listbox_to_panel(scene_panel, "Cameras");
+    current_cameras->add_item(-1, "");
+    glui->add_button_to_panel(scene_panel, "Delete", 1, handle_delete);
+    
+    glui->add_separator_to_panel(scene_panel);
+
+    GLUI_Listbox *list_polygon = glui->add_listbox_to_panel(scene_panel, "Polygon");
+    list_polygon->add_item((int)Polygon::Line,"Line");
+    list_polygon->add_item((int)Polygon::Point,"Point");
+    GLUI_Listbox *list_manipulate = glui->add_listbox_to_panel(scene_panel, "Manipulation", &current_manipulation);
+    list_manipulate->add_item(manipulate::translate,"Translate");
+    list_manipulate->add_item(manipulate::rotate,   "Rotate");
+    list_manipulate->add_item(manipulate::scale,    "Scale");
+    glui->add_separator_to_panel(scene_panel);
+    glui->add_checkbox_to_panel(scene_panel, "Draw Cameras", NULL, 1, toggle_cameras);
+
+    glui->add_column(true);
+    GLUI_Panel *obj_panel = glui->add_panel("Create Object");
+    glui->add_button_to_panel(obj_panel,    "Box",         (int)Object::Box,       handle_objects);
+    glui->add_button_to_panel(obj_panel,    "Cylinder",    (int)Object::Cylinder,  handle_objects);
+    glui->add_button_to_panel(obj_panel,    "Sphere",      (int)Object::Sphere,    handle_objects);
+    glui->add_button_to_panel(obj_panel,    "Pyramid",     (int)Object::Pyramid,   handle_objects);
+    glui->add_button_to_panel(obj_panel,    "Model",       (int)Object::Model,     handle_objects);
+    
+    GLUI_Panel *cam_panel = glui->add_panel("Create Camera");
+    glui->add_button_to_panel(cam_panel,    "Ortho",       (int)Camera::Ortho,         handle_cameras);
+    glui->add_button_to_panel(cam_panel,    "Frustum",     (int)Camera::Frustum,       handle_cameras);
+    glui->add_button_to_panel(cam_panel,    "Perspective", (int)Camera::Perspective,   handle_cameras);
+    
+    glui->add_separator();
+    glui->add_button("Quit", 0, exit);
+    
+    glui->set_main_gfx_window(window_id);
+    GLUI_Master.set_glutIdleFunc(idlefunc);
+    GLUI_Master.set_glutMouseFunc(mousefunc);
+}
+
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
@@ -563,46 +657,10 @@ int main(int argc, char **argv)
 	glutKeyboardUpFunc(keyupfunc);
     
     // Setup GLUI
-    /* TODO Assignment 1: Implement a menu that allows the following operations:
-     * - change the fovy, aspect, width, height, near or far values of the active camera
-     * - create an orthographic, frustum, or perspective camera
-     * - set the polygon mode to point or line
-     * - enable culling for front or back face or disable culling
-     * - enable rendering of vertex or face normals, or disabe both
-     * - Set an object or camera as the focus of the active camera (using canvashdl::look_at)
-     * - Unset the focus of the active camera
-     * - Translate, rotate, or scale an object or camera
-     * - delete an object or camera
-     * - Set the active camera
-     * - quit
-     */
-    GLUI *glui = GLUI_Master.create_glui("GLUI",0,800,0);
-    glui->add_statictext("Create Object");
-    glui->add_button("Box",         (int)Object::Box,       handle_objects);
-    glui->add_button("Cylinder",    (int)Object::Cylinder,  handle_objects);
-    glui->add_button("Sphere",      (int)Object::Sphere,    handle_objects);
-    glui->add_button("Pyramid",     (int)Object::Pyramid,   handle_objects);
-    glui->add_button("Model",       (int)Object::Model,     handle_objects);
-    GLUI_Listbox *list_manipulate = glui->add_listbox("Manipulation", &current_manipulation);
-    list_manipulate->add_item(manipulate::translate,"Translate");
-    list_manipulate->add_item(manipulate::rotate,   "Rotate");
-    list_manipulate->add_item(manipulate::scale,    "Scale");
-
-    glui->add_separator();
-    GLUI_Listbox *list_camera = glui->add_listbox("Camera");
-    list_camera->add_item(1,"Ortho");
-    list_camera->add_item(2,"Frustum");
-    list_camera->add_item(3,"Perspective");
-    GLUI_Listbox *list_polygon = glui->add_listbox("Polygon");
-    list_polygon->add_item(1,"Line");
-    list_polygon->add_item(2,"Point");
-    glui->add_checkbox("Draw Cameras", NULL, 1, toggle_cameras);
-    glui->add_separator();
-    glui->add_button("Quit", 0, exit);
+    setup_glui();
     
-    glui->set_main_gfx_window(window_id);
-    GLUI_Master.set_glutIdleFunc(idlefunc);
-    GLUI_Master.set_glutMouseFunc(mousefunc);
+    // Create camera
+    handle_cameras((int)Camera::Ortho);
     
     // Start GLUT loop
 	glutMainLoop();
