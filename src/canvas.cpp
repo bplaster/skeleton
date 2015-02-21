@@ -110,7 +110,7 @@ void canvashdl::rotate(float angle, vec3f axis)
                          axis[0]*axis[1]*cp + axis[2]*s, c + pow(axis[1],2)*cp, axis[1]*axis[2]*cp - axis[0]*s, 0.,
                          axis[0]*axis[2]*cp - axis[1]*s, axis[1]*axis[2]*cp + axis[0]*s, c + pow(axis[2],2)*cp, 0.,
                          0., 0., 0., 1.);
-        matrices[active_matrix] = projection * matrices[active_matrix];
+        matrices[active_matrix] *= projection;
     }
 }
 
@@ -127,7 +127,7 @@ void canvashdl::translate(vec3f direction)
                      0., 0., 1., direction[2],
                      0., 0., 0., 1.);
     
-    matrices[active_matrix] = projection * matrices[active_matrix];
+    matrices[active_matrix] *= projection;
 }
 
 /* scale
@@ -143,7 +143,7 @@ void canvashdl::scale(vec3f size)
                      0., 0., size[2], 0.,
                      0., 0., 0., 1.);
     
-    matrices[active_matrix] = projection * matrices[active_matrix];
+    matrices[active_matrix] *= projection;
 }
 
 /* perspective
@@ -169,7 +169,7 @@ void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
                      0., 0., -(f+n)/(f-n), -2.*f*n/(f-n),
                      0., 0., -1., 0.);
     
-    matrices[active_matrix] = projection * matrices[active_matrix];
+    matrices[active_matrix] *= projection;
 }
 
 /* ortho
@@ -185,7 +185,7 @@ void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
                      0., 0., -2./(f-n), (f+n)/(f-n),
                      0., 0., 0., 1.);
     
-    matrices[active_matrix] = projection * matrices[active_matrix];
+    matrices[active_matrix] *= projection;
 }
 
 /* look_at
@@ -197,6 +197,18 @@ void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
 void canvashdl::look_at(vec3f eye, vec3f at, vec3f up)
 {
 	// TODO Assignment 1: Emulate the functionality of gluLookAt
+    vec3f f = norm(at - eye);
+    vec3f s = cross(f, norm(up));
+    vec3f u = cross(norm(s), f);
+    
+    mat4f projection(s[0], s[1], s[2], 0.,
+                     u[0], u[1], u[2], 0.,
+                     -f[0], -f[1], -f[2], 0.,
+                     0., 0., 0., 1.);
+    
+    matrices[active_matrix] *= projection;
+    translate(-eye);
+    
 }
 
 /* to_window
@@ -259,9 +271,10 @@ vec8f canvashdl::shade_vertex(vec8f v)
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1.);
     vt = matrices[normal_matrix]*matrices[projection_matrix]*matrices[modelview_matrix]*vt;
-    
+    v.set(0, 3, vt(0,3));
+
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
-	return vt;
+	return v;
 }
 
 /* shade_fragment
