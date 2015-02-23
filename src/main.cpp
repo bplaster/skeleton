@@ -399,12 +399,15 @@ void handle_cameras (int val){
 void handle_polygons (int val){
     
     switch ((Polygon)val){
+            
         case Polygon::Point :
-            
+            canvas.polygon_mode = canvashdl::point;
             break;
+            
         case Polygon::Line :
-            
+            canvas.polygon_mode = canvashdl::line;
             break;
+            
         default:
             
             break;

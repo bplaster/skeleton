@@ -442,12 +442,18 @@ void canvashdl::plot_triangle(vec8f v1, vec8f v2, vec8f v3)
 	 * triangle as 3 points or 3 lines.
 	 */
     
-    // 3 Line implementation
-    plot_line(v1, v2);
-    plot_line(v2, v3);
-    plot_line(v3, v1);
-    
-    // 3 Point implementation
+    if (polygon_mode == point) {
+        // 3 Point implementation
+        plot_point(v1);
+        plot_point(v2);
+        plot_point(v3);
+    }
+    else {
+        // 3 Line implementation
+        plot_line(v1, v2);
+        plot_line(v2, v3);
+        plot_line(v3, v1);
+    }
 
 	// TODO Assignment 2: Add in the fill polygon mode.
 }
