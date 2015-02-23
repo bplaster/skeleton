@@ -83,20 +83,20 @@ public:
     vec2i to_pixel(vec3f window);
 
 	// Drawing and Shading
-	enum
+	enum Polygon
 	{
 		point = 0,
 		line = 1,
 	} polygon_mode;
 
-	enum
+	enum Culling
 	{
 		disable = 0,
 		backface = 1,
 		frontface = 2
-	} culling;
+	} culling_mode;
     
-    enum
+    enum 
     {
         red = 0,
         green = 1,

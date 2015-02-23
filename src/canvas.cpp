@@ -23,7 +23,7 @@ canvashdl::canvashdl(int w, int h)
         matrices[i] = identity<float, 4, 4>();
     
 	polygon_mode = line;
-	culling = backface;
+	culling_mode = backface;
 }
 
 canvashdl::~canvashdl()
@@ -294,9 +294,9 @@ vec3f canvashdl::shade_fragment(vec8f v)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
     vec3f color;
-    color[red] = 100.;
-    color[green] = 100.;
-    color[blue] = 100.;
+    color[red] = 255.;
+    color[green] = 255.;
+    color[blue] = 255.;
 
 	/* TODO Assignment 2: Figure out the pixel color due to lighting and materials
 	 * and implement phong shading.

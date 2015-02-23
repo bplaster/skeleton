@@ -24,10 +24,6 @@ void camerahdl::view(canvashdl *canvas)
     vec3f up = ror3(vec3f(0,1,0), orientation);
     vec3f center = position + ror3(vec3f(0,0,-1), orientation);
     canvas->look_at(position, center, up);
-//    canvas->rotate(-orientation[2], vec3f(1.,0.,0.));
-//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(-orientation[0], vec3f(0.,0.,1.));
-//    canvas->translate(-position);
 
 }
 
@@ -76,7 +72,7 @@ void frustumhdl::project(canvashdl *canvas)
 
 perspectivehdl::perspectivehdl()
 {
-	fovy = m_pi/4.0;
+	fovy = 2.0*m_pi/3.0;
 	aspect = 1.0;
 	front = 2.0;
 	back = 101.0;
