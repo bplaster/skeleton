@@ -161,7 +161,7 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
                      0., 0., f/(f- n), 0.,
                      0., 0., 0., -(f*n/(f-n)));
     
-    matrices[active_matrix] = projection * matrices[active_matrix];
+    matrices[active_matrix] *= projection;
 }
 
 /* frustum

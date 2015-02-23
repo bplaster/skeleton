@@ -561,15 +561,9 @@ void create_menu()
 
 /* TODO Assignment 1: Implement a menu that allows the following operations:
  * - change the fovy, aspect, width, height, near or far values of the active camera
- * - create an orthographic, frustum, or perspective camera
- * - set the polygon mode to point or line
- * - enable culling for front or back face or disable culling
- * - enable rendering of vertex or face normals, or disabe both
  * - Set an object or camera as the focus of the active camera (using canvashdl::look_at)
  * - Unset the focus of the active camera
  * - Translate, rotate, or scale an object or camera
- * - delete an object or camera
- * - Set the active camera
  */
 void setup_glui() {
     glui = GLUI_Master.create_glui("Controls",0,800,0);
@@ -589,6 +583,16 @@ void setup_glui() {
     GLUI_Listbox *list_polygon = glui->add_listbox_to_panel(scene_panel, "Polygon");
     list_polygon->add_item((int)Polygon::Line,"Line");
     list_polygon->add_item((int)Polygon::Point,"Point");
+    GLUI_Listbox *list_normal = glui->add_listbox_to_panel(scene_panel, "Normal");
+    list_normal->add_item((int)Normal::None,"None");
+    list_normal->add_item((int)Normal::Face,"Face");
+    list_normal->add_item((int)Normal::Vertex,"Vertex");
+    GLUI_Listbox *list_culling = glui->add_listbox_to_panel(scene_panel, "Culling");
+    list_culling->add_item((int)Culling::None,"None");
+    list_culling->add_item((int)Culling::Back,"Back");
+    list_culling->add_item((int)Culling::Front,"Front");
+
+    
     GLUI_Listbox *list_manipulate = glui->add_listbox_to_panel(scene_panel, "Manipulation", &current_manipulation);
     list_manipulate->add_item(manipulate::translate,"Translate");
     list_manipulate->add_item(manipulate::rotate,   "Rotate");
