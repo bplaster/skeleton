@@ -3,7 +3,7 @@
 
 camerahdl::camerahdl()
 {
-	position = vec3f(0., 0., -2.0);
+	position = vec3f(0., 0., -3.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	model = NULL;
 	type = "camera";
@@ -30,10 +30,10 @@ void camerahdl::view(canvashdl *canvas)
 
 orthohdl::orthohdl()
 {
-	left = -5.0;
-	right = 5.0;
-	bottom = -5.0;
-	top = 5.0;
+	left = -2.0;
+	right = 2.0;
+	bottom = -2.0;
+	top = 2.0;
 	near = 2.0;
 	far = 101.0;
 	type = "ortho";
@@ -51,10 +51,10 @@ void orthohdl::project(canvashdl *canvas)
 
 frustumhdl::frustumhdl()
 {
-	left = -5.0;
-	right = 5.0;
-	bottom = -5.0;
-	top = 5.0;
+	left = -2.0;
+	right = 2.0;
+	bottom = -2.0;
+	top = 2.0;
 	near = 2.0;
 	far = 101.0;
 	type = "frustum";
@@ -73,7 +73,7 @@ void frustumhdl::project(canvashdl *canvas)
 
 perspectivehdl::perspectivehdl()
 {
-	fovy = 2.0*m_pi/3.0;
+	fovy = m_pi/4.0;
 	aspect = 1.0;
 	near = 2.0;
 	far = 101.0;

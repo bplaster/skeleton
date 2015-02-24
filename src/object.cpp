@@ -24,7 +24,7 @@ void rigidhdl::draw(canvashdl *canvas)
 
 objecthdl::objecthdl()
 {
-	position = vec3f(0.0, 0.0, 1.0);
+	position = vec3f(0.0, 0.0, 2.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	bound = vec6f(1.0e6, -1.0e6, 1.0e6, -1.0e6, 1.0e6, -1.0e6);
 	scale = 1.0;
