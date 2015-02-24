@@ -158,8 +158,8 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
     
     mat4f projection(fov/aspect, 0., 0., 0.,
                      0., fov, 0., 0.,
-                     0., 0., f/(f- n), 0.,
-                     0., 0., 0., -(f*n/(f-n)));
+                     0., 0., (f+n)/(n-f), (2.*f*n)/(n-f),
+                     0., 0., -1., 0.);
     
     matrices[active_matrix] *= projection;
 }
@@ -241,8 +241,8 @@ vec3f canvashdl::to_window(vec2i pixel)
  */
 vec2i canvashdl::to_pixel(vec3f window)
 {
-    int x = roundf(width*(window[0]+1)/2);
-    int y = roundf(height*(window[1]+1)/2);
+    int x = roundf(width*(window[0]+1.)/2.);
+    int y = roundf(height*(window[1]+1.)/2.);
     
     return vec2i(x,y);
 }
@@ -255,10 +255,10 @@ vec2i canvashdl::to_pixel(vec3f window)
 vec3f canvashdl::unproject(vec3f window)
 {
 	// TODO Assignment 1: Unproject a window coordinate into world coordinates.
-    vec4f vt  = vec4f(window[0], window[1], window[2], 1);
+    vec4f vt  = vec4f(window[0], window[1], window[2], 1.);
     
-    //vt = inverse(matrices[active_matrix])*vt;
     vt = inverse(matrices[modelview_matrix])*inverse(matrices[projection_matrix])*vt;
+    vt /= vt[3];
     
 	return vec3f(vt[0],vt[1],vt[2]);
 }
@@ -278,7 +278,9 @@ vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1.);
-    vt = matrices[normal_matrix]*matrices[projection_matrix]*matrices[modelview_matrix]*vt;
+    vt = matrices[projection_matrix]*matrices[modelview_matrix]*vt;
+    vt /= vt[3];
+
     v.set(0, 3, vt(0,3));
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.

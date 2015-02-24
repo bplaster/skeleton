@@ -31,7 +31,7 @@ struct orthohdl : camerahdl
 	orthohdl();
 	~orthohdl();
 
-	float left, right, bottom, top, front, back;
+	float left, right, bottom, top, near, far;
 
 	void project(canvashdl *canvas);
 };
@@ -41,7 +41,7 @@ struct frustumhdl : camerahdl
 	frustumhdl();
 	~frustumhdl();
 
-	float left, right, bottom, top, front, back;
+	float left, right, bottom, top, near, far;
 
 	void project(canvashdl *canvas);
 };
@@ -51,7 +51,7 @@ struct perspectivehdl : camerahdl
 	perspectivehdl();
 	~perspectivehdl();
 
-	float fovy, aspect, front, back;
+	float fovy, aspect, near, far;
 
 	void project(canvashdl *canvas);
 };

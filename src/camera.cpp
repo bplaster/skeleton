@@ -3,7 +3,7 @@
 
 camerahdl::camerahdl()
 {
-	position = vec3f(0., 0., -5.0);
+	position = vec3f(0., 0., -2.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	model = NULL;
 	type = "camera";
@@ -23,6 +23,7 @@ void camerahdl::view(canvashdl *canvas)
 	 */
     vec3f up = ror3(vec3f(0,1,0), orientation);
     vec3f center = position + ror3(vec3f(0,0,-1), orientation);
+
     canvas->look_at(position, center, up);
 
 }
@@ -33,8 +34,8 @@ orthohdl::orthohdl()
 	right = 5.0;
 	bottom = -5.0;
 	top = 5.0;
-	front = 2.0;
-	back = 101.0;
+	near = 2.0;
+	far = 101.0;
 	type = "ortho";
 }
 
@@ -45,7 +46,7 @@ orthohdl::~orthohdl()
 void orthohdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::ortho function to set up an orthographic projection
-    canvas->ortho(left, right, bottom, top, front, back);
+    canvas->ortho(left, right, bottom, top, near, far);
 }
 
 frustumhdl::frustumhdl()
@@ -54,8 +55,8 @@ frustumhdl::frustumhdl()
 	right = 5.0;
 	bottom = -5.0;
 	top = 5.0;
-	front = 2.0;
-	back = 101.0;
+	near = 2.0;
+	far = 101.0;
 	type = "frustum";
 }
 
@@ -67,15 +68,15 @@ frustumhdl::~frustumhdl()
 void frustumhdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::frustum function to set up a perspective projection
-    canvas->frustum(left, right, bottom, top, front, back);
+    canvas->frustum(left, right, bottom, top, near, far);
 }
 
 perspectivehdl::perspectivehdl()
 {
 	fovy = 2.0*m_pi/3.0;
 	aspect = 1.0;
-	front = 2.0;
-	back = 101.0;
+	near = 2.0;
+	far = 101.0;
 	type = "perspective";
 }
 
@@ -87,5 +88,5 @@ perspectivehdl::~perspectivehdl()
 void perspectivehdl::project(canvashdl *canvas)
 {
 	// TODO Assignment 1: Use the canvashdl::perspective function to set up a perspective projection
-    canvas->perspective(fovy, aspect, front, back);
+    canvas->perspective(fovy, aspect, near, far);
 }
