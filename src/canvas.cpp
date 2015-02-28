@@ -481,15 +481,17 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
 void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &indices)
 {
 	// TODO Assignment 1: Clip the lines against the frustum, call the vertex shader, and then draw them.
-    vector<vec8f> new_geometry = geometry;
+    vector<vec8f> old_geometry = geometry;
+    vector<vec8f> new_geometry;
+    vector<int> new_indices;
     
-    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
+    for (vector<vec8f>::iterator iter = old_geometry.begin(); iter != old_geometry.end(); ++iter) {
         
         *iter = shade_vertex(*iter);
     }
     
-    for (int i = 0; i < indices.size()-1; i+=2) {
-        plot_line(new_geometry[indices[i]], new_geometry[indices[i+1]]);
+    for (int i = 0; i < new_indices.size()-1; i+=2) {
+        plot_line(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]]);
     }
     
 }
@@ -520,6 +522,41 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 
 }
 
+void canvashdl::clip_lines(vector<vec8f> geometry, vector<int> indices)
+{
+    // Get frustum (with planes) for the relevant project (ortho, frustum, or perspective)
+    //
+}
+
+canvashdl::plane canvashdl::construct_plane (vec3f p1, vec3f p2, vec3f p3)
+{
+    plane p;                      // plane to construct from a,b and c
+    
+    // build normal vector
+    vec3f q,v;
+    q[0] = p2[0] - p1[0];    v[0] = p2[0] - p3[0];
+    q[1] = p2[1] - p1[1];    v[1] = p2[1] - p3[1];
+    q[2] = p2[2] - p1[2];    v[2] = p2[2] - p3[2];
+    p.normal = cross (q,v);
+    p.normal = norm (p.normal);
+    
+    // calculate distance to origin
+    p.distance = dot (p.normal, p1);
+    
+    return p;
+}
+
+canvashdl::frustumhdl canvashdl::construct_frustum ()
+{
+    frustumhdl frustum;
+    
+    // if ortho
+    // Get 3 points for each plane
+    // Use construct_plane to construct 6 planes for frustum
+    // Enter each plane into frustum struct and return frustum
+    
+    return frustum;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

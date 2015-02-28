@@ -43,6 +43,24 @@ private:
 	void plot_line(vec8f v1, vec8f v2);
 	void plot_half_triangle(vec2i s1, vec2i s2, vec2i s3, vec8f v1, vec8f v2, vec8f v3, vec5f ave);
 	void plot_triangle(vec8f v1, vec8f v2, vec8f v3);
+    
+    // Clipping
+    struct plane
+    {
+        vec3f  normal;         // normalized Normal-Vector of the plane
+        float    distance;       // shortest distance from plane to Origin
+    };
+    
+    struct frustumhdl
+    {
+        plane sides[4];          // represent the 4 sides of the frustum
+        plane znear;             // the z-near plane
+        plane zfar;              // z-far plane
+    };
+    
+    void clip_lines(vector<vec8f> geometry, vector<int> indices);
+    plane construct_plane (vec3f p1, vec3f p2, vec3f p3);
+    frustum construct_frustum();
 
 public:
 	canvashdl(int w, int h);
