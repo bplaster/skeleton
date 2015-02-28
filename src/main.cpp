@@ -87,6 +87,13 @@ void init(string working_directory)
     // Setup GLUI
     setup_glui();
     
+    mat4f test(11, 12, 13, 14,
+               21, 22, 23, 24,
+               31, 32, 33, 34,
+               41, 42, 43, 44);
+    cout << "Accessing test matrix" << test[0][0] << endl;
+    cout << "Hello" << endl;
+    
     // Create camera
     create_camera(Camera::Ortho);
     
@@ -648,7 +655,6 @@ int main(int argc, char **argv)
     
 	cout << "Status: Using OpenGL " << glGetString(GL_VERSION) << endl;
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-
     
     init(string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/");
 	create_menu();

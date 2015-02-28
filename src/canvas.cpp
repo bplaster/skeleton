@@ -279,7 +279,7 @@ vec8f canvashdl::shade_vertex(vec8f v)
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1.);
     vt = matrices[projection_matrix]*matrices[modelview_matrix]*vt;
-    vt /= vt[3];
+    vt /= vt[3]; // Homogenize vector (divide by w)
 
     v.set(0, 3, vt(0,3));
 
@@ -530,23 +530,44 @@ void canvashdl::clip_lines(vector<vec8f> geometry, vector<int> indices)
     //
 }
 
-canvashdl::plane canvashdl::construct_plane (vec3f p1, vec3f p2, vec3f p3)
+void canvashdl::construct_planes ()
 {
-    plane p;                      // plane to construct from a,b and c
-    
-    // build normal vector
-    vec3f q,v;
-    q[0] = p2[0] - p1[0];    v[0] = p2[0] - p3[0];
-    q[1] = p2[1] - p1[1];    v[1] = p2[1] - p3[1];
-    q[2] = p2[2] - p1[2];    v[2] = p2[2] - p3[2];
-    p.normal = cross (q,v);
-    p.normal = norm (p.normal);
-    
-    // calculate distance to origin
-    p.distance = dot (p.normal, p1);
-    
-    return p;
+//    plane p;                      // plane to construct from a,b and c
+//    
+//    // build normal vector
+//    vec3f q,v;
+//    q[0] = p2[0] - p1[0];    v[0] = p2[0] - p3[0];
+//    q[1] = p2[1] - p1[1];    v[1] = p2[1] - p3[1];
+//    q[2] = p2[2] - p1[2];    v[2] = p2[2] - p3[2];
+//    p.normal = cross (q,v);
+//    p.normal = norm (p.normal);
+//    
+//    // calculate distance to origin
+//    p.distance = dot (p.normal, p1);
+//    
+//    return p;
+    for (int i = 0; i < 6; i++) {
+        
+        vec3f normal;
+        float distance;
+        mat4f a = matrices[projection_matrix]*matrices[modelview_matrix];
+        
+        switch (i) {
+            case 0: {
+                normal[0] = a[1][1] + a[1][4];
+                normal[1] = a[1][2] + a[4][2];
+                break;
+            }
+            case 1: break;
+            case 2: break;
+            case 3: break;
+            case 4: break;
+            case 5: break;
+        }
+    }
 }
+
+
 
 canvashdl::frustumhdl canvashdl::construct_frustum ()
 {

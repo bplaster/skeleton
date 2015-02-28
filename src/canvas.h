@@ -51,6 +51,8 @@ private:
         float    distance;       // shortest distance from plane to Origin
     };
     
+    plane planes[6];
+    
     struct frustumhdl
     {
         plane sides[4];          // represent the 4 sides of the frustum
@@ -59,8 +61,8 @@ private:
     };
     
     void clip_lines(vector<vec8f> geometry, vector<int> indices);
-    plane construct_plane (vec3f p1, vec3f p2, vec3f p3);
-    frustum construct_frustum();
+    void construct_planes ();
+    frustumhdl construct_frustum();
 
 public:
 	canvashdl(int w, int h);
