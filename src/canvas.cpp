@@ -23,7 +23,7 @@ canvashdl::canvashdl(int w, int h)
         matrices[i] = identity<float, 4, 4>();
     
 	polygon_mode = line;
-	culling = backface;
+	culling_mode = backface;
 }
 
 canvashdl::~canvashdl()
@@ -158,10 +158,10 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
     
     mat4f projection(fov/aspect, 0., 0., 0.,
                      0., fov, 0., 0.,
-                     0., 0., f/(f- n), 0.,
-                     0., 0., 0., -(f*n/(f-n)));
+                     0., 0., (f+n)/(n-f), -(2.*f*n)/(n-f),
+                     0., 0., -1., 0.);
     
-    matrices[active_matrix] = projection * matrices[active_matrix];
+    matrices[active_matrix] *= projection;
 }
 
 /* frustum
@@ -174,7 +174,7 @@ void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 	// TODO Assignment 1: Multiply the active matrix by a frustum projection matrix.
     mat4f projection(2.*n/(r-l), 0., (r+l)/(r-l), 0.,
                      0., 2.*n/(t-b), (t+b)/(t-b), 0.,
-                     0., 0., -(f+n)/(f-n), -2.*f*n/(f-n),
+                     0., 0., -(f+n)/(f-n), 2.*f*n/(f-n),
                      0., 0., -1., 0.);
     
     matrices[active_matrix] *= projection;
@@ -190,7 +190,7 @@ void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
 	// TODO Assignment 1: Multiply the active matrix by an orthographic projection matrix.
     mat4f projection(2./(r-l), 0., 0., -(r+l)/(r-l),
                      0., 2./(t-b), 0., -(t+b)/(t-b),
-                     0., 0., -2./(f-n), (f+n)/(f-n),
+                     0., 0., -2./(f-n), -(f+n)/(f-n),
                      0., 0., 0., 1.);
     
     matrices[active_matrix] *= projection;
@@ -241,8 +241,8 @@ vec3f canvashdl::to_window(vec2i pixel)
  */
 vec2i canvashdl::to_pixel(vec3f window)
 {
-    int x = roundf(width*(window[0]+1)/2);
-    int y = roundf(height*(window[1]+1)/2);
+    int x = roundf(width*(window[0]+1.)/2.);
+    int y = roundf(height*(window[1]+1.)/2.);
     
     return vec2i(x,y);
 }
@@ -255,10 +255,10 @@ vec2i canvashdl::to_pixel(vec3f window)
 vec3f canvashdl::unproject(vec3f window)
 {
 	// TODO Assignment 1: Unproject a window coordinate into world coordinates.
-    vec4f vt  = vec4f(window[0], window[1], window[2], 1);
+    vec4f vt  = vec4f(window[0], window[1], window[2], 1.);
     
-    //vt = inverse(matrices[active_matrix])*vt;
     vt = inverse(matrices[modelview_matrix])*inverse(matrices[projection_matrix])*vt;
+    vt /= vt[3];
     
 	return vec3f(vt[0],vt[1],vt[2]);
 }
@@ -278,7 +278,9 @@ vec8f canvashdl::shade_vertex(vec8f v)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1.);
-    vt = matrices[normal_matrix]*matrices[projection_matrix]*matrices[modelview_matrix]*vt;
+    vt = matrices[projection_matrix]*matrices[modelview_matrix]*vt;
+    vt /= vt[3];
+
     v.set(0, 3, vt(0,3));
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
@@ -294,9 +296,9 @@ vec3f canvashdl::shade_fragment(vec8f v)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
     vec3f color;
-    color[red] = 100.;
-    color[green] = 100.;
-    color[blue] = 100.;
+    color[red] = 255.;
+    color[green] = 255.;
+    color[blue] = 255.;
 
 	/* TODO Assignment 2: Figure out the pixel color due to lighting and materials
 	 * and implement phong shading.

@@ -20,7 +20,7 @@ struct scenehdl
     int object_index_at_point(vec3f point);
 
 	// Whether and how to render the normals
-	enum
+	enum Normal
 	{
 		none = 0,
 		face = 1,
