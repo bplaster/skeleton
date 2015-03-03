@@ -47,22 +47,19 @@ private:
     // Clipping
     struct plane
     {
-        vec3f  normal;         // normalized Normal-Vector of the plane
-        float    distance;       // shortest distance from plane to Origin
+        vec3f  normal;
+        float distance;
     };
     
-    plane planes[6];
+    std::vector<plane> planes;
     
-    struct frustumhdl
-    {
-        plane sides[4];          // represent the 4 sides of the frustum
-        plane znear;             // the z-near plane
-        plane zfar;              // z-far plane
-    };
-    
-    void clip_lines(vector<vec8f> geometry, vector<int> indices);
+    vector<vec8f> clip_line(vec8f point1, vec8f point2);
+    vector<vec8f> clip_triangle(vec8f v1, vec8f v2, vec8f v3);
     void construct_planes ();
-    frustumhdl construct_frustum();
+    plane get_plane (vec<float, 4> row1, vec<float, 4> row2);
+    vec3f get_intersection_point (vec3f inside_point, vec3f outside_point, float intersection_factor);
+    vector<vec8f> clip_triangle_against_plane (vector<vec8f> triangle_points, plane clipping_plane);
+    void clip_line_against_plane (vec8f v1, vec8f v2, plane clipping_plane, vector<vec8f> &new_clipping_points);
 
 public:
 	canvashdl(int w, int h);
