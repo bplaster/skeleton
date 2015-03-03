@@ -172,8 +172,7 @@ void motionfunc(int x, int y)
 	if (!bound && !menu)
 	{
         // TODO: Do we need to set the perspective matrix to Ortho before object selection
-        canvas.set_matrix(canvashdl::modelview_matrix);
-        //canvas.load_identity();
+        // canvas.set_matrix(canvashdl::modelview_matrix);
         
         vec3f old_mouse_window = canvas.to_window(vec2i(mousex,mousey));
         vec3f old_mouse_world = canvas.unproject(old_mouse_window);
@@ -196,11 +195,11 @@ void motionfunc(int x, int y)
                     break;
                 }
                 case manipulate::rotate: {
-                    delta_world *= vec3f(1.0, -1.0, 1.0);
+                    delta_world *= vec3f(-1.0, 1.0, 1.0);
                     scene.objects[scene.active_object]->orientation += delta_world.swap(0, 1);
                     break;
                 }
-                case manipulate::scale: {
+                case manipulate::scale: { // TODO: make better
                     vec3f old_diff = old_mouse_world - scene.objects[scene.active_object]->position;
                     vec3f new_diff = mouse_world - scene.objects[scene.active_object]->position;
                     float delta_scale = mag(new_diff)/mag(old_diff) - 1.;
@@ -229,29 +228,102 @@ void motionfunc(int x, int y)
 	}
 }
 
+void specialfunc(int key, int x, int y)
+{
+    switch (key) {
+        case GLUT_KEY_UP: // Up arrow
+            if (scene.active_camera_valid()) {
+                vec3f forward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
+                scene.cameras[scene.active_camera]->position += forward;
+            }
+            break;
+        case GLUT_KEY_DOWN: // Down arrow
+            if (scene.active_camera_valid()) {
+                vec3f backward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
+                scene.cameras[scene.active_camera]->position += backward;
+            }
+            break;
+        case GLUT_KEY_RIGHT: // Right arrow
+            if (scene.active_camera_valid()) {
+                vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                scene.cameras[scene.active_camera]->position += right;
+            }
+            break;
+        case GLUT_KEY_LEFT: // Left arrow
+            if (scene.active_camera_valid()) {
+                vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                scene.cameras[scene.active_camera]->position += left;
+            }
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay();
+
+}
+
 void keydownfunc(unsigned char key, int x, int y)
 {
 	keys[key] = true;
+    
+    switch (key) {
+        case 27: // Escape Key Pressed
+            glutDestroyWindow(window_id);
+            exit(0);
+            break;
+        case 'm':
+            if (bound) {
+                bound = false;
+                glutSetCursor(GLUT_CURSOR_INHERIT);
+                glutAttachMenu(GLUT_RIGHT_BUTTON);
+            } else {
+                bound = true;
+                glutSetCursor(GLUT_CURSOR_NONE);
+                glutDetachMenu(GLUT_RIGHT_BUTTON);
+                mousex = x;
+                mousey = y;
+            }
+            break;
+        case GLUT_KEY_UP: // Up arrow
+            if (scene.active_camera_valid()) {
+                vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
+                scene.cameras[scene.active_camera]->position += forward;
+            }
+            cout << "up" << endl;
 
-	if (key == 27) // Escape Key Pressed
-	{
-		glutDestroyWindow(window_id);
-		exit(0);
-	}
-	else if (key == 'm' && bound)
-	{
-		bound = false;
-		glutSetCursor(GLUT_CURSOR_INHERIT);
-		glutAttachMenu(GLUT_RIGHT_BUTTON);
-	}
-	else if (key == 'm' && !bound)
-	{
-		bound = true;
-		glutSetCursor(GLUT_CURSOR_NONE);
-		glutDetachMenu(GLUT_RIGHT_BUTTON);
-		mousex = x;
-		mousey = y;
-	}
+            break;
+        case GLUT_KEY_DOWN: // Down arrow
+            if (scene.active_camera_valid()) {
+                vec3f forward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
+                scene.cameras[scene.active_camera]->position += forward;
+            }
+            cout << "down" << endl;
+
+            break;
+        default:
+            break;
+    }
+    
+    
+//	if (key == 27) // Escape Key Pressed
+//	{
+//		glutDestroyWindow(window_id);
+//		exit(0);
+//	}
+//	else if (key == 'm' && bound)
+//	{
+//		bound = false;
+//		glutSetCursor(GLUT_CURSOR_INHERIT);
+//		glutAttachMenu(GLUT_RIGHT_BUTTON);
+//	}
+//	else if (key == 'm' && !bound)
+//	{
+//		bound = true;
+//		glutSetCursor(GLUT_CURSOR_NONE);
+//		glutDetachMenu(GLUT_RIGHT_BUTTON);
+//		mousex = x;
+//		mousey = y;
+//	}
 }
 
 void keyupfunc(unsigned char key, int x, int y)
@@ -361,25 +433,23 @@ void create_camera (int val){
 //        case Camera::ClearFocus :
 //            
 //            break;
-        case Camera::Ortho : {
+        case Camera::Ortho: {
             camerahdl *camera = new orthohdl;
             scene.cameras.push_back(camera);
             index = (int)scene.cameras.size() - 1;
             scene.active_camera = index;
             current_cameras->add_item(index, "Ortho");
-
             break;
         }
-        case Camera::Frustum : {
+        case Camera::Frustum: {
             camerahdl *camera = new frustumhdl;
             scene.cameras.push_back(camera);
             index = (int)scene.cameras.size() - 1;
             scene.active_camera = index;
             current_cameras->add_item(index, "Frustum");
-
             break;
         }
-        case Camera::Perspective : {
+        case Camera::Perspective: {
             camerahdl *camera = new perspectivehdl;
             scene.cameras.push_back(camera);
             index = (int)scene.cameras.size() - 1;
@@ -389,7 +459,6 @@ void create_camera (int val){
             break;
         }
         default:
-            
             break;
     }
     current_cameras->set_int_val(index);
@@ -398,15 +467,12 @@ void create_camera (int val){
 
 void handle_polygon (int val){
     switch (val){
-            
         case canvashdl::point:
             current_polygon = canvashdl::point;
             break;
-            
         case canvashdl::line:
             current_polygon = canvashdl::line;
             break;
-            
         default:
             break;
     }
@@ -415,19 +481,17 @@ void handle_polygon (int val){
 }
 
 void handle_culling (int val){
-    
     switch (val){
         case canvashdl::Culling::disable:
-            
+            current_culling = canvashdl::Culling::disable;
             break;
-        case canvashdl::Culling::backface :
-            
+        case canvashdl::Culling::backface:
+            current_culling = canvashdl::Culling::backface;
             break;
-        case canvashdl::Culling::frontface :
-            
+        case canvashdl::Culling::frontface:
+            current_culling = canvashdl::Culling::frontface;
             break;
         default:
-            
             break;
     }
     canvas.culling_mode = (canvashdl::Culling)current_culling;
@@ -435,19 +499,17 @@ void handle_culling (int val){
 }
 
 void handle_normal (int val){
-    
     switch (val){
-        case scenehdl::Normal::none :
+        case scenehdl::Normal::none:
             current_normal = scenehdl::Normal::none;
             break;
-        case scenehdl::Normal::face :
+        case scenehdl::Normal::face:
             current_normal = scenehdl::Normal::face;
             break;
-        case scenehdl::Normal::vertex :
+        case scenehdl::Normal::vertex:
             current_normal = scenehdl::Normal::vertex;
             break;
         default:
-            
             break;
     }
     scene.render_normals = (scenehdl::Normal)current_normal;
@@ -659,6 +721,7 @@ int main(int argc, char **argv)
 
 	glutPassiveMotionFunc(pmotionfunc);
 	glutMotionFunc(motionfunc);
+    glutSpecialFunc(specialfunc);
 	//glutMouseFunc(mousefunc);
 
 	glutKeyboardFunc(keydownfunc);

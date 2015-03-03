@@ -156,8 +156,8 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
 	// TODO Assignment 1: Multiply the active matrix by a perspective projection matrix.
     float fov = tanf(M_PI_2 - fovy/2.);
     
-    mat4f projection(fov/aspect, 0., 0., 0.,
-                     0., fov, 0., 0.,
+    mat4f projection(-fov/aspect, 0., 0., 0.,
+                     0., -fov, 0., 0.,
                      0., 0., (f+n)/(n-f), -(2.*f*n)/(n-f),
                      0., 0., -1., 0.);
     
@@ -172,8 +172,8 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
 void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by a frustum projection matrix.
-    mat4f projection(2.*n/(r-l), 0., (r+l)/(r-l), 0.,
-                     0., 2.*n/(t-b), (t+b)/(t-b), 0.,
+    mat4f projection(-2.*n/(r-l), 0., (r+l)/(r-l), 0.,
+                     0., -2.*n/(t-b), (t+b)/(t-b), 0.,
                      0., 0., -(f+n)/(f-n), 2.*f*n/(f-n),
                      0., 0., -1., 0.);
     
@@ -280,8 +280,13 @@ vec8f canvashdl::shade_vertex(vec8f v)
     vec4f vt = vec4f(v[0],v[1],v[2],1.);
     vt = matrices[projection_matrix]*matrices[modelview_matrix]*vt;
     vt /= vt[3];
+    
+    vec4f vt_norm = vec4f(v[3],v[4],v[5],1.);
+    vt_norm = matrices[projection_matrix]*matrices[modelview_matrix]*vt_norm;
+    vt_norm /= vt_norm[3];
 
     v.set(0, 3, vt(0,3));
+    v.set(3, 3, vt_norm(0,3));
 
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return v;
@@ -483,11 +488,10 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
 void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &indices)
 {
 	// TODO Assignment 1: Clip the lines against the frustum, call the vertex shader, and then draw them.
-    vector<vec8f> old_geometry = geometry;
-    vector<vec8f> new_geometry;
-    vector<int> new_indices;
+    vector<vec8f> new_geometry = geometry;
+    vector<int> new_indices = indices;
     
-    for (vector<vec8f>::iterator iter = old_geometry.begin(); iter != old_geometry.end(); ++iter) {
+    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
         
         *iter = shade_vertex(*iter);
     }
@@ -519,7 +523,40 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     }
     
     for (int i = 0; i < indices.size()-2; i+=3) {
-        plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
+        switch (culling_mode) {
+            case disable:{
+                plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
+                break;
+            }
+            case backface:{
+                vec3f avg_norm;
+                for (int j = 0; j < 3; j++) {
+                    avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
+                }
+                avg_norm = norm(avg_norm);
+//                cout << "norm: " << avg_norm << endl;
+//                cout << "dot: " << dot(new_geometry[indices[i]](0,3), avg_norm) << endl;
+                if (dot((vec3f)new_geometry[indices[i]](0,3), avg_norm) < 0) {
+                    plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
+                }
+                break;
+            }
+            case frontface:{
+                vec3f avg_norm;
+                for (int j = 0; j < 3; j++) {
+                    avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
+                }
+                avg_norm = norm(avg_norm);
+                cout << "norm: " << avg_norm << endl;
+                cout << "dot: " << dot(new_geometry[indices[i]](0,3), avg_norm) << endl;
+                if (dot(new_geometry[indices[i]](0,3), avg_norm) > 0) {
+                    plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
 }
@@ -548,17 +585,17 @@ canvashdl::plane canvashdl::construct_plane (vec3f p1, vec3f p2, vec3f p3)
     return p;
 }
 
-canvashdl::frustumhdl canvashdl::construct_frustum ()
-{
-    frustumhdl frustum;
-    
-    // if ortho
-    // Get 3 points for each plane
-    // Use construct_plane to construct 6 planes for frustum
-    // Enter each plane into frustum struct and return frustum
-    
-    return frustum;
-}
+//canvashdl::frustumhdl canvashdl::construct_frustum ()
+//{
+//    frustumhdl frustum;
+//    
+//    // if ortho
+//    // Get 3 points for each plane
+//    // Use construct_plane to construct 6 planes for frustum
+//    // Enter each plane into frustum struct and return frustum
+//    
+//    return frustum;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
