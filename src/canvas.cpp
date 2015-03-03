@@ -548,10 +548,11 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
         }
         
         // Form new triangles (use fanning structure)
-        for (int i = 1; i < new_points.size() - 2; i ++){
+        for (int i = 0; i < new_points.size() - 2; i ++){
+            cout << "NEW GEOMETRY" << new_geometry.size() << endl;
             new_indices.push_back((int)new_geometry.size());
-            new_indices.push_back((int)new_geometry.size() + i);
-            new_indices.push_back((int)new_geometry.size() + i+1);
+            new_indices.push_back((int)new_geometry.size() + i + 1);
+            new_indices.push_back((int)new_geometry.size() + i + 2);
         }
         
         // Add actual points to new geometry
@@ -564,7 +565,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     for (int i = 0; i < new_indices.size()-2; i+=3) {
         cout << "Plot triangle called: " << i << endl;
         cout << new_geometry.size() << endl;
-        cout << new_geometry.size() << endl;
+        cout << new_indices.size() << endl;
         plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
     }
 
