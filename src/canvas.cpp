@@ -549,7 +549,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
         
         // Form new triangles (use fanning structure)
         for (int i = 0; i < new_points.size() - 2; i ++){
-            cout << "NEW GEOMETRY" << new_geometry.size() << endl;
             new_indices.push_back((int)new_geometry.size());
             new_indices.push_back((int)new_geometry.size() + i + 1);
             new_indices.push_back((int)new_geometry.size() + i + 2);
@@ -662,7 +661,7 @@ vector<vec8f> canvashdl::clip_line(vec8f point1, vec8f point2)
             vec3f intersection_point = get_intersection_point (point1_coords, point2_coords, s);
             point2_coords = intersection_point;
             
-        } else {
+        } else if (d1 < 0 && d2 < 0){
             clipped_points.clear();
             return clipped_points;
         }
@@ -699,7 +698,7 @@ void canvashdl::construct_planes ()
     planes[1] = get_plane (-a[0], a[3]); // right
     planes[2] = get_plane (a[1], a[3]);  // bottom
     planes[3] = get_plane (-a[1], a[3]);  // top
-    planes[4] = get_plane (-a[2], -a[3]);  // near
+    planes[4] = get_plane (a[2], a[3]);  // near
     planes[5] = get_plane (-a[2], a[3]);  // far
     
     //cout << planes[5].normal[2] << endl;

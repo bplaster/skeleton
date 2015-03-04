@@ -91,10 +91,11 @@ void init(string working_directory)
 //                21, 22, 23, 24,
 //                31, 32, 33, 34,
 //                41, 42, 43, 44);
-//    cout << "Test matrix " << -test[1] << endl;
+//    vec<float,4> a = -test[3];
+//    cout << "Test matrix " << a[3] << endl;
     
     // Create camera
-    create_camera(Camera::Ortho);
+    create_camera(Camera::Frustum);
     
     // Setup settings
     handle_culling(current_culling);
