@@ -51,6 +51,8 @@ private:
         float    distance;       // shortest distance from plane to Origin
     };
     
+    plane planes[6];
+    
     struct frustumhdl
     {
         plane sides[4];          // represent the 4 sides of the frustum

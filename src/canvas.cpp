@@ -567,23 +567,7 @@ void canvashdl::clip_lines(vector<vec8f> geometry, vector<int> indices)
     //
 }
 
-canvashdl::plane canvashdl::construct_plane (vec3f p1, vec3f p2, vec3f p3)
-{
-    plane p;                      // plane to construct from a,b and c
-    
-    // build normal vector
-    vec3f q,v;
-    q[0] = p2[0] - p1[0];    v[0] = p2[0] - p3[0];
-    q[1] = p2[1] - p1[1];    v[1] = p2[1] - p3[1];
-    q[2] = p2[2] - p1[2];    v[2] = p2[2] - p3[2];
-    p.normal = cross (q,v);
-    p.normal = norm (p.normal);
-    
-    // calculate distance to origin
-    p.distance = dot (p.normal, p1);
-    
-    return p;
-}
+
 
 //canvashdl::frustumhdl canvashdl::construct_frustum ()
 //{
