@@ -202,7 +202,7 @@ void motionfunc(int x, int y)
                     break;
                 }
                 case manipulate::rotate: {
-                    delta_world *= vec3f(-1.0, 1.0, 1.0);
+                    delta_world *= vec3f(1.0, -1.0, 1.0);
                     scene.objects[scene.active_object]->orientation += delta_world.swap(0, 1);
                     break;
                 }

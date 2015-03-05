@@ -288,8 +288,6 @@ vec8f canvashdl::shade_vertex(vec8f v)
     v.set(0, 3, vt(0,3));
     v.set(3, 6, vt_norm(0,3));
     
-    cout << "v:" << v << endl;
-
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return v;
 }
@@ -537,8 +535,9 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                 }
                 avg_norm = norm(avg_norm);
                 cout << "avg norm: " << avg_norm << endl;
-
-                if (dot(-(vec3f)new_geometry[indices[i]](0,3), avg_norm) < 0) {
+                vec3f direction(0,0,0);
+                vec3f point = (vec3f)new_geometry[indices[i]](0,3);
+                if (dot(direction - point, avg_norm) < 0) {
                     plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
                 }
                 break;
@@ -549,7 +548,9 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
                 }
                 avg_norm = norm(avg_norm);
-                if (dot(-(vec3f)new_geometry[indices[i]](0,3), avg_norm) > 0) {
+                vec3f direction(0,0,0);
+                vec3f point = (vec3f)new_geometry[indices[i]](0,3);
+                if (dot(direction - point, avg_norm) > 0) {
                     plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
                 }
                 break;

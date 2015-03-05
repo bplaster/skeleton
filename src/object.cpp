@@ -147,14 +147,71 @@ void objecthdl::draw_bound(canvashdl *canvas)
  */
 void objecthdl::draw_normals(canvashdl *canvas, bool face)
 {
+    canvas->translate(position);
+    canvas->scale(vec3f(scale, scale, scale));
+    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+    
 	/* TODO Assignment 1: Generate the geometry to display the normals and send the necessary
 	 * transformations and geometry to the renderer
 	 */
     if (face) {
-        
+        for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+            vector<vec8f> geometry;
+            vector<int> indices;
+            int size = (int)(*iter).indices.size();
+            geometry.reserve(2*size/3);
+            indices.reserve(2*size/3);
+            
+            for (int i = 0; i < size - 2; i+=3) {
+                vec8f avg_point =   (*iter).geometry[(*iter).indices[i]] +
+                                    (*iter).geometry[(*iter).indices[i+1]] +
+                                    (*iter).geometry[(*iter).indices[i+2]];
+                avg_point /= 3.;
+                
+                vec8f norm_point = avg_point;
+                vec3f norm_vec = avg_point(3,6);
+                norm_vec /= 4.;
+                norm_point.set(0, 3, avg_point(0,3) + norm_vec);
+                geometry.push_back(avg_point);
+                geometry.push_back(norm_point);
+                indices.push_back(2*i/3);
+                indices.push_back(2*i/3 + 1);
+            }
+            
+            canvas->draw_lines(geometry, indices);
+        }
     } else {
-        
+        for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+            vector<vec8f> geometry;
+            vector<int> indices;
+            int size = (int)(*iter).geometry.size();
+            geometry.reserve(2*size);
+            indices.reserve(2*size);
+
+            for (int i = 0; i < size; i++) {
+                vec8f norm_point = (*iter).geometry[i];
+                vec3f normal = (*iter).geometry[i](3,6);
+                normal /= 4.;
+                normal = normal + norm_point(0,3);
+                norm_point.set(0, 3, normal);
+                geometry.push_back((*iter).geometry[i]);
+                geometry.push_back(norm_point);
+                indices.push_back(2*i);
+                indices.push_back(2*i+1);
+            }
+            
+            canvas->draw_lines(geometry, indices);
+        }
     }
+    
+    // Undo transformations
+    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+    canvas->translate(-position);
 }
 
 // bound(left, right, bottom, top, front, back)
