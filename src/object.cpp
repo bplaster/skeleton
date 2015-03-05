@@ -150,6 +150,20 @@ void objecthdl::draw_normals(canvashdl *canvas, bool face)
 	/* TODO Assignment 1: Generate the geometry to display the normals and send the necessary
 	 * transformations and geometry to the renderer
 	 */
+    canvas->translate(position);
+    canvas->scale(vec3f(scale, scale, scale));
+    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+    
+    
+    
+    // Undo transformations
+    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+    canvas->translate(-position);
 }
 
 // bound(left, right, bottom, top, front, back)
