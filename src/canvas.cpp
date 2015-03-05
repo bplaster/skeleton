@@ -9,6 +9,7 @@ canvashdl::canvashdl(int w, int h)
 	reshape_width = w;
 	reshape_height = h;
 	initialized = false;
+    planes.reserve(6);
 
 	color_buffer = new unsigned char[width*height*3];
 	// TODO Assignment 2: Initialize the depth buffer
@@ -287,7 +288,7 @@ vec8f canvashdl::shade_vertex(vec8f v)
 
     v.set(0, 3, vt(0,3));
     v.set(3, 6, vt_norm(0,3));
-    
+
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return v;
 }
@@ -488,16 +489,36 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
 void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &indices)
 {
 	// TODO Assignment 1: Clip the lines against the frustum, call the vertex shader, and then draw them.
-    vector<vec8f> new_geometry = geometry;
-    vector<int> new_indices = indices;
+
+    construct_planes();
+    vector<vec8f> new_geometry;
+    //vector<int> new_indices;
     
-    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
+    for (int i = 0; i < indices.size(); i+= 2) {
         
-        *iter = shade_vertex(*iter);
+        // Clip line
+        vector<vec8f> new_points = clip_line(geometry[indices[i]], geometry[indices[i+1]]);
+        
+        if (!new_points.empty()){
+            
+            // Call vertex shader
+            for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
+                *iter = shade_vertex(*iter);
+            }
+            
+            // Insert new points into new geometry
+            for (int i = 0; i < new_points.size(); i ++){
+                new_geometry.push_back(new_points[i]);
+            }
+        }
+
     }
     
-    for (int i = 0; i < new_indices.size()-1; i+=2) {
-        plot_line(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]]);
+    if (new_geometry.size()){
+        // Plot lines
+        for (int i = 0; i < new_geometry.size(); i+=2) {
+            plot_line(new_geometry[i], new_geometry[i+1]);
+        }
     }
     
 }
@@ -514,73 +535,253 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
 	 */
+    construct_planes();
+    vector<vec8f> new_geometry;
+    vector<int> new_indices;
     
-    vector<vec8f> new_geometry = geometry;
-    
-    for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
+    for (int i = 0; i < indices.size() - 2; i += 3) {
         
-        *iter = shade_vertex(*iter);
+        //cout << "Draw triangles called: " << i << endl;
+        
+        // Clip triangles
+        vector<vec8f> new_points = clip_triangle(geometry[indices[i]], geometry[indices[i+1]], geometry[indices[i+2]]);
+        
+        if (new_points.size() == 0){
+            continue;
+        }
+        
+        // Vertex shader
+        for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
+            *iter = shade_vertex(*iter);
+        }
+        
+        // Form new triangles (use fanning structure)
+        for (int i = 0; i < new_points.size() - 2; i ++){
+            new_indices.push_back((int)new_geometry.size());
+            new_indices.push_back((int)new_geometry.size() + i + 1);
+            new_indices.push_back((int)new_geometry.size() + i + 2);
+        }
+        
+        // Add actual points to new geometry
+        for (int i = 0; i < new_points.size(); i ++){
+            new_geometry.push_back(new_points[i]);
+        }
+        
     }
     
-    for (int i = 0; i < indices.size()-2; i+=3) {
-        switch (culling_mode) {
-            case disable:{
-                plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
-                break;
+    if (new_geometry.size()) {
+        for (int i = 0; i < new_indices.size()-2; i+=3) {
+            switch (culling_mode) {
+                case disable:{
+                    plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+                    break;
+                }
+                case backface:{
+                    vec3f avg_norm;
+                    for (int j = 0; j < 3; j++) {
+                        avg_norm[j] = new_geometry[new_indices[i]][j+3] + new_geometry[new_indices[i+1]][j+3] + new_geometry[new_indices[i+2]][j+3];
+                    }
+                    avg_norm = norm(avg_norm);
+
+                    cout << "avg norm: " << avg_norm << endl;
+                    vec3f direction(0,0,0);
+                    vec3f point = (vec3f)new_geometry[new_indices[i]](0,3);
+                    if (dot(direction - point, avg_norm) < 0) {
+                        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+
+                    }
+                    break;
+                }
+                case frontface:{
+                    vec3f avg_norm;
+                    for (int j = 0; j < 3; j++) {
+                        avg_norm[j] = new_geometry[new_indices[i]][j+3] + new_geometry[new_indices[i+1]][j+3] + new_geometry[new_indices[i+2]][j+3];
+                    }
+                    avg_norm = norm(avg_norm);
+                    vec3f direction(0,0,0);
+                    vec3f point = (vec3f)new_geometry[new_indices[i]](0,3);
+                    if (dot(direction - point, avg_norm) > 0) {
+                        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
-            case backface:{
-                vec3f avg_norm;
-                for (int j = 0; j < 3; j++) {
-                    avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
-                }
-                avg_norm = norm(avg_norm);
-                cout << "avg norm: " << avg_norm << endl;
-                vec3f direction(0,0,0);
-                vec3f point = (vec3f)new_geometry[indices[i]](0,3);
-                if (dot(direction - point, avg_norm) < 0) {
-                    plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
-                }
-                break;
-            }
-            case frontface:{
-                vec3f avg_norm;
-                for (int j = 0; j < 3; j++) {
-                    avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
-                }
-                avg_norm = norm(avg_norm);
-                vec3f direction(0,0,0);
-                vec3f point = (vec3f)new_geometry[indices[i]](0,3);
-                if (dot(direction - point, avg_norm) > 0) {
-                    plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
-                }
-                break;
-            }
-            default:
-                break;
         }
     }
+    
+//    for (int i = 0; i < new_indices.size()-2; i+=3) {
+//        //cout << "Plot triangle called: " << i << endl;
+//        //cout << new_geometry.size() << endl;
+//        //cout << new_indices.size() << endl;
+//        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+//    }
 
 }
 
-void canvashdl::clip_lines(vector<vec8f> geometry, vector<int> indices)
+vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
 {
-    // Get frustum (with planes) for the relevant project (ortho, frustum, or perspective)
-    //
+    //cout << "Clip triangle called" << endl;
+    
+    vector<vec8f> clipped_points = {v1,v2,v3};
+    
+    for (int i = 0; i < planes.capacity(); i++) {
+        clipped_points = clip_triangle_against_plane (clipped_points, planes[i]);
+        if (clipped_points.size() == 0) {
+            break;
+        }
+    }
+    
+    return clipped_points;
 }
 
+// clips a triangle against a single plane
+vector<vec8f> canvashdl::clip_triangle_against_plane (vector<vec8f> triangle_points, plane clipping_plane) {
+    //cout << "Clip triangle against plane called" << endl;
+    //cout << triangle_points.size() << endl;
+    vector<vec8f> new_clipping_points;
+    
+    for (int i = 0; i < triangle_points.size() - 1; i++) {
+        clip_line_against_plane (triangle_points[i], triangle_points[i+1], clipping_plane, new_clipping_points);
+    }
+    clip_line_against_plane (triangle_points[triangle_points.size() - 1], triangle_points[0], clipping_plane, new_clipping_points);
+    
+    return new_clipping_points;
+}
 
+void canvashdl::clip_line_against_plane (vec8f v1, vec8f v2, plane clipping_plane, vector<vec8f> &new_clipping_points) {
+    //cout << "Clip line against plane called" << endl;
+    vec3f v1_coords = {v1[0], v1[1], v1[2]};
+    vec3f v2_coords = {v2[0], v2[1], v2[2]};
+    
+    float d1 = dot(v1_coords, clipping_plane.normal) + clipping_plane.distance;
+    float d2 = dot(v2_coords, clipping_plane.normal) + clipping_plane.distance;
+    
+    if (d1 < 0 && d2 >= 0){ // Outside to inside (first point outside and second point inside)
+        
+        float s = d2/(d2 - d1);
+        vec3f intersection_point = get_intersection_point (v2_coords, v1_coords, s);
+        v1_coords = intersection_point;
+        v1.set(0, 3, v1_coords);
+        new_clipping_points.push_back(v1);
+        new_clipping_points.push_back(v2);
+        
+        //cout << "Outside to inside" << endl;
+        
+    } else if (d1 >= 0 && d2 < 0) { // Inside to outside (first point inside and second point outside)
+        
+        float s = d1/(d1 - d2);
+        vec3f intersection_point = get_intersection_point (v1_coords, v2_coords, s);
+        v1_coords = intersection_point;
+        v1.set(0, 3, v1_coords);
+        new_clipping_points.push_back(v1);
+        
+        //cout << "Inside to outside" << endl;
+        
+    } else if (d1 >= 0 && d2>= 0){ // Both points inside plane
+        new_clipping_points.push_back(v2);
+        
+        //cout << "Both inside" << endl;
+    } else {
+        //cout << "Both outside" << endl;
+    }
 
-//canvashdl::frustumhdl canvashdl::construct_frustum ()
-//{
-//    frustumhdl frustum;
+}
+
+// Clip given line with all 6 frustum planes and return final points
+vector<vec8f> canvashdl::clip_line(vec8f point1, vec8f point2)
+{
+    vector<vec8f> clipped_points;
+    vec3f point1_coords = {point1[0], point1[1], point1[2]};
+    vec3f point2_coords = {point2[0], point2[1], point2[2]};
+    
+    for (int i = 0; i < planes.capacity(); i ++){
+        float d1 = dot(point1_coords, planes[i].normal) + planes[i].distance;
+        float d2 = dot(point2_coords, planes[i].normal) + planes[i].distance;
+        
+        if (d1 < 0 && d2 >= 0){
+            
+            float s = d2/(d2 - d1);
+            vec3f intersection_point = get_intersection_point (point2_coords, point1_coords, s);
+            point1_coords = intersection_point;
+            
+        } else if (d1 >= 0 && d2 < 0) {
+            
+            float s = d1/(d1 - d2);
+            vec3f intersection_point = get_intersection_point (point1_coords, point2_coords, s);
+            point2_coords = intersection_point;
+            
+        } else if (d1 < 0 && d2 < 0){
+            clipped_points.clear();
+            return clipped_points;
+        }
+    }
+    
+    point1.set(0, 3, point1_coords);
+    point2.set(0, 3, point2_coords);
+    clipped_points.push_back(point1);
+    clipped_points.push_back(point2);
+    
+    return clipped_points;
+}
+
+void canvashdl::construct_planes ()
+{
+//    plane p;                      // plane to construct from a,b and c
 //    
-//    // if ortho
-//    // Get 3 points for each plane
-//    // Use construct_plane to construct 6 planes for frustum
-//    // Enter each plane into frustum struct and return frustum
+//    // build normal vector
+//    vec3f q,v;
+//    q[0] = p2[0] - p1[0];    v[0] = p2[0] - p3[0];
+//    q[1] = p2[1] - p1[1];    v[1] = p2[1] - p3[1];
+//    q[2] = p2[2] - p1[2];    v[2] = p2[2] - p3[2];
+//    p.normal = cross (q,v);
+//    p.normal = norm (p.normal);
 //    
-//    return frustum;
-//}
+//    // calculate distance to origin
+//    p.distance = dot (p.normal, p1);
+//    
+//    return p;
+    
+    mat4f a = matrices[projection_matrix]*matrices[modelview_matrix];
+    
+    planes[0] = get_plane (a[0], a[3]); // left
+    planes[1] = get_plane (-a[0], a[3]); // right
+    planes[2] = get_plane (a[1], a[3]);  // bottom
+    planes[3] = get_plane (-a[1], a[3]);  // top
+    planes[4] = get_plane (a[2], a[3]);  // near
+    planes[5] = get_plane (-a[2], a[3]);  // far
+    
+    //cout << planes[5].normal[2] << endl;
+}
+
+canvashdl::plane canvashdl::get_plane (vec<float,4> row1, vec<float,4> row2){
+    
+    plane new_plane;
+    vec3f normal;
+    float distance;
+    
+    normal[0] = row1[0] + row2[0];
+    normal[1] = row1[1] + row2[1];
+    normal[2] = row1[2] + row2[2];
+    distance = row1[3] + row2[3];
+    
+    new_plane.normal = normal;
+    new_plane.distance = distance;
+    
+    return new_plane;
+}
+
+vec3f canvashdl::get_intersection_point(vec3f inside_point, vec3f outside_point, float intersection_factor) {
+    vec3f intersection_point;
+    
+    intersection_point[0] = inside_point[0] + intersection_factor*(outside_point[0] - inside_point[0]);
+    intersection_point[1] = inside_point[1] + intersection_factor*(outside_point[1] - inside_point[1]);
+    intersection_point[2] = inside_point[2] + intersection_factor*(outside_point[2] - inside_point[2]);
+    
+    return intersection_point;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

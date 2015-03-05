@@ -87,12 +87,12 @@ void init(string working_directory)
     // Setup GLUI
     setup_glui();
     
-    mat4f test(11, 12, 13, 14,
-               21, 22, 23, 24,
-               31, 32, 33, 34,
-               41, 42, 43, 44);
-    cout << "Accessing test matrix" << test[0][0] << endl;
-    cout << "Hello" << endl;
+//    mat4f test (11, 12, 13, 14,
+//                21, 22, 23, 24,
+//                31, 32, 33, 34,
+//                41, 42, 43, 44);
+//    vec<float,4> a = -test[3];
+//    cout << "Test matrix " << a[3] << endl;
     
     // Create camera
     create_camera(Camera::Ortho);
