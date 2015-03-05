@@ -52,7 +52,6 @@ private:
     };
     
     std::vector<plane> planes;
-    
     vector<vec8f> clip_line(vec8f point1, vec8f point2);
     vector<vec8f> clip_triangle(vec8f v1, vec8f v2, vec8f v3);
     void construct_planes ();

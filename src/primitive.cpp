@@ -61,7 +61,7 @@ boxhdl::boxhdl(float width, float height, float depth)
     }
     
     // Bounding box (same as box in this case)
-    bound = vec6f(-(width/2), (width/2), -(height/2), (height/2), -(depth/2), (depth/2));
+    bound = vec6f(-(width/2) - 0.1, (width/2) + 0.1, -(height/2) - 0.1, (height/2) + 0.1, -(depth/2) - 0.1, (depth/2) + 0.1);
 }
 
 boxhdl::~boxhdl()

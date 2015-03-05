@@ -3,7 +3,7 @@
 
 camerahdl::camerahdl()
 {
-	position = vec3f(0., 0., -3.0);
+	position = vec3f(0., 0., 3.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	model = NULL;
 	type = "camera";
