@@ -24,7 +24,7 @@ void rigidhdl::draw(canvashdl *canvas)
 
 objecthdl::objecthdl()
 {
-	position = vec3f(0.0, 0.0, 2.0);
+	position = vec3f(0.0, 0.0, -2.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	bound = vec6f(1.0e6, -1.0e6, 1.0e6, -1.0e6, 1.0e6, -1.0e6);
 	scale = 1.0;
@@ -147,16 +147,66 @@ void objecthdl::draw_bound(canvashdl *canvas)
  */
 void objecthdl::draw_normals(canvashdl *canvas, bool face)
 {
-	/* TODO Assignment 1: Generate the geometry to display the normals and send the necessary
-	 * transformations and geometry to the renderer
-	 */
     canvas->translate(position);
     canvas->scale(vec3f(scale, scale, scale));
     canvas->rotate(orientation[2], vec3f(0.,0.,1.));
     canvas->rotate(orientation[1], vec3f(0.,1.,0.));
     canvas->rotate(orientation[0], vec3f(1.,0.,0.));
     
-    
+	/* TODO Assignment 1: Generate the geometry to display the normals and send the necessary
+	 * transformations and geometry to the renderer
+	 */
+
+    if (face) {
+        for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+            vector<vec8f> geometry;
+            vector<int> indices;
+            int size = (int)(*iter).indices.size();
+            geometry.reserve(2*size/3);
+            indices.reserve(2*size/3);
+            
+            for (int i = 0; i < size - 2; i+=3) {
+                vec8f avg_point =   (*iter).geometry[(*iter).indices[i]] +
+                                    (*iter).geometry[(*iter).indices[i+1]] +
+                                    (*iter).geometry[(*iter).indices[i+2]];
+                avg_point /= 3.;
+                
+                vec8f norm_point = avg_point;
+                vec3f norm_vec = avg_point(3,6);
+                norm_vec /= 4.;
+                norm_point.set(0, 3, avg_point(0,3) + norm_vec);
+                geometry.push_back(avg_point);
+                geometry.push_back(norm_point);
+                indices.push_back(2*i/3);
+                indices.push_back(2*i/3 + 1);
+            }
+            
+            canvas->draw_lines(geometry, indices);
+        }
+    } else {
+        for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+            vector<vec8f> geometry;
+            vector<int> indices;
+            int size = (int)(*iter).geometry.size();
+            geometry.reserve(2*size);
+            indices.reserve(2*size);
+
+            for (int i = 0; i < size; i++) {
+                vec8f norm_point = (*iter).geometry[i];
+                vec3f normal = (*iter).geometry[i](3,6);
+                normal /= 4.;
+                normal = normal + norm_point(0,3);
+                norm_point.set(0, 3, normal);
+                geometry.push_back((*iter).geometry[i]);
+                geometry.push_back(norm_point);
+                indices.push_back(2*i);
+                indices.push_back(2*i+1);
+            }
+            
+            canvas->draw_lines(geometry, indices);
+        }
+    }
+
     
     // Undo transformations
     canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
@@ -178,79 +228,4 @@ bool objecthdl::contains_point(vec3f point)
     }
     return false;
 }
-
-//vec4f objecthdl::translate_point(vec4f point, vec3f direction){
-//    mat4f projection(1., 0., 0., direction[0],
-//                     0., 1., 0., direction[1],
-//                     0., 0., 1., direction[2],
-//                     0., 0., 0., 1.);
-//    return projection * point;
-//}
-//
-//vec4f objecthdl::scale_point(vec4f point, vec3f size){
-//    mat4f projection(size[0], 0., 0., 0.,
-//                     0., size[1], 0., 0.,
-//                     0., 0., size[2], 0.,
-//                     0., 0., 0., 1.);
-//    return projection * point;
-//}
-//
-//// http://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
-//vec4f objecthdl::rotate_point(vec4f point, float angle, vec3f axis){
-//    if (angle == 0.0) {
-//        return point;
-//    } else {
-//        float c = cosf(angle);
-//        float cp = 1. - c;
-//        float s = sinf(angle);
-//        axis = norm(axis);
-//        mat4f projection(c + pow(axis[0],2)*cp, axis[0]*axis[1]*cp - axis[2]*s, axis[0]*axis[2]*cp + axis[1]*s, 0.,
-//                         axis[0]*axis[1]*cp + axis[2]*s, c + pow(axis[1],2)*cp, axis[1]*axis[2]*cp - axis[0]*s, 0.,
-//                         axis[0]*axis[2]*cp - axis[1]*s, axis[1]*axis[2]*cp + axis[0]*s, c + pow(axis[2],2)*cp, 0.,
-//                         0., 0., 0., 1.);
-//        return projection * point;
-//    }
-//}
-//
-//// http://en.wikipedia.org/wiki/Euler_angles#Intrinsic_rotations
-//vec4f objecthdl::euler_project(vec4f point){
-//    vec4f axis = vec4f(0.,0.,1.,1.);
-//    
-//    // Rotate about Z
-//    point = rotate_point(point, orientation[0], axis(0,3));
-//    
-//    // Rotate about rotated X
-//    axis = rotate_point(vec4f(1.,0.,0.,1.), orientation[0], axis(0,3));
-//    point = rotate_point(point, orientation[1], axis);
-//    
-//    // Rotate about rotated Z
-//    axis = rotate_point(vec4f(0.,0.,1.,1.), orientation[1], axis(0,3));
-//    point = rotate_point(point, orientation[2], axis);
-//    
-//    return point;
-//};
-//
-//vec8f objecthdl::transform_point(vec8f point){
-//    
-//    vec4f new_point = vec4f(0.,0.,0.,1.);
-//    new_point.set(0, 3, point(0,3));
-//    
-//    // Euler rotation
-//    new_point = euler_project(new_point);
-//    
-//    // Scale
-//    new_point = scale_point(new_point, vec3f(scale,scale,scale));
-//    
-//    // Translate
-//    new_point = translate_point(new_point, position);
-//    
-//    // Create point
-//    vec8f new_vec;
-//    new_vec.set(0, 3, new_point(0,3));
-//    new_vec.set(3, 8, point(3,8));
-//    
-//    return new_vec;
-//};
-
-
 

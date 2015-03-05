@@ -156,9 +156,9 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
 	// TODO Assignment 1: Multiply the active matrix by a perspective projection matrix.
     float fov = tanf(M_PI_2 - fovy/2.);
     
-    mat4f projection(-fov/aspect, 0., 0., 0.,
-                     0., -fov, 0., 0.,
-                     0., 0., (f+n)/(n-f), -(2.*f*n)/(n-f),
+    mat4f projection(fov/aspect, 0., 0., 0.,
+                     0., fov, 0., 0.,
+                     0., 0., (f+n)/(n-f), (2.*f*n)/(n-f),
                      0., 0., -1., 0.);
     
     matrices[active_matrix] *= projection;
@@ -172,9 +172,9 @@ void canvashdl::perspective(float fovy, float aspect, float n, float f)
 void canvashdl::frustum(float l, float r, float b, float t, float n, float f)
 {
 	// TODO Assignment 1: Multiply the active matrix by a frustum projection matrix.
-    mat4f projection(-2.*n/(r-l), 0., (r+l)/(r-l), 0.,
-                     0., -2.*n/(t-b), (t+b)/(t-b), 0.,
-                     0., 0., -(f+n)/(f-n), 2.*f*n/(f-n),
+    mat4f projection(2.*n/(r-l), 0., (r+l)/(r-l), 0.,
+                     0., 2.*n/(t-b), (t+b)/(t-b), 0.,
+                     0., 0., -(f+n)/(f-n), -2.*f*n/(f-n),
                      0., 0., -1., 0.);
     
     matrices[active_matrix] *= projection;
@@ -286,8 +286,8 @@ vec8f canvashdl::shade_vertex(vec8f v)
     vt_norm /= vt_norm[3];
 
     v.set(0, 3, vt(0,3));
-    v.set(3, 3, vt_norm(0,3));
-
+    v.set(3, 6, vt_norm(0,3));
+    
 	// TODO Assignment 2: Implement Flat and Gouraud shading.
 	return v;
 }
@@ -534,9 +534,10 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
                 }
                 avg_norm = norm(avg_norm);
-//                cout << "norm: " << avg_norm << endl;
-//                cout << "dot: " << dot(new_geometry[indices[i]](0,3), avg_norm) << endl;
-                if (dot((vec3f)new_geometry[indices[i]](0,3), avg_norm) < 0) {
+                cout << "avg norm: " << avg_norm << endl;
+                vec3f direction(0,0,0);
+                vec3f point = (vec3f)new_geometry[indices[i]](0,3);
+                if (dot(direction - point, avg_norm) < 0) {
                     plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
                 }
                 break;
@@ -547,9 +548,9 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     avg_norm[j] = new_geometry[indices[i]][j+3] + new_geometry[indices[i+1]][j+3] + new_geometry[indices[i+2]][j+3];
                 }
                 avg_norm = norm(avg_norm);
-                cout << "norm: " << avg_norm << endl;
-                cout << "dot: " << dot(new_geometry[indices[i]](0,3), avg_norm) << endl;
-                if (dot(new_geometry[indices[i]](0,3), avg_norm) > 0) {
+                vec3f direction(0,0,0);
+                vec3f point = (vec3f)new_geometry[indices[i]](0,3);
+                if (dot(direction - point, avg_norm) > 0) {
                     plot_triangle(new_geometry[indices[i]], new_geometry[indices[i+1]], new_geometry[indices[i+2]]);
                 }
                 break;

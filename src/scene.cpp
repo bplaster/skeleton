@@ -57,6 +57,15 @@ void scenehdl::draw()
     for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
         if (*iter) {
             (*iter)->draw(canvas);
+            switch (render_normals) {
+                case face:
+                    (*iter)->draw_normals(canvas, true);
+                    break;
+                case vertex:
+                    (*iter)->draw_normals(canvas, false);
+                default:
+                    break;
+            }
         }
     }
     

@@ -202,7 +202,7 @@ void motionfunc(int x, int y)
                     break;
                 }
                 case manipulate::rotate: {
-                    delta_world *= vec3f(-1.0, 1.0, 1.0);
+                    delta_world *= vec3f(1.0, -1.0, 1.0);
                     scene.objects[scene.active_object]->orientation += delta_world.swap(0, 1);
                     break;
                 }
@@ -240,13 +240,13 @@ void specialfunc(int key, int x, int y)
     switch (key) {
         case GLUT_KEY_UP: // Up arrow
             if (scene.active_camera_valid()) {
-                vec3f forward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
+                vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
                 scene.cameras[scene.active_camera]->position += forward;
             }
             break;
         case GLUT_KEY_DOWN: // Down arrow
             if (scene.active_camera_valid()) {
-                vec3f backward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
+                vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
                 scene.cameras[scene.active_camera]->position += backward;
             }
             break;
@@ -296,16 +296,12 @@ void keydownfunc(unsigned char key, int x, int y)
                 vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
                 scene.cameras[scene.active_camera]->position += forward;
             }
-            cout << "up" << endl;
-
             break;
         case GLUT_KEY_DOWN: // Down arrow
             if (scene.active_camera_valid()) {
                 vec3f forward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
                 scene.cameras[scene.active_camera]->position += forward;
             }
-            cout << "down" << endl;
-
             break;
         default:
             break;
