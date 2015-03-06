@@ -57,9 +57,11 @@ int current_manipulation = manipulate::translate;
 int current_polygon = canvashdl::Polygon::line;
 int current_culling = canvashdl::Culling::disable;
 int current_normal = scenehdl::Normal::none;
+int current_model;
 float fovy, aspect, width, height, near, far;
 
 int window_id;
+string models[] = {"banana.obj", "beethoven.obj", "bishop.obj", "blob.obj", "Bunny.obj", "chain.obj", "cow.obj", "cowUV.obj", "demo.obj", "dolphin.obj", "feline.obj", "helmet.obj", "pawn.obj", "shirt.obj", "statue.obj", "teapot.obj"};
 GLUI *glui;
 GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
@@ -74,6 +76,8 @@ GLUI_EditText *fovy_text;
 GLUI_EditText *aspect_text;
 GLUI_EditText *near_text;
 GLUI_EditText *far_text;
+
+GLUI_Listbox *list_model;
 GLUI_Checkbox *focus_checkbox;
 GLUI_Panel *cam_prop_panel;
 
@@ -865,14 +869,25 @@ void setup_glui() {
     glui->add_button_to_panel(obj_panel,    "Cylinder",    Object::Cylinder,  create_object);
     glui->add_button_to_panel(obj_panel,    "Sphere",      Object::Sphere,    create_object);
     glui->add_button_to_panel(obj_panel,    "Pyramid",     Object::Pyramid,   create_object);
-    glui->add_button_to_panel(obj_panel,    "Model",       Object::Model,     create_object);
+    glui->add_button_to_panel(obj_panel, "Model", Object::Model, create_object);
+    list_model = glui->add_listbox_to_panel(obj_panel, "Choose Model", &current_model);
+    list_model->add_item(0, "Banana");
+    list_model->add_item(1, "Beethoven");
+    list_model->add_item(2, "Bishop");
+    list_model->add_item(3, "Blob");
+    list_model->add_item(4, "Bunny");
+    list_model->add_item(5, "Chain");
+    list_model->add_item(6, "Cow");
+    list_model->add_item(7, "CowUV");
+    list_model->add_item(8, "Demo");
+    list_model->add_item(9, "Dolphin");
+    list_model->add_item(10, "Feline");
+    list_model->add_item(11, "Helmet");
+    list_model->add_item(12, "Pawn");
+    list_model->add_item(13, "Shirt");
+    list_model->add_item(14, "Statue");
+    list_model->add_item(15, "Teapot");
     
-    GLUI_Panel *model_panel = glui->add_panel("Model File Browser", GLUI_PANEL_NONE);
-    file_browser =  new GLUI_FileBrowser(model_panel, "Model File Browser",GLUI_PANEL_NONE, 0, fb_callback);
-    file_browser->fbreaddir("./res/models/");
-    //file_browser->set_allow_change_dir(1);
-//    GLUI_List *hah = new GLUI_List(model_panel,true,1,fb_callback);
-//    hah->add_item(0,"FileBrowser");
     
     GLUI_Panel *cam_panel = glui->add_panel("Create Camera");
     glui->add_button_to_panel(cam_panel,    "Ortho",       Camera::Ortho,         create_camera);
