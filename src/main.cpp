@@ -61,6 +61,7 @@ float fovy, aspect, width, height, near, far;
 
 int window_id;
 GLUI *glui;
+GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
 GLUI_Listbox *current_cameras;
 GLUI_Listbox *list_normal;
@@ -71,11 +72,10 @@ GLUI_Panel *camera_panel;
 GLUI_Panel *object_panel;
 GLUI_EditText *fovy_text;
 GLUI_EditText *aspect_text;
-GLUI_EditText *width_text;
-GLUI_EditText *height_text;
 GLUI_EditText *near_text;
 GLUI_EditText *far_text;
-
+GLUI_Checkbox *focus_checkbox;
+GLUI_Panel *cam_prop_panel;
 
 // Helper functions
 void create_camera(int val);
@@ -253,26 +253,59 @@ void specialfunc(int key, int x, int y)
     switch (key) {
         case GLUT_KEY_UP: // Up arrow
             if (scene.active_camera_valid()) {
-                vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += forward;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position += dir_of_movement;
+                } else {
+                    vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += forward;
+                }
             }
             break;
         case GLUT_KEY_DOWN: // Down arrow
             if (scene.active_camera_valid()) {
-                vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += backward;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+                }
+                else {
+                    vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += backward;
+                }
             }
             break;
         case GLUT_KEY_RIGHT: // Right arrow
             if (scene.active_camera_valid()) {
-                vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += right;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    vec3f dir_of_movement = cross(up, dir);
+                    dir_of_movement = norm(dir_of_movement);
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position += dir_of_movement;
+                }
+                else{
+                    vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += right;
+                }
             }
             break;
         case GLUT_KEY_LEFT: // Left arrow
             if (scene.active_camera_valid()) {
-                vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += left;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    vec3f dir_of_movement = cross(up, dir);
+                    dir_of_movement = norm(dir_of_movement);
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+                }
+                else{
+                    vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += left;
+                }
             }
             break;
         default:
@@ -371,6 +404,22 @@ void toggle_cameras (int val){
         scene.render_cameras = !scene.render_cameras;
 }
 
+void focus_object (int val) {
+    if (val) {
+        if (scene.active_camera_valid()){
+            if (!scene.cameras[scene.active_camera]->focus){
+                int obj_ind = current_objects->get_int_val();
+                scene.cameras[scene.active_camera]->focus = scene.objects[obj_ind];
+            }
+            else {
+                scene.cameras[scene.active_camera]->focus = NULL;
+                
+            }
+            glutPostRedisplay();
+        }
+    }
+}
+
 void create_object (int val){
     int index = -1;
     switch (val){
@@ -410,9 +459,12 @@ void create_object (int val){
             current_objects->add_item(index, "Pyramid");
             break;
         }
-        case Object::Model :
+        case Object::Model : {
             
+//            printf("Get file: %s\n\n",file_browser-> text.c_str());
             break;
+        }
+            
         default:
             
             break;
@@ -421,33 +473,76 @@ void create_object (int val){
     glutPostRedisplay();
 }
 
+// This is so that there are only four variables displayed
+// TODO: rename variables
 void handle_camera_manip (int val){
     switch (val) {
         case manipulate::fovy :
-
+            height = fovy;
             break;
         case manipulate::aspect :
-
+            width = aspect;
             break;
         case manipulate::width :
-
+            
             break;
         case manipulate::height :
-
+            
             break;
         case manipulate::near:
-
+            
             break;
         case manipulate::far:
-
+            
             break;
         default:
             break;
     }
+    
+    if (scene.active_camera_valid()){
+        
+        string type = scene.cameras[scene.active_camera]->type;
+        if (type == "ortho") {
+            orthohdl *cam = (orthohdl*)scene.cameras[scene.active_camera];
+            cam->near = near;
+            cam->far = far;
+            cam->left = -width/2.;
+            cam->right = width/2.;
+            cam->top = height/2.;
+            cam->bottom = -height/2.;
+        } else if (	type == "frustum") {
+            frustumhdl *cam = (frustumhdl*)scene.cameras[scene.active_camera];
+            cam->near = near;
+            cam->far = far;
+            cam->left = -width/2.;
+            cam->right = width/2.;
+            cam->top = height/2.;
+            cam->bottom = -height/2.;
+            
+        } else if (type == "perspective"){
+            perspectivehdl *cam = (perspectivehdl*)scene.cameras[scene.active_camera];
+            cam->near = near;
+            cam->far = far;
+            cam->fovy = fovy;
+            cam->aspect = aspect;
+        }
+    }
+}
+void fb_callback (int value){
+    //const char* file = file_browser->get_file();
+    if (value == 0) {
+        printf("Get file: %s\n\n",file_browser->get_file());
+    }
+    cout << "testing" << endl;
 }
 
 void create_camera (int val){
     int index = -1;
+    
+    if (scene.active_camera_valid()){
+        scene.cameras[scene.active_camera]->focus = NULL;
+        focus_checkbox->set_int_val(0);
+    }
 
     switch (val){
         case Camera::Ortho: {
@@ -649,30 +744,31 @@ void set_camera_info(int obj_ind){
         orthohdl *cam = (orthohdl*)scene.cameras[obj_ind];
         near_text->set_float_val(cam->near);
         far_text->set_float_val(cam->far);
-        width_text->set_float_val(cam->right - cam->left);
-        height_text->set_float_val(cam->top - cam->bottom);
-        aspect_text->set_float_val(width/height);
-        fovy_text->set_float_val(0.);
+        aspect_text->set_name("width");
+        fovy_text->set_name("height");
+        aspect_text->set_float_val(cam->right - cam->left);
+        fovy_text->set_float_val(cam->top - cam->bottom);
         cout << "ortho" << endl;
         
     } else if (	type == "frustum") {
         frustumhdl *cam = (frustumhdl*)scene.cameras[obj_ind];
         near_text->set_float_val(cam->near);
         far_text->set_float_val(cam->far);
-        width_text->set_float_val(cam->right - cam->left);
-        height_text->set_float_val(cam->top - cam->bottom);
-        aspect_text->set_float_val(width/height);
-        fovy_text->set_float_val(0.);
+        aspect_text->set_name("width");
+        fovy_text->set_name("height");
+        aspect_text->set_float_val(cam->right - cam->left);
+        fovy_text->set_float_val(cam->top - cam->bottom);
         cout << "frustum" << endl;
         
     } else if (type == "perspective"){
         perspectivehdl *cam = (perspectivehdl*)scene.cameras[obj_ind];
         near_text->set_float_val(cam->near);
         far_text->set_float_val(cam->far);
-        width_text->set_float_val(0.);
-        height_text->set_float_val(0.);
+        aspect_text->set_name("aspect");
+        fovy_text->set_name("fovy");
         aspect_text->set_float_val(cam->aspect);
         fovy_text->set_float_val(cam->fovy);
+
         cout << "perspective" << endl;
     }
 }
@@ -687,6 +783,11 @@ void selected_object(int id) {
             break;
         }
         case 2:{ //Camera
+            if (scene.active_camera_valid()){
+                scene.cameras[scene.active_camera]->focus = NULL;
+                focus_checkbox->set_int_val(0);
+            }
+
             int obj_ind = current_cameras->get_int_val();
             if (obj_ind < scene.cameras.size() && obj_ind >= 0) {
                 scene.active_camera = obj_ind;
@@ -715,6 +816,7 @@ void setup_glui() {
     object_panel = glui->add_panel_to_panel(scene_panel, "Object");
     current_objects = glui->add_listbox_to_panel(object_panel, "", NULL, 1, selected_object);
     current_objects->add_item(-1, "");
+    focus_checkbox = glui->add_checkbox_to_panel(object_panel, "Focus on Object", NULL, 1, focus_object);
     GLUI_Panel *obj_pos_panel = glui->add_panel_to_panel(object_panel, "Position");
     glui->add_edittext_to_panel(obj_pos_panel, "x:");
     glui->add_edittext_to_panel(obj_pos_panel, "y:");
@@ -730,11 +832,10 @@ void setup_glui() {
     camera_panel = glui->add_panel_to_panel(scene_panel, "Camera");
     current_cameras = glui->add_listbox_to_panel(camera_panel, "", NULL, 2, selected_object);
     current_cameras->add_item(-1, "");
-    GLUI_Panel *cam_prop_panel = glui->add_panel_to_panel(camera_panel, "Properties");
+    glui->add_checkbox_to_panel(camera_panel, "Draw Cameras", NULL, 1, toggle_cameras);
+    cam_prop_panel = glui->add_panel_to_panel(camera_panel, "Properties");
     fovy_text = glui->add_edittext_to_panel(cam_prop_panel, "fovy:", GLUI_EDITTEXT_FLOAT, &fovy, manipulate::fovy, handle_camera_manip);
     aspect_text = glui->add_edittext_to_panel(cam_prop_panel, "aspect:", GLUI_EDITTEXT_FLOAT, &aspect, manipulate::aspect, handle_camera_manip);
-    width_text = glui->add_edittext_to_panel(cam_prop_panel, "width:", GLUI_EDITTEXT_FLOAT, &width, manipulate::fovy, handle_camera_manip);
-    height_text = glui->add_edittext_to_panel(cam_prop_panel, "height:", GLUI_EDITTEXT_FLOAT, &height, manipulate::fovy, handle_camera_manip);
     near_text = glui->add_edittext_to_panel(cam_prop_panel, "near:", GLUI_EDITTEXT_FLOAT, &near, manipulate::fovy, handle_camera_manip);
     far_text = glui->add_edittext_to_panel(cam_prop_panel, "far:", GLUI_EDITTEXT_FLOAT, &far, manipulate::fovy, handle_camera_manip);
     glui->add_button_to_panel(camera_panel, "Delete", 1, handle_delete);
@@ -757,7 +858,6 @@ void setup_glui() {
     list_manipulation->add_item(manipulate::rotate,   "Rotate");
     list_manipulation->add_item(manipulate::scale,    "Scale");
     glui->add_separator_to_panel(scene_panel);
-    glui->add_checkbox_to_panel(scene_panel, "Draw Cameras", NULL, 1, toggle_cameras);
 
     glui->add_column(true);
     GLUI_Panel *obj_panel = glui->add_panel("Create Object");
@@ -766,6 +866,13 @@ void setup_glui() {
     glui->add_button_to_panel(obj_panel,    "Sphere",      Object::Sphere,    create_object);
     glui->add_button_to_panel(obj_panel,    "Pyramid",     Object::Pyramid,   create_object);
     glui->add_button_to_panel(obj_panel,    "Model",       Object::Model,     create_object);
+    
+    GLUI_Panel *model_panel = glui->add_panel("Model File Browser", GLUI_PANEL_NONE);
+    file_browser =  new GLUI_FileBrowser(model_panel, "Model File Browser",GLUI_PANEL_NONE, 0, fb_callback);
+    file_browser->fbreaddir("./res/models/");
+    //file_browser->set_allow_change_dir(1);
+//    GLUI_List *hah = new GLUI_List(model_panel,true,1,fb_callback);
+//    hah->add_item(0,"FileBrowser");
     
     GLUI_Panel *cam_panel = glui->add_panel("Create Camera");
     glui->add_button_to_panel(cam_panel,    "Ortho",       Camera::Ortho,         create_camera);

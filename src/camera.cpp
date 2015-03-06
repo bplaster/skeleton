@@ -7,6 +7,7 @@ camerahdl::camerahdl()
 	position = vec3f(0., 0., 3.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
 	model = NULL;
+    model = new modelhdl("res/models/cow.obj");
 	type = "camera";
 	focus = NULL;
 	radius = 10.0f;
@@ -22,8 +23,12 @@ void camerahdl::view(canvashdl *canvas)
 	/* TODO Assignment 1: Do the necessary modelview transformations to move
 	 * the camera into place.
 	 */
-    vec3f up = ror3(vec3f(0,1,0), orientation);
-    vec3f center = position + ror3(vec3f(0,0,-1), orientation);
+    vec3f up = ror3(vec3f(0.,1.,0.), orientation);
+    vec3f center = position + ror3(vec3f(0.,0.,-1.), orientation);
+    
+    if (focus) {
+        center = focus->position;
+    }
 
     canvas->look_at(position, center, up);
 
