@@ -21,8 +21,12 @@ void camerahdl::view(canvashdl *canvas)
 	/* TODO Assignment 1: Do the necessary modelview transformations to move
 	 * the camera into place.
 	 */
-    vec3f up = ror3(vec3f(0,1,0), orientation);
-    vec3f center = position + ror3(vec3f(0,0,-1), orientation);
+    vec3f up = ror3(vec3f(0.,1.,0.), orientation);
+    vec3f center = position + ror3(vec3f(0.,0.,-1.), orientation);
+    
+    if (focus) {
+        center = focus->position;
+    }
 
     canvas->look_at(position, center, up);
 

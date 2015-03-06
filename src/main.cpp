@@ -59,12 +59,14 @@ int current_culling = canvashdl::Culling::disable;
 int current_normal = scenehdl::Normal::none;
 int window_id;
 GLUI *glui;
+GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
 GLUI_Listbox *current_cameras;
 GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
 GLUI_Listbox *list_manipulation;
+GLUI_Checkbox *focus_checkbox;
 
 // Helper functions
 void create_camera(int val);
@@ -240,26 +242,59 @@ void specialfunc(int key, int x, int y)
     switch (key) {
         case GLUT_KEY_UP: // Up arrow
             if (scene.active_camera_valid()) {
-                vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += forward;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position += dir_of_movement;
+                } else {
+                    vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += forward;
+                }
             }
             break;
         case GLUT_KEY_DOWN: // Down arrow
             if (scene.active_camera_valid()) {
-                vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += backward;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+                }
+                else {
+                    vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += backward;
+                }
             }
             break;
         case GLUT_KEY_RIGHT: // Right arrow
             if (scene.active_camera_valid()) {
-                vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += right;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    vec3f dir_of_movement = cross(up, dir);
+                    dir_of_movement = norm(dir_of_movement);
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position += dir_of_movement;
+                }
+                else{
+                    vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += right;
+                }
             }
             break;
         case GLUT_KEY_LEFT: // Left arrow
             if (scene.active_camera_valid()) {
-                vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
-                scene.cameras[scene.active_camera]->position += left;
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    vec3f dir_of_movement = cross(up, dir);
+                    dir_of_movement = norm(dir_of_movement);
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+                }
+                else{
+                    vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += left;
+                }
             }
             break;
         default:
@@ -358,6 +393,22 @@ void toggle_cameras (int val){
         scene.render_cameras = !scene.render_cameras;
 }
 
+void focus_object (int val) {
+    if (val) {
+        if (scene.active_camera_valid()){
+            if (!scene.cameras[scene.active_camera]->focus){
+                int obj_ind = current_objects->get_int_val();
+                scene.cameras[scene.active_camera]->focus = scene.objects[obj_ind];
+            }
+            else {
+                scene.cameras[scene.active_camera]->focus = NULL;
+                
+            }
+            glutPostRedisplay();
+        }
+    }
+}
+
 void create_object (int val){
     int index = -1;
     switch (val){
@@ -397,9 +448,11 @@ void create_object (int val){
             current_objects->add_item(index, "Pyramid");
             break;
         }
-        case Object::Model :
-            
+        case Object::Model : {
+            printf("Get file: %s\n\n",file_browser->get_file());
             break;
+        }
+            
         default:
             
             break;
@@ -408,8 +461,20 @@ void create_object (int val){
     glutPostRedisplay();
 }
 
+void fb_callback (int value){
+    //const char* file = file_browser->get_file();
+    if (value == 0) {
+        printf("Get file: %s\n\n",file_browser->get_file());
+    }
+}
+
 void create_camera (int val){
     int index = -1;
+    
+    if (scene.active_camera_valid()){
+        scene.cameras[scene.active_camera]->focus = NULL;
+        focus_checkbox->set_int_val(0);
+    }
 
     switch (val){
 //        case Camera::Fovy :
@@ -666,6 +731,7 @@ void setup_glui() {
     list_manipulation->add_item(manipulate::scale,    "Scale");
     glui->add_separator_to_panel(scene_panel);
     glui->add_checkbox_to_panel(scene_panel, "Draw Cameras", NULL, 1, toggle_cameras);
+    focus_checkbox = glui->add_checkbox_to_panel(scene_panel, "Focus on Object", NULL, 1, focus_object);
 
     glui->add_column(true);
     GLUI_Panel *obj_panel = glui->add_panel("Create Object");
@@ -674,6 +740,13 @@ void setup_glui() {
     glui->add_button_to_panel(obj_panel,    "Sphere",      Object::Sphere,    create_object);
     glui->add_button_to_panel(obj_panel,    "Pyramid",     Object::Pyramid,   create_object);
     glui->add_button_to_panel(obj_panel,    "Model",       Object::Model,     create_object);
+    
+    GLUI_Panel *model_panel = glui->add_panel("Model File Browser", GLUI_PANEL_NONE);
+    file_browser = new GLUI_FileBrowser(model_panel, "Model File Browser",GLUI_PANEL_NONE, 0, fb_callback);
+    file_browser->fbreaddir("./res/models/");
+    //file_browser->set_allow_change_dir(1);
+//    GLUI_List *hah = new GLUI_List(model_panel,true,1,fb_callback);
+//    hah->add_item(0,"FileBrowser");
     
     GLUI_Panel *cam_panel = glui->add_panel("Create Camera");
     glui->add_button_to_panel(cam_panel,    "Ortho",       Camera::Ortho,         create_camera);
