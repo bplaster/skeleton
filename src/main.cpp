@@ -29,8 +29,8 @@ namespace manipulate
 		aspect = 4,
 		width = 5,
 		height = 6,
-		front = 7,
-		back = 8
+		near = 7,
+		far = 8
 	};
 }
 
@@ -57,6 +57,8 @@ int current_manipulation = manipulate::translate;
 int current_polygon = canvashdl::Polygon::line;
 int current_culling = canvashdl::Culling::disable;
 int current_normal = scenehdl::Normal::none;
+float fovy, aspect, width, height, near, far;
+
 int window_id;
 GLUI *glui;
 GLUI_Listbox *current_objects;
@@ -65,6 +67,15 @@ GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
 GLUI_Listbox *list_manipulation;
+GLUI_Panel *camera_panel;
+GLUI_Panel *object_panel;
+GLUI_EditText *fovy_text;
+GLUI_EditText *aspect_text;
+GLUI_EditText *width_text;
+GLUI_EditText *height_text;
+GLUI_EditText *near_text;
+GLUI_EditText *far_text;
+
 
 // Helper functions
 void create_camera(int val);
@@ -74,6 +85,8 @@ void handle_polygon(int val);
 void handle_normal(int val);
 void handle_manip(int val);
 void setup_glui();
+void set_camera_info(int obj_ind);
+
 
 void init(string working_directory)
 {
@@ -408,34 +421,35 @@ void create_object (int val){
     glutPostRedisplay();
 }
 
+void handle_camera_manip (int val){
+    switch (val) {
+        case manipulate::fovy :
+
+            break;
+        case manipulate::aspect :
+
+            break;
+        case manipulate::width :
+
+            break;
+        case manipulate::height :
+
+            break;
+        case manipulate::near:
+
+            break;
+        case manipulate::far:
+
+            break;
+        default:
+            break;
+    }
+}
+
 void create_camera (int val){
     int index = -1;
 
     switch (val){
-//        case Camera::Fovy :
-//            
-//            break;
-//        case Camera::Aspect :
-//            
-//            break;
-//        case Camera::Width :
-//            
-//            break;
-//        case Camera::Height :
-//            
-//            break;
-//        case Camera::Near :
-//            
-//            break;
-//        case Camera::Far :
-//            
-//            break;
-//        case Camera::ToggleDraw :
-//            
-//            break;
-//        case Camera::ClearFocus :
-//            
-//            break;
         case Camera::Ortho: {
             camerahdl *camera = new orthohdl;
             scene.cameras.push_back(camera);
@@ -465,6 +479,7 @@ void create_camera (int val){
             break;
     }
     current_cameras->set_int_val(index);
+    set_camera_info(index);
     glutPostRedisplay();
 }
 
@@ -628,6 +643,65 @@ void create_menu()
     glutMenuStatusFunc(menustatusfunc);
 }
 
+void set_camera_info(int obj_ind){
+    string type = scene.cameras[obj_ind]->type;
+    if (type == "ortho") {
+        orthohdl *cam = (orthohdl*)scene.cameras[obj_ind];
+        near_text->set_float_val(cam->near);
+        far_text->set_float_val(cam->far);
+        width_text->set_float_val(cam->right - cam->left);
+        height_text->set_float_val(cam->top - cam->bottom);
+        aspect_text->set_float_val(width/height);
+        fovy_text->set_float_val(0.);
+        cout << "ortho" << endl;
+        
+    } else if (	type == "frustum") {
+        frustumhdl *cam = (frustumhdl*)scene.cameras[obj_ind];
+        near_text->set_float_val(cam->near);
+        far_text->set_float_val(cam->far);
+        width_text->set_float_val(cam->right - cam->left);
+        height_text->set_float_val(cam->top - cam->bottom);
+        aspect_text->set_float_val(width/height);
+        fovy_text->set_float_val(0.);
+        cout << "frustum" << endl;
+        
+    } else if (type == "perspective"){
+        perspectivehdl *cam = (perspectivehdl*)scene.cameras[obj_ind];
+        near_text->set_float_val(cam->near);
+        far_text->set_float_val(cam->far);
+        width_text->set_float_val(0.);
+        height_text->set_float_val(0.);
+        aspect_text->set_float_val(cam->aspect);
+        fovy_text->set_float_val(cam->fovy);
+        cout << "perspective" << endl;
+    }
+}
+
+void selected_object(int id) {
+    switch (id) {
+        case 1:{ //Object
+//            int obj_ind = current_objects->get_int_val();
+//            if (obj_ind < scene.objects.size() && obj_ind >= 0) {
+//                scene.objects[obj_ind]
+            
+            break;
+        }
+        case 2:{ //Camera
+            int obj_ind = current_cameras->get_int_val();
+            if (obj_ind < scene.cameras.size() && obj_ind >= 0) {
+                scene.active_camera = obj_ind;
+                set_camera_info(obj_ind);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    glutPostRedisplay();
+}
+
+
+
 /* TODO Assignment 1: Implement a menu that allows the following operations:
  * - change the fovy, aspect, width, height, near or far values of the active camera
  * - Set an object or camera as the focus of the active camera (using canvashdl::look_at)
@@ -638,14 +712,32 @@ void setup_glui() {
     glui = GLUI_Master.create_glui("Controls",0,800,0);
     GLUI_Panel *scene_panel = glui->add_panel("Current Scene");
     
-    current_objects = glui->add_listbox_to_panel(scene_panel, "Objects");
+    object_panel = glui->add_panel_to_panel(scene_panel, "Object");
+    current_objects = glui->add_listbox_to_panel(object_panel, "", NULL, 1, selected_object);
     current_objects->add_item(-1, "");
-    glui->add_button_to_panel(scene_panel, "Delete", 0, handle_delete);
+    GLUI_Panel *obj_pos_panel = glui->add_panel_to_panel(object_panel, "Position");
+    glui->add_edittext_to_panel(obj_pos_panel, "x:");
+    glui->add_edittext_to_panel(obj_pos_panel, "y:");
+    glui->add_edittext_to_panel(obj_pos_panel, "z:");
+    GLUI_Panel *obj_ori_panel = glui->add_panel_to_panel(object_panel, "Orientation");
+    glui->add_edittext_to_panel(obj_ori_panel, "x:");
+    glui->add_edittext_to_panel(obj_ori_panel, "y:");
+    glui->add_edittext_to_panel(obj_ori_panel, "z:");
+    glui->add_button_to_panel(object_panel, "Delete", 0, handle_delete);
 
     glui->add_separator_to_panel(scene_panel);
-    current_cameras = glui->add_listbox_to_panel(scene_panel, "Cameras");
+    
+    camera_panel = glui->add_panel_to_panel(scene_panel, "Camera");
+    current_cameras = glui->add_listbox_to_panel(camera_panel, "", NULL, 2, selected_object);
     current_cameras->add_item(-1, "");
-    glui->add_button_to_panel(scene_panel, "Delete", 1, handle_delete);
+    GLUI_Panel *cam_prop_panel = glui->add_panel_to_panel(camera_panel, "Properties");
+    fovy_text = glui->add_edittext_to_panel(cam_prop_panel, "fovy:", GLUI_EDITTEXT_FLOAT, &fovy, manipulate::fovy, handle_camera_manip);
+    aspect_text = glui->add_edittext_to_panel(cam_prop_panel, "aspect:", GLUI_EDITTEXT_FLOAT, &aspect, manipulate::aspect, handle_camera_manip);
+    width_text = glui->add_edittext_to_panel(cam_prop_panel, "width:", GLUI_EDITTEXT_FLOAT, &width, manipulate::fovy, handle_camera_manip);
+    height_text = glui->add_edittext_to_panel(cam_prop_panel, "height:", GLUI_EDITTEXT_FLOAT, &height, manipulate::fovy, handle_camera_manip);
+    near_text = glui->add_edittext_to_panel(cam_prop_panel, "near:", GLUI_EDITTEXT_FLOAT, &near, manipulate::fovy, handle_camera_manip);
+    far_text = glui->add_edittext_to_panel(cam_prop_panel, "far:", GLUI_EDITTEXT_FLOAT, &far, manipulate::fovy, handle_camera_manip);
+    glui->add_button_to_panel(camera_panel, "Delete", 1, handle_delete);
     
     glui->add_separator_to_panel(scene_panel);
 
