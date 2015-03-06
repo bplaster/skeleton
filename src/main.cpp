@@ -57,7 +57,9 @@ int current_manipulation = manipulate::translate;
 int current_polygon = canvashdl::Polygon::line;
 int current_culling = canvashdl::Culling::disable;
 int current_normal = scenehdl::Normal::none;
+int current_model;
 int window_id;
+string models[] = {"banana.obj", "beethoven.obj", "bishop.obj", "blob.obj", "Bunny.obj", "chain.obj", "cow.obj", "cowUV.obj", "demo.obj", "dolphin.obj", "feline.obj", "helmet.obj", "pawn.obj", "shirt.obj", "statue.obj", "teapot.obj"};
 GLUI *glui;
 GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
@@ -66,6 +68,7 @@ GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
 GLUI_Listbox *list_manipulation;
+GLUI_Listbox *list_model;
 GLUI_Checkbox *focus_checkbox;
 
 // Helper functions
@@ -461,13 +464,6 @@ void create_object (int val){
     glutPostRedisplay();
 }
 
-void fb_callback (int value){
-    //const char* file = file_browser->get_file();
-    if (value == 0) {
-        printf("Get file: %s\n\n",file_browser->get_file());
-    }
-}
-
 void create_camera (int val){
     int index = -1;
     
@@ -612,6 +608,13 @@ void handle_delete(int val)
     glutPostRedisplay();
 }
 
+void fb_callback (int value){
+    //const char* file = file_browser->get_file();
+    if (value == 0) {
+        printf("Get file: %s",file_browser->get_file());
+    }
+}
+
 void create_menu()
 {
 	/* TODO Assignment 1: Implement a menu that allows the following operations:
@@ -739,14 +742,33 @@ void setup_glui() {
     glui->add_button_to_panel(obj_panel,    "Cylinder",    Object::Cylinder,  create_object);
     glui->add_button_to_panel(obj_panel,    "Sphere",      Object::Sphere,    create_object);
     glui->add_button_to_panel(obj_panel,    "Pyramid",     Object::Pyramid,   create_object);
-    glui->add_button_to_panel(obj_panel,    "Model",       Object::Model,     create_object);
+    glui->add_button_to_panel(obj_panel, "Model", Object::Model, create_object);
+    list_model = glui->add_listbox_to_panel(obj_panel, "Choose Model", &current_model);
+    list_model->add_item(0, "Banana");
+    list_model->add_item(1, "Beethoven");
+    list_model->add_item(2, "Bishop");
+    list_model->add_item(3, "Blob");
+    list_model->add_item(4, "Bunny");
+    list_model->add_item(5, "Chain");
+    list_model->add_item(6, "Cow");
+    list_model->add_item(7, "CowUV");
+    list_model->add_item(8, "Demo");
+    list_model->add_item(9, "Dolphin");
+    list_model->add_item(10, "Feline");
+    list_model->add_item(11, "Helmet");
+    list_model->add_item(12, "Pawn");
+    list_model->add_item(13, "Shirt");
+    list_model->add_item(14, "Statue");
+    list_model->add_item(15, "Teapot");
     
-    GLUI_Panel *model_panel = glui->add_panel("Model File Browser", GLUI_PANEL_NONE);
+    GLUI_Panel *model_panel = glui->add_panel("Model File Browser");
     file_browser = new GLUI_FileBrowser(model_panel, "Model File Browser",GLUI_PANEL_NONE, 0, fb_callback);
     file_browser->fbreaddir("./res/models/");
+    file_browser->list->set_click_type(1);
     //file_browser->set_allow_change_dir(1);
-//    GLUI_List *hah = new GLUI_List(model_panel,true,1,fb_callback);
-//    hah->add_item(0,"FileBrowser");
+//    GLUI_List *list = new GLUI_List(file_browser,true,1,fb_callback);
+//    list->set_object_callback(fb_callback, file_browser);
+//    list->set_click_type(GLUI_DOUBLE_CLICK);
     
     GLUI_Panel *cam_panel = glui->add_panel("Create Camera");
     glui->add_button_to_panel(cam_panel,    "Ortho",       Camera::Ortho,         create_camera);
