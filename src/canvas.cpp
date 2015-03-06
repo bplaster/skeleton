@@ -282,9 +282,9 @@ vec8f canvashdl::shade_vertex(vec8f v)
     vt = matrices[projection_matrix]*matrices[modelview_matrix]*vt;
     vt /= vt[3];
     
-    vec4f vt_norm = vec4f(v[3],v[4],v[5],1.);
-    vt_norm = matrices[projection_matrix]*matrices[modelview_matrix]*vt_norm;
-    vt_norm /= vt_norm[3];
+    vec4f vt_norm = vec4f(v[3],v[4],v[5],0.);
+    vt_norm = matrices[normal_matrix]*vt_norm;
+    //vt_norm /= vt_norm[3];
 
     v.set(0, 3, vt(0,3));
     v.set(3, 6, vt_norm(0,3));
@@ -493,6 +493,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
     construct_planes();
     vector<vec8f> new_geometry;
     //vector<int> new_indices;
+    matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
     for (int i = 0; i < indices.size(); i+= 2) {
         
@@ -539,6 +540,8 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     vector<vec8f> new_geometry;
     vector<int> new_indices;
     
+    matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
+    
     for (int i = 0; i < indices.size() - 2; i += 3) {
         
         //cout << "Draw triangles called: " << i << endl;
@@ -577,30 +580,25 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     break;
                 }
                 case backface:{
-                    vec3f avg_norm;
-                    for (int j = 0; j < 3; j++) {
-                        avg_norm[j] = new_geometry[new_indices[i]][j+3] + new_geometry[new_indices[i+1]][j+3] + new_geometry[new_indices[i+2]][j+3];
-                    }
-                    avg_norm = norm(avg_norm);
-
-                    cout << "avg norm: " << avg_norm << endl;
-                    vec3f direction(0,0,0);
-                    vec3f point = (vec3f)new_geometry[new_indices[i]](0,3);
-                    if (dot(direction - point, avg_norm) < 0) {
+                    vec8f avg_point =   new_geometry[new_indices[i]] +
+                                        new_geometry[new_indices[i+1]] +
+                                        new_geometry[new_indices[i+2]];
+                    avg_point /= 3.;
+                    vec3f normal = avg_point(3,6);
+                    vec3f direction(0,0,-1);
+                    if (dot(direction, normal) < 0) {
                         plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
-
                     }
                     break;
                 }
                 case frontface:{
-                    vec3f avg_norm;
-                    for (int j = 0; j < 3; j++) {
-                        avg_norm[j] = new_geometry[new_indices[i]][j+3] + new_geometry[new_indices[i+1]][j+3] + new_geometry[new_indices[i+2]][j+3];
-                    }
-                    avg_norm = norm(avg_norm);
-                    vec3f direction(0,0,0);
-                    vec3f point = (vec3f)new_geometry[new_indices[i]](0,3);
-                    if (dot(direction - point, avg_norm) > 0) {
+                    vec8f avg_point =   new_geometry[new_indices[i]] +
+                                        new_geometry[new_indices[i+1]] +
+                                        new_geometry[new_indices[i+2]];
+                    avg_point /= 3.;
+                    vec3f normal = avg_point(3,6);
+                    vec3f direction(0,0,-1);
+                    if (dot(direction, normal) > 0) {
                         plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
                     }
                     break;
