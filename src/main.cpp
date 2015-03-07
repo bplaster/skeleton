@@ -465,7 +465,10 @@ void create_object (int val){
         }
         case Object::Model : {
             
-//            printf("Get file: %s\n\n",file_browser-> text.c_str());
+            modelhdl *model = new modelhdl("res/models/"+models[current_model]);
+            scene.objects.push_back(model);
+            index = (int)scene.objects.size()-1;
+            current_objects->add_item(index, "Model");
             break;
         }
             
