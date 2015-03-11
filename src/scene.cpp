@@ -31,6 +31,7 @@ void scenehdl::draw()
 	 */
     
     // Set projection matrix
+    // TODO: doesn't need to happen every frame
     canvas->set_matrix(canvashdl::projection_matrix);
     canvas->load_identity();
     if (active_camera_valid()) {
@@ -74,12 +75,6 @@ void scenehdl::draw()
         objects[active_object]->draw_bound(canvas);
     }
     
-    // Draw normal
-    if (render_normals != none){
-        if (render_normals == face){
-            
-        }
-    }
 
 	/* TODO Assignment 2: Pass the lights to the shaders through canvashdl::uniform.
 	 * If enabled, draw the lights.
