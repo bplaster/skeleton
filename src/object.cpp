@@ -30,9 +30,27 @@ objecthdl::objecthdl()
 	scale = 1.0;
 }
 
+objecthdl::objecthdl(const objecthdl &o)
+{
+	position = o.position;
+	orientation = o.orientation;
+	bound = o.bound;
+	scale = o.scale;
+	rigid = o.rigid;
+	for (map<string, materialhdl*>::const_iterator i = o.material.begin(); i != o.material.end(); i++)
+		material.insert(pair<string, materialhdl*>(i->first, i->second->clone()));
+}
+
 objecthdl::~objecthdl()
 {
+	for (map<string, materialhdl*>::iterator i = material.begin(); i != material.end(); i++)
+		if (i->second != NULL)
+		{
+			delete i->second;
+			i->second = NULL;
+		}
 
+	material.clear();
 }
 
 /* draw
@@ -60,6 +78,7 @@ void objecthdl::draw(canvashdl *canvas)
     canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
     canvas->translate(-position);
 
+	// TODO Assignment 2: Pass the material as a uniform into the renderer
 }
 
 /* draw_bound
@@ -137,6 +156,7 @@ void objecthdl::draw_bound(canvashdl *canvas)
     canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
     canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
     canvas->translate(-position);
+	// TODO Assignment 2: clear the material in the uniform list
 }
 
 /* draw_normals
@@ -227,5 +247,6 @@ bool objecthdl::contains_point(vec3f point)
         return true;
     }
     return false;
+	// TODO Assignment 2: clear the material in the uniform list before rendering
 }
 

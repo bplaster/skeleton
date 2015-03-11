@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "camera.h"
 #include "object.h"
+#include "light.h"
 
 #include "primitive.h"
 #include "model.h"
@@ -11,6 +12,7 @@ scenehdl::scenehdl()
 	active_camera = -1;
 	active_object = -1;
 	render_normals = none;
+	render_lights = false;
 	render_cameras = false;
 }
 
@@ -76,8 +78,10 @@ void scenehdl::draw()
     }
     
 
-	/* TODO Assignment 2: Pass the lights to the shaders through canvashdl::uniform.
-	 * If enabled, draw the lights.
+	/* TODO Assignment 2: Clear the uniform variables and pass the vector of
+	 * lights into the renderer as a uniform variable.
+	 * TODO Assignment 2: Update the light positions and directions
+	 * TODO Assignment 2: Render the lights
 	 */
 }
 
