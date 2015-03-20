@@ -8,6 +8,7 @@
 #include "primitive.h"
 #include "tinyfiledialogs.h"
 #include "core/geometry.h"
+#include "light.h"
 
 
 canvashdl canvas(750, 750);
@@ -97,7 +98,7 @@ void init(string working_directory)
 	for (int i = 0; i < 256; i++)
 		keys[i] = false;
 
-    canvas.working_directory = working_directory;
+	canvas.working_directory = working_directory;
 	scene.canvas = &canvas;
 	// TODO Assignment 1: Initialize the Scene as necessary.
     
@@ -123,6 +124,7 @@ void init(string working_directory)
 void displayfunc()
 {
 	canvas.clear_color_buffer();
+	canvas.clear_depth_buffer();
 
 	scene.draw();
 
@@ -131,7 +133,7 @@ void displayfunc()
 
 void reshapefunc(int w, int h)
 {
-	canvas.viewport(w, h);
+	canvas.viewport(0, 0, w, h);
 	glutPostRedisplay();
 }
 
@@ -731,12 +733,13 @@ void create_menu()
     glutAddMenuEntry("Quit", 5);
 
 
-	/* TODO Assignment 2: Add to the menu the following operations:
-	 * - create directional, point, or spot lights
-	 * - enable/disable rendering of lights
+	/* TODO Assignment 2: Add menus for handling the lights. You should
+	 * be able to
+	 * - enable/disable the drawing of the lights
+	 * - create directional, point, or spot lights sources
+	 * - change the emissive, ambient, diffuse, and specular colors, and the attenuation of the lights
+	 * - rotate and translate the lights just like you would an object and have it affect the lighting of the scene
 	 * - set the polygon mode to fill
-	 * - change the ambient, diffuse, or specular color of a light
-	 * - change the attenuation parameters of a point or spot light
 	 * - set the shading mode to none, flat, gouraud, or phong
 	 */
 
@@ -908,12 +911,12 @@ void setup_glui() {
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
-    int display_mode = GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE;
+	int display_mode = GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE;
 #ifdef OSX_CORE3
-    display_mode |= GLUT_3_2_CORE_PROFILE;
+	display_mode |= GLUT_3_2_CORE_PROFILE;
 #endif
 	glutInitDisplayMode(display_mode);
-	
+
 	glutInitWindowSize(750, 750);
 	glutInitWindowPosition(0, 0);
 	window_id = glutCreateWindow("Assignment");
@@ -927,11 +930,12 @@ int main(int argc, char **argv)
 	}
 	cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << endl;
 #endif
-    
+
 	cout << "Status: Using OpenGL " << glGetString(GL_VERSION) << endl;
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     
     init(string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/");
+
 	create_menu();
 
 	glutReshapeFunc(reshapefunc);

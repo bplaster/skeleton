@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1AB69CEE1AB0D5B80008162E /* light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AB69CEA1AB0D5B80008162E /* light.cpp */; };
+		1AB69CEF1AB0D5B80008162E /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AB69CEC1AB0D5B80008162E /* material.cpp */; };
 		C5EE0A6E1A71517000FAF23F /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5EE0A531A71517000FAF23F /* camera.cpp */; };
 		C5EE0A6F1A71517000FAF23F /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5EE0A551A71517000FAF23F /* canvas.cpp */; };
 		C5EE0A701A71517000FAF23F /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5EE0A581A71517000FAF23F /* color.cpp */; };
@@ -36,6 +38,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1AB69CEA1AB0D5B80008162E /* light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = light.cpp; sourceTree = "<group>"; };
+		1AB69CEB1AB0D5B80008162E /* light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = light.h; sourceTree = "<group>"; };
+		1AB69CEC1AB0D5B80008162E /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
+		1AB69CED1AB0D5B80008162E /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		C5EE0A261A71506700FAF23F /* assignment */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = assignment; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5EE0A301A71517000FAF23F /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
 		C5EE0A321A71517000FAF23F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
@@ -181,6 +187,10 @@
 		C5EE0A521A71517000FAF23F /* src */ = {
 			isa = PBXGroup;
 			children = (
+				1AB69CEA1AB0D5B80008162E /* light.cpp */,
+				1AB69CEB1AB0D5B80008162E /* light.h */,
+				1AB69CEC1AB0D5B80008162E /* material.cpp */,
+				1AB69CED1AB0D5B80008162E /* material.h */,
 				C5EE0A531A71517000FAF23F /* camera.cpp */,
 				C5EE0A541A71517000FAF23F /* camera.h */,
 				C5EE0A551A71517000FAF23F /* canvas.cpp */,
@@ -275,7 +285,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5EE0A6E1A71517000FAF23F /* camera.cpp in Sources */,
+				1AB69CEF1AB0D5B80008162E /* material.cpp in Sources */,
 				C5EE0A781A71517000FAF23F /* tinyfiledialogs.c in Sources */,
+				1AB69CEE1AB0D5B80008162E /* light.cpp in Sources */,
 				C5EE0A731A71517000FAF23F /* model.cpp in Sources */,
 				C5EE0A741A71517000FAF23F /* object.cpp in Sources */,
 				C5EE0A701A71517000FAF23F /* color.cpp in Sources */,

@@ -1,29 +1,38 @@
 #include "canvas.h"
 #include "core/geometry.h"
+#include "light.h"
+#include "material.h"
 
 canvashdl::canvashdl(int w, int h)
 {
+	last_reshape_time = -1.0;
 	width = w;
 	height = h;
-	last_reshape_time = -1.0;
 	reshape_width = w;
 	reshape_height = h;
+
+	matrices[viewport_matrix] = mat4f((float)width/2.0, 0.0, 0.0, (float)width/2.0,
+									  0.0, (float)height/2.0, 0.0, (float)height/2.0,
+									  0.0, 0.0, (float)depth/2.0, (float)depth/2.0,
+									  0.0, 0.0, 0.0, 1.0);
+
 	initialized = false;
     planes.reserve(6);
 
 	color_buffer = new unsigned char[width*height*3];
-	// TODO Assignment 2: Initialize the depth buffer
+	depth_buffer = new unsigned short[width*height];
 
 	screen_texture = 0;
 	screen_geometry = 0;
 	screen_shader = 0;
 
 	active_matrix = modelview_matrix;
-    
-    for (int i = 0; i < 3; i++)
-        matrices[i] = identity<float, 4, 4>();
-    
+
+	for (int i = 0; i < 4; i++)
+		matrices[i] = identity<float, 4, 4>();
+
 	polygon_mode = line;
+	shade_model = none;
 	culling_mode = backface;
 }
 
@@ -35,7 +44,11 @@ canvashdl::~canvashdl()
 		color_buffer = NULL;
 	}
 
-	// TODO Assignment 2: Clean up the depth buffer
+	if (depth_buffer != NULL)
+	{
+		delete [] depth_buffer;
+		depth_buffer = NULL;
+	}
 }
 
 void canvashdl::clear_color_buffer()
@@ -45,13 +58,11 @@ void canvashdl::clear_color_buffer()
 
 void canvashdl::clear_depth_buffer()
 {
-	// TODO Assignment 2: Clear the depth buffer
+	memset(depth_buffer, 255, width*height*sizeof(unsigned short));
 }
 
-void canvashdl::resize(int w, int h)
+void canvashdl::reallocate(int w, int h)
 {
-	// TODO Assignment 2: resize the depth buffer
-
 	last_reshape_time = -1.0;
 
 	if (color_buffer != NULL)
@@ -60,10 +71,17 @@ void canvashdl::resize(int w, int h)
 		color_buffer = NULL;
 	}
 
+	if (depth_buffer != NULL)
+	{
+		delete [] depth_buffer;
+		depth_buffer = NULL;
+	}
+
 	width = w;
 	height = h;
 
 	color_buffer = new unsigned char[w*h*3];
+	depth_buffer = new unsigned short[w*h];
 
 	glActiveTexture(GL_TEXTURE0);
 	check_error(__FILE__, __LINE__);
@@ -197,6 +215,16 @@ void canvashdl::ortho(float l, float r, float b, float t, float n, float f)
     matrices[active_matrix] *= projection;
 }
 
+void canvashdl::viewport(int left, int bottom, int right, int top)
+{
+	matrices[viewport_matrix] = mat4f((float)(right - left)/2.0, 0.0, 0.0, (float)(right + left)/2.0,
+									  0.0, (float)(top - bottom)/2.0, 0.0, (float)(top + bottom)/2.0,
+									  0.0, 0.0, (float)depth/2.0, (float)depth/2.0,
+									  0.0, 0.0, 0.0, 1.0);
+
+	resize(right - left, top - bottom);
+}
+
 /* look_at
  *
  * Move and orient the modelview so the camera is at the 'at' position focused on the 'eye'
@@ -218,6 +246,11 @@ void canvashdl::look_at(vec3f eye, vec3f at, vec3f up)
     matrices[active_matrix] *= projection;
     translate(-eye);
     
+}
+
+void canvashdl::update_normal_matrix()
+{
+	// TODO Assignment 2: calculate the normal matrix
 }
 
 /* to_window
@@ -275,7 +308,7 @@ vec3f canvashdl::unproject(vec3f window)
  * Note that the only requirements for the returned values are that the first 3 components
  * be a projected position. The rest are yours to decide what to do with.
  */
-vec8f canvashdl::shade_vertex(vec8f v)
+vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f vt = vec4f(v[0],v[1],v[2],1.);
@@ -289,8 +322,12 @@ vec8f canvashdl::shade_vertex(vec8f v)
     v.set(0, 3, vt(0,3));
     v.set(3, 6, vt_norm(0,3));
 
-	// TODO Assignment 2: Implement Flat and Gouraud shading.
+
 	return v;
+	/* TODO Assignment 2: Get the material from the list of uniform variables and
+	 * call its vertex shader.
+	 */
+
 }
 
 /* shade_fragment
@@ -298,7 +335,7 @@ vec8f canvashdl::shade_vertex(vec8f v)
  * This is the fragment shader. The pixel color is determined here.
  * the values for v are the interpolated result of whatever you returned from the vertex shader
  */
-vec3f canvashdl::shade_fragment(vec8f v)
+vec3f canvashdl::shade_fragment(vector<float> varying)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
     vec3f color;
@@ -306,44 +343,48 @@ vec3f canvashdl::shade_fragment(vec8f v)
     color[green] = 255.;
     color[blue] = 255.;
 
-	/* TODO Assignment 2: Figure out the pixel color due to lighting and materials
-	 * and implement phong shading.
+	/* TODO Assignment 2: Get the material from the list of uniform variables and
+	 * call its fragment shader.
 	 */
 	return color;
 }
 
 /* plot
  *
- * Plot a pixel.
+ * Plot a pixel and check it against the depth buffer.
  */
-void canvashdl::plot(vec2i xy, vec8f v)
+void canvashdl::plot(vec3i xyz, vector<float> varying)
 {
 	// TODO Assignment 1: Plot a pixel, calling the fragment shader.
-    vec3f color = shade_fragment(v);
-    if ((xy[0] >= 0 && xy[0] < width) && (xy[1] >=0 && xy[1] < height)) {
-        color_buffer[3*(width*xy[1]+xy[0])+0] = color[red];
-        color_buffer[3*(width*xy[1]+xy[0])+1] = color[green];
-        color_buffer[3*(width*xy[1]+xy[0])+2] = color[blue];
+    vec3f color = shade_fragment(varying);
+    if ((xyz[0] >= 0 && xyz[0] < width) && (xyz[1] >=0 && xyz[1] < height)) {
+        color_buffer[3*(width*xyz[1]+xyz[0])+0] = color[red];
+        color_buffer[3*(width*xyz[1]+xyz[0])+1] = color[green];
+        color_buffer[3*(width*xyz[1]+xyz[0])+2] = color[blue];
     }
-	// TODO Assignment 2: Check the pixel depth against the depth buffer.
+
+
+	/* TODO Assignment 2: Compare the z value against the depth buffer and
+	 * only render if its less. Then set the depth buffer.
+	 */
 }
 
 /* plot_point
  *
  * Plot a point given in window coordinates.
  */
-void canvashdl::plot_point(vec8f v)
+void canvashdl::plot_point(vec3f v, vector<float> varying)
 {
 	// TODO Assignment 1: Plot a point given in window coordinates.
     vec2i vp = to_pixel(vec3f(v[0],v[1],v[2]));
-    plot(vp,v);
+    plot(vp,varying);
 }
 
 /* plot_line
  *
  * Plot a line defined by two points in window coordinates.
  */
-void canvashdl::plot_line(vec8f v1, vec8f v2)
+void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<float> v2_varying)
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
     // Convert to Pixel coordinates here
@@ -352,7 +393,7 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
     
     // Variables
     vec2i xy, xy_max;
-    vec8f v;
+    vector<float> v;
     int dy = abs(vp2[1] - vp1[1]);
     int dx = abs(vp2[0] - vp1[0]);
     
@@ -363,11 +404,11 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
         if(vp2[0]>=vp1[0]){
             xy = vp1;
             xy_max = vp2;
-            v = v1;
+            v = v1_varying;
         } else {
             xy = vp2;
             xy_max = vp1;
-            v = v2;
+            v = v2_varying;
         }
         plot(xy, v);
         int d = 2*dy-dx;
@@ -396,11 +437,11 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
         if(vp2[1]>=vp1[1]) {
             xy = vp1;
             xy_max = vp2;
-            v = v1;
+            v = v1_varying;
         } else {
             xy = vp2;
             xy_max = vp1;
-            v = v2;
+            v = v2_varying;
         }
         plot(xy, v);
         int d = 2*dx-dy;
@@ -423,7 +464,8 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
             plot(xy, v);
         }
     }
-	// TODO Assignment 2: Add interpolation for the normals and texture coordinates as well.
+
+	// TODO Assignment 2: Interpolate the varying values before passing them into plot.
 }
 
 /* plot_half_triangle
@@ -431,19 +473,19 @@ void canvashdl::plot_line(vec8f v1, vec8f v2)
  * Plot half of a triangle defined by three points in window coordinates (v1, v2, v3).
  * The remaining inputs are as follows (s1, s2, s3) are the pixel coordinates of (v1, v2, v3),
  * and (ave) is the average value of the normal and texture coordinates for flat shading.
+ * Use Bresenham's algorithm for this. You may plot the horizontal half or the vertical half.
  */
-void canvashdl::plot_half_triangle(vec2i s1, vec2i s2, vec2i s3, vec8f v1, vec8f v2, vec8f v3, vec5f ave)
+void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2, vector<float> v2_varying, vec3i s3, vector<float> v3_varying, vector<float> ave_varying)
 {
-	/* TODO Assignment 2: Implement Bresenham's algorithm. You may plot the horizontal
-	 * half or the vertical half. Add interpolation for the normals and texture coordinates as well.
-	 */
+	// TODO Assignment 2: Implement Bresenham's half triangle fill algorithm
+	// TODO Assignment 2: Interpolate the varying values before passing them into plot.
 }
 
 /* plot_triangle
  *
  * Plot a triangle. (v1, v2, v3) are given in window coordinates.
  */
-void canvashdl::plot_triangle(vec8f v1, vec8f v2, vec8f v3)
+void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vector<float> v2_varying, vec3f v3, vector<float> v3_varying)
 {
 	/* TODO Assignment 1: Use the above functions to plot a whole triangle. Don't forget to
 	 * take into account the polygon mode. You should be able to render the
@@ -452,18 +494,19 @@ void canvashdl::plot_triangle(vec8f v1, vec8f v2, vec8f v3)
     
     if (polygon_mode == point) {
         // 3 Point implementation
-        plot_point(v1);
-        plot_point(v2);
-        plot_point(v3);
+        plot_point(v1, v1_varying);
+        plot_point(v2, v2_varying);
+        plot_point(v3, v3_varying);
     }
     else {
         // 3 Line implementation
-        plot_line(v1, v2);
-        plot_line(v2, v3);
-        plot_line(v3, v1);
+        plot_line(v1, v1_varying, v2, v2_varying);
+        plot_line(v2, v2_varying, v3, v3_varying);
+        plot_line(v3, v3_varying, v1, v1_varying);
     }
 
-	// TODO Assignment 2: Add in the fill polygon mode.
+
+	// TODO Assignment 2: Calculate the average varying vector for flat shading and call plot_half_triangle as needed.
 }
 
 /* draw_points
@@ -477,10 +520,11 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
     vector<vec8f> new_geometry = geometry;
     
     for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
-        
-        *iter = shade_vertex(*iter);
-        plot_point(*iter);
+        vector<float> varying; // TODO: Temp fix
+        *iter = shade_vertex(*iter, varying);
+        plot_point(*iter, varying);
     }
+	// TODO Assignment 2: Update the normal matrix
 }
 
 /* Draw a set of 3D lines on the canvas. Each point in geometry
@@ -504,7 +548,9 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
             
             // Call vertex shader
             for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
-                *iter = shade_vertex(*iter);
+                vector<float> varying; // TODO: Temp fix
+
+                *iter = shade_vertex(*iter,varying);
             }
             
             // Insert new points into new geometry
@@ -518,10 +564,13 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
     if (new_geometry.size()){
         // Plot lines
         for (int i = 0; i < new_geometry.size(); i+=2) {
-            plot_line(new_geometry[i], new_geometry[i+1]);
+            vector<float> varying; // TODO: Temp fix
+
+            plot_line(new_geometry[i], varying, new_geometry[i+1], varying);
         }
     }
     
+	// TODO Assignment 2: Update the normal matrix
 }
 
 /* Draw a set of 3D triangles on the canvas. Each point in geometry is
@@ -555,7 +604,9 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
         
         // Vertex shader
         for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
-            *iter = shade_vertex(*iter);
+            vector<float> varying; // TODO: Temp fix
+
+            *iter = shade_vertex(*iter, varying);
         }
         
         // Form new triangles (use fanning structure)
@@ -574,9 +625,11 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     
     if (new_geometry.size()) {
         for (int i = 0; i < new_indices.size()-2; i+=3) {
+            vector<float> varying; // TODO: Temp fix
+
             switch (culling_mode) {
                 case disable:{
-                    plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+                    plot_triangle(new_geometry[new_indices[i]], varying, new_geometry[new_indices[i+1]], varying, new_geometry[new_indices[i+2]], varying);
                     break;
                 }
                 case backface:{
@@ -587,7 +640,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     vec3f normal = avg_point(3,6);
                     vec3f direction(0,0,-1);
                     if (dot(direction, normal) < 0) {
-                        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+                        plot_triangle(new_geometry[new_indices[i]], varying, new_geometry[new_indices[i+1]],varying, new_geometry[new_indices[i+2]], varying);
                     }
                     break;
                 }
@@ -599,7 +652,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     vec3f normal = avg_point(3,6);
                     vec3f direction(0,0,-1);
                     if (dot(direction, normal) > 0) {
-                        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
+                        plot_triangle(new_geometry[new_indices[i]], varying, new_geometry[new_indices[i+1]], varying, new_geometry[new_indices[i+2]], varying);
                     }
                     break;
                 }
@@ -615,6 +668,8 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 //        //cout << new_indices.size() << endl;
 //        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
 //    }
+
+    // TODO Assignment 2: Update the normal matrix.
 
 }
 
@@ -778,6 +833,7 @@ vec3f canvashdl::get_intersection_point(vec3f inside_point, vec3f outside_point,
     intersection_point[2] = inside_point[2] + intersection_factor*(outside_point[2] - inside_point[2]);
     
     return intersection_point;
+
 }
 
 
@@ -869,7 +925,7 @@ double canvashdl::get_time()
 	return gtime.tv_sec + gtime.tv_usec*1.0E-6;
 }
 
-void canvashdl::viewport(int w, int h)
+void canvashdl::resize(int w, int h)
 {
 	glViewport(0, 0, w, h);
 	last_reshape_time = get_time();

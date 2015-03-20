@@ -62,6 +62,8 @@ boxhdl::boxhdl(float width, float height, float depth)
     
     // Bounding box (same as box in this case)
     bound = vec6f(-(width/2) - 0.1, (width/2) + 0.1, -(height/2) - 0.1, (height/2) + 0.1, -(depth/2) - 0.1, (depth/2) + 0.1);
+
+	// TODO Assignment 2: Set up the material properties for this object
 }
 
 boxhdl::~boxhdl()
@@ -117,6 +119,8 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 	}
 
 	bound = vec6f(-radius, radius, -radius, radius, -radius, radius);
+
+	// TODO Assignment 2: Set up the material properties for this object
 }
 
 spherehdl::~spherehdl()
@@ -220,6 +224,8 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
     // Bounding box
     bound = vec6f(-radius, radius, -(height/2), (height/2), -radius, radius);
     
+
+	// TODO Assignment 2: Set up the material properties for this object
 }
 
 cylinderhdl::~cylinderhdl()
@@ -303,6 +309,8 @@ pyramidhdl::pyramidhdl(float radius, float height, int slices)
     
     // Bounding box
     bound = vec6f(-radius, radius, -(height/3), 2*(height/3), -radius, radius);
+
+	// TODO Assignment 2: Set up the material properties for this object
 }
 
 pyramidhdl::~pyramidhdl()
