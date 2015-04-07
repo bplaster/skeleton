@@ -21,6 +21,11 @@ canvashdl::canvashdl(int w, int h)
 
 	color_buffer = new unsigned char[width*height*3];
 	depth_buffer = new unsigned short[width*height];
+    
+    // Initialize depth buffer values
+    for (int i = 0; i < width*height; i++){
+        depth_buffer[i] = depth;
+    }
 
 	screen_texture = 0;
 	screen_geometry = 0;
@@ -82,6 +87,11 @@ void canvashdl::reallocate(int w, int h)
 
 	color_buffer = new unsigned char[w*h*3];
 	depth_buffer = new unsigned short[w*h];
+    
+    // Initialize depth buffer values
+    for (int i = 0; i < w*h; i++){
+        depth_buffer[i] = depth;
+    }
 
 	glActiveTexture(GL_TEXTURE0);
 	check_error(__FILE__, __LINE__);
@@ -358,15 +368,19 @@ void canvashdl::plot(vec3i xyz, vector<float> varying)
 	// TODO Assignment 1: Plot a pixel, calling the fragment shader.
     vec3f color = shade_fragment(varying);
     if ((xyz[0] >= 0 && xyz[0] < width) && (xyz[1] >=0 && xyz[1] < height)) {
-        color_buffer[3*(width*xyz[1]+xyz[0])+0] = color[red];
-        color_buffer[3*(width*xyz[1]+xyz[0])+1] = color[green];
-        color_buffer[3*(width*xyz[1]+xyz[0])+2] = color[blue];
+        
+        /* TODO Assignment 2: Compare the z value against the depth buffer and
+         * only render if its less. Then set the depth buffer.
+         */
+        if (xyz[2] < depth_buffer[width*xyz[1]+xyz[0]]){
+            color_buffer[3*(width*xyz[1]+xyz[0])+0] = color[red];
+            color_buffer[3*(width*xyz[1]+xyz[0])+1] = color[green];
+            color_buffer[3*(width*xyz[1]+xyz[0])+2] = color[blue];
+            
+            // Set depth buffer
+            depth_buffer[width*xyz[1]+xyz[0]] = xyz[2];
+        }
     }
-
-
-	/* TODO Assignment 2: Compare the z value against the depth buffer and
-	 * only render if its less. Then set the depth buffer.
-	 */
 }
 
 /* plot_point
@@ -471,13 +485,16 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
 /* plot_half_triangle
  *
  * Plot half of a triangle defined by three points in window coordinates (v1, v2, v3).
- * The remaining inputs are as follows (s1, s2, s3) are the pixel coordinates of (v1, v2, v3),
+ * The remaining inputs are as follows: (s1, s2, s3) are the pixel coordinates of (v1, v2, v3),
  * and (ave) is the average value of the normal and texture coordinates for flat shading.
  * Use Bresenham's algorithm for this. You may plot the horizontal half or the vertical half.
  */
 void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2, vector<float> v2_varying, vec3i s3, vector<float> v3_varying, vector<float> ave_varying)
 {
-	// TODO Assignment 2: Implement Bresenham's half triangle fill algorithm
+	// TODO Assignment 2: Implement Bresenham's half triangle fill algorithm (refer Ned's link on Piazza)
+    
+    // Interpolate z-value for every pixel to be plotted and call plot function (z-buffer algorithm)
+    
 	// TODO Assignment 2: Interpolate the varying values before passing them into plot.
 }
 
@@ -507,6 +524,16 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
 
 
 	// TODO Assignment 2: Calculate the average varying vector for flat shading and call plot_half_triangle as needed.
+    
+    // Calculate average varying vector
+    vector<float> ave_varying (3);
+    for (int i=0; i < ave_varying.size(); i++){
+        ave_varying[i] = (v1_varying[i] + v2_varying[i] + v3_varying[i])/3.;
+    }
+    
+    // Divide triangle into 2 flat sided triangles and call plot_half_triangle on each one
+    
+    // Calculate pixel coordinates, retain z-value
 }
 
 /* draw_points
@@ -577,7 +604,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
  * formatted (vx, vy, vz, nx, ny, nz, s, t). Don't forget to clip the
  * triangles against the clipping planes of the projection. You can't
  * just not render them because you'll get some weird popping at the
- * edge of the view. Also, this is where font/back face culling is implemented.
+ * edge of the view. Also, this is where front/back face culling is implemented.
  */
 void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> &indices)
 {
