@@ -251,6 +251,7 @@ void canvashdl::look_at(vec3f eye, vec3f at, vec3f up)
 void canvashdl::update_normal_matrix()
 {
 	// TODO Assignment 2: calculate the normal matrix
+    matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
 }
 
 /* to_window
@@ -262,11 +263,11 @@ vec3f canvashdl::to_window(vec2i pixel)
 	/* TODO Assignment 1: Given a pixel coordinate (x from 0 to width and y from 0 to height),
 	 * convert it into window coordinates (x from -1 to 1 and y from -1 to 1).
 	 */
-    float x = 2.*pixel[0]/width - 1.;
-    float y = 1. - 2.*pixel[1]/height;
-    float z = 0.;
+    vec3f result(2.0*(float)pixel[0]/(float)(width-1) - 1.0,
+                 2.0*(float)(height - 1 - pixel[1])/(float)(height-1) - 1.0,
+                 1.0);
     
-	return vec3f(x,y,z);
+    return result;
 }
 
 /* to_pixel
@@ -289,12 +290,7 @@ vec2i canvashdl::to_pixel(vec3f window)
 vec3f canvashdl::unproject(vec3f window)
 {
 	// TODO Assignment 1: Unproject a window coordinate into world coordinates.
-    vec4f vt  = vec4f(window[0], window[1], window[2], 1.);
-    
-    vt = inverse(matrices[modelview_matrix])*inverse(matrices[projection_matrix])*vt;
-    vt /= vt[3];
-    
-	return vec3f(vt[0],vt[1],vt[2]);
+    return inverse(matrices[modelview_matrix])*inverse(matrices[projection_matrix])*homogenize(window);
 }
 
 /* shade_vertex
@@ -311,19 +307,10 @@ vec3f canvashdl::unproject(vec3f window)
 vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
-    vec4f vt = vec4f(v[0],v[1],v[2],1.);
-    vt = matrices[projection_matrix]*matrices[modelview_matrix]*vt;
-    vt /= vt[3];
+    vec4f eye_space_vertex = matrices[projection_matrix]*matrices[modelview_matrix]*homogenize(v);
+    eye_space_vertex /= eye_space_vertex[3];
+    return eye_space_vertex;
     
-    vec4f vt_norm = vec4f(v[3],v[4],v[5],0.);
-    vt_norm = matrices[normal_matrix]*vt_norm;
-    //vt_norm /= vt_norm[3];
-
-    v.set(0, 3, vt(0,3));
-    v.set(3, 6, vt_norm(0,3));
-
-
-	return v;
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its vertex shader.
 	 */

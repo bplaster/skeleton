@@ -49,8 +49,6 @@ enum Camera{
     Perspective
 };
 
-manipulate::type manipulator;
-
 bool keys[256];
 
 // GLUI Variables
@@ -61,7 +59,11 @@ int current_normal = scenehdl::Normal::none;
 int current_model;
 float fovy, aspect, width, height, near, far;
 
+int object_option_menu_id;
+int canvas_menu_id;
+int camera_menu_id;
 int window_id;
+
 string models[] = {"banana.obj", "beethoven.obj", "bishop.obj", "blob.obj", "Bunny.obj", "chain.obj", "cow.obj", "cowUV.obj", "demo.obj", "dolphin.obj", "feline.obj", "helmet.obj", "pawn.obj", "shirt.obj", "statue.obj", "teapot.obj"};
 GLUI *glui;
 GLUI_FileBrowser *file_browser;
@@ -139,52 +141,232 @@ void reshapefunc(int w, int h)
 
 void pmotionfunc(int x, int y)
 {
-	if (bound)
-	{
-		int deltax = x - mousex;
-		int deltay = y - mousey;
-
-		mousex = x;
-		mousey = y;
-
-		bool warp = false;
-		if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
-		{
-			mousex = canvas.get_width()/2;
-			warp = true;
-		}
-
-		if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
-		{
-			mousey = canvas.get_height()/2;
-			warp = true;
-		}
-
-		if (warp)
-			glutWarpPointer(mousex, mousey);
-
-		// TODO Assignment 1: Use the mouse delta to change the orientation of the active camera
-        if (scene.active_camera_valid()) {
-            scene.cameras[scene.active_camera]->orientation[1] += (float)deltax/100.;
-            scene.cameras[scene.active_camera]->orientation[0] += (float)deltay/100.;
-        }
-
-		glutPostRedisplay();
-	}
-	else if (scene.active_camera_valid())
-	{
-		/* TODO Assignment 1: Figure out which object the mouse pointer is hovering over and make
-		 * that the active object.
-		 */
-        canvas.set_matrix(canvashdl::modelview_matrix);
-        //canvas.load_identity();
+    if (bound)
+    {
+        glutSetMenu(canvas_menu_id);
         
-        vec3f mouse_window = canvas.to_window(vec2i(x,y));
-        vec3f mouse_world = canvas.unproject(mouse_window);
-        int object_index = scene.object_index_at_point(mouse_world);
-        scene.active_object = object_index;
+        int deltax = x - mousex;
+        int deltay = y - mousey;
+        
+        mousex = x;
+        mousey = y;
+        
+        bool warp = false;
+        if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
+        {
+            mousex = canvas.get_width()/2;
+            warp = true;
+        }
+        
+        if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
+        {
+            mousey = canvas.get_height()/2;
+            warp = true;
+        }
+        
+        if (warp)
+            glutWarpPointer(mousex, mousey);
+        
+        if (scene.active_camera_valid())
+        {
+            scene.cameras[scene.active_camera]->orientation[1] -= (float)deltax/500.0;
+            scene.cameras[scene.active_camera]->orientation[0] -= (float)deltay/500.0;
+        }
+        
         glutPostRedisplay();
-	}
+    }
+    else if (scene.active_camera_valid())
+    {
+        vec3f direction;
+        vec3f position;
+        
+        if (scene.active_camera_valid())
+        {
+            if (scene.cameras[scene.active_camera]->type == "ortho")
+            {
+                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
+                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
+            }
+            else
+            {
+                position = scene.cameras[scene.active_camera]->position;
+                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
+            }
+        }
+        
+        int old_active_object = scene.active_object;
+        scene.active_object = -1;
+        for (int i = 0; i < scene.objects.size(); i++)
+        {
+            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
+            {
+                bool is_camera = false;
+                
+                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
+                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
+                        is_camera = true;
+                
+                if (!is_camera || (is_camera && scene.render_cameras))
+                {
+                    vec3f invdir = 1.0f/direction;
+                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+                    vec3f origin = position - scene.objects[i]->position;
+                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+                    if ((tmin <= tymax) && (tymin <= tmax))
+                    {
+                        if (tymin > tmin)
+                            tmin = tymin;
+                        if (tymax < tmax)
+                            tmax = tymax;
+                        
+                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+                        
+                        if ((tmin <= tzmax) && (tzmin <= tmax))
+                        {
+                            scene.active_object = i;
+                            i = scene.objects.size();
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (scene.active_object != old_active_object)
+        {
+            bool is_camera = false;
+            
+            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
+                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
+                    is_camera = true;
+            
+//            glutDetachMenu(GLUT_RIGHT_BUTTON);
+//            if (scene.active_object == -1)
+//                glutSetMenu(canvas_menu_id);
+//            else if (is_camera)
+//                glutSetMenu(camera_menu_id);
+//            else
+//                glutSetMenu(object_menu_id);
+//            glutAttachMenu(GLUT_RIGHT_BUTTON);
+            glutPostRedisplay();
+        }
+    }
+//	if (bound)
+//	{
+//		int deltax = x - mousex;
+//		int deltay = y - mousey;
+//
+//		mousex = x;
+//		mousey = y;
+//
+//		bool warp = false;
+//		if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
+//		{
+//			mousex = canvas.get_width()/2;
+//			warp = true;
+//		}
+//
+//		if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
+//		{
+//			mousey = canvas.get_height()/2;
+//			warp = true;
+//		}
+//
+//		if (warp)
+//			glutWarpPointer(mousex, mousey);
+//
+//		// TODO Assignment 1: Use the mouse delta to change the orientation of the active camera
+//        if (scene.active_camera_valid()) {
+//            scene.cameras[scene.active_camera]->orientation[1] += (float)deltax/500.;
+//            scene.cameras[scene.active_camera]->orientation[0] += (float)deltay/500.;
+//        }
+//
+//		glutPostRedisplay();
+//	}
+//	else if (scene.active_camera_valid())
+//	{
+//        vec3f direction;
+//        vec3f position;
+//        
+//        if (scene.active_camera_valid())
+//        {
+//            if (scene.cameras[scene.active_camera]->type == "ortho")
+//            {
+//                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
+//                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
+//            }
+//            else
+//            {
+//                position = scene.cameras[scene.active_camera]->position;
+//                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
+//            }
+//        }
+//        
+//        int old_active_object = scene.active_object;
+//        scene.active_object = -1;
+//        for (int i = 0; i < scene.objects.size(); i++)
+//        {
+//            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
+//            {
+//                bool is_camera = false;
+//                
+//                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
+//                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
+//                        is_camera = true;
+//                
+//                if (!is_camera || (is_camera && scene.render_cameras))
+//                {
+//                    vec3f invdir = 1.0f/direction;
+//                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+//                    vec3f origin = position - scene.objects[i]->position;
+//                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+//                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+//                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+//                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+//                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+//                    if ((tmin <= tymax) && (tymin <= tmax))
+//                    {
+//                        if (tymin > tmin)
+//                            tmin = tymin;
+//                        if (tymax < tmax)
+//                            tmax = tymax;
+//                        
+//                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+//                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+//                        
+//                        if ((tmin <= tzmax) && (tzmin <= tmax))
+//                        {
+//                            scene.active_object = i;
+//                            i = (int)scene.objects.size();
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        
+//        if (scene.active_object != old_active_object)
+//        {
+//            bool is_camera = false;
+//            
+//            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
+//                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
+//                    is_camera = true;
+//            
+////            glutDetachMenu(GLUT_RIGHT_BUTTON);
+////            if (scene.active_object == -1)
+////                glutSetMenu(canvas_menu_id);
+////            else if (is_camera)
+////                glutSetMenu(camera_menu_id);
+////            else
+////                glutSetMenu(object_menu_id);
+////            glutAttachMenu(GLUT_RIGHT_BUTTON);
+//            glutPostRedisplay();
+//        }
+//	}
 }
 
 void mousefunc(int button, int state, int x, int y)
@@ -195,130 +377,107 @@ void mousefunc(int button, int state, int x, int y)
 
 void motionfunc(int x, int y)
 {
-	if (!bound && !menu)
-	{
-        // TODO: Do we need to set the perspective matrix to Ortho before object selection
-        // canvas.set_matrix(canvashdl::modelview_matrix);
-        
-        vec3f old_mouse_window = canvas.to_window(vec2i(mousex,mousey));
-        vec3f old_mouse_world = canvas.unproject(old_mouse_window);
-        
+    if (!bound && !menu)
+    {
+        // TODO: make so it's not setting the center, but instead, naturally dragging object
         int deltax = x - mousex;
-        int deltay = y - mousey;
+        int deltay = mousey - y;
         
-		mousex = x;
-		mousey = y;
+        mousex = x;
+        mousey = y;
         
-        vec3f mouse_window = canvas.to_window(vec2i(x,y));
-        vec3f mouse_world = canvas.unproject(mouse_window);
-        vec3f delta_world = mouse_world - old_mouse_world;
-
+        vec3f direction;
+        vec3f position;
+        vec3f delta;
         
-        if (scene.active_object_valid()) {
-            switch (current_manipulation) {
-                case manipulate::translate: {
-                    scene.objects[scene.active_object]->position += delta_world;
-                    break;
-                }
-                case manipulate::rotate: {
-                    delta_world *= vec3f(1.0, -1.0, 1.0);
-                    scene.objects[scene.active_object]->orientation += delta_world.swap(0, 1);
-                    break;
-                }
-                case manipulate::scale: { // TODO: make better
-                    vec3f old_diff = old_mouse_world - scene.objects[scene.active_object]->position;
-                    vec3f new_diff = mouse_world - scene.objects[scene.active_object]->position;
-                    float delta_scale = mag(new_diff)/mag(old_diff) - 1.;
-                    scene.objects[scene.active_object]->scale += delta_scale/2.;
-                    break;
-                }
-                default:
-                    break;
+        if (scene.active_camera_valid())
+        {
+            if (scene.cameras[scene.active_camera]->type == "ortho")
+            {
+                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
+                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
             }
-            
+            else
+            {
+                position = scene.cameras[scene.active_camera]->position;
+                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
+            }
         }
-
-		/* TODO Assignment 1: Implement the functionality for the following operations here:
-		 * translation, rotation, and scaling of an object
-		 * changing the fovy, aspect, width, height, near, or far values of the active camera
-		 *
-		 * This uses the mouse, so you'll have to determine the world coordinate position of the
-		 * mouse pointer.
-		 */
-		glutPostRedisplay();
-	}
-	else if (!bound)
-	{
-		menu = false;
-		pmotionfunc(x, y);
-	}
-}
-
-void specialfunc(int key, int x, int y)
-{
-    switch (key) {
-        case GLUT_KEY_UP: // Up arrow
-            if (scene.active_camera_valid()) {
-                if (scene.cameras[scene.active_camera]->focus){
-                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
-                    dir_of_movement /= 10.;
-                    scene.cameras[scene.active_camera]->position += dir_of_movement;
-                } else {
-                    vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
-                    scene.cameras[scene.active_camera]->position += forward;
-                }
+        
+        if (scene.active_object_valid() && scene.active_camera_valid())
+        {
+            if (current_manipulation == manipulate::translate)
+            {
+                float d = mag(scene.objects[scene.active_object]->position - position);
+                scene.objects[scene.active_object]->position = d*direction + position;
             }
-            break;
-        case GLUT_KEY_DOWN: // Down arrow
-            if (scene.active_camera_valid()) {
-                if (scene.cameras[scene.active_camera]->focus){
-                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
-                    dir_of_movement /= 10.;
-                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+            else if (current_manipulation == manipulate::rotate)
+                scene.objects[scene.active_object]->orientation += vec3f(-(float)deltay/100.0, (float)deltax/100.0, 0.0);
+            else if (current_manipulation == manipulate::scale)
+                scene.objects[scene.active_object]->scale += (float)deltay/100.0;
+            
+            for (int i = 0; i < scene.cameras.size(); i++)
+                if (scene.cameras[i]->model == scene.objects[scene.active_object])
+                {
+                    scene.cameras[i]->position = scene.objects[scene.active_object]->position;
+                    scene.cameras[i]->orientation = scene.objects[scene.active_object]->orientation;
                 }
-                else {
-                    vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
-                    scene.cameras[scene.active_camera]->position += backward;
-                }
+        }
+        if (scene.active_camera_valid())
+        {
+            if (current_manipulation == manipulate::fovy && scene.cameras[scene.active_camera]->type == "perspective")
+                ((perspectivehdl*)scene.cameras[scene.active_camera])->fovy += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::aspect && scene.cameras[scene.active_camera]->type == "perspective")
+                ((perspectivehdl*)scene.cameras[scene.active_camera])->aspect += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::width && scene.cameras[scene.active_camera]->type == "ortho")
+            {
+                ((orthohdl*)scene.cameras[scene.active_camera])->right += (float)deltay/200.0;
+                ((orthohdl*)scene.cameras[scene.active_camera])->left -= (float)deltay/200.0;
             }
-            break;
-        case GLUT_KEY_RIGHT: // Right arrow
-            if (scene.active_camera_valid()) {
-                if (scene.cameras[scene.active_camera]->focus){
-                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
-                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
-                    vec3f dir_of_movement = cross(up, dir);
-                    dir_of_movement = norm(dir_of_movement);
-                    dir_of_movement /= 10.;
-                    scene.cameras[scene.active_camera]->position += dir_of_movement;
-                }
-                else{
-                    vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
-                    scene.cameras[scene.active_camera]->position += right;
-                }
+            else if (current_manipulation == manipulate::width && scene.cameras[scene.active_camera]->type == "frustum")
+            {
+                ((frustumhdl*)scene.cameras[scene.active_camera])->right += (float)deltay/200.0;
+                ((frustumhdl*)scene.cameras[scene.active_camera])->left -= (float)deltay/200.0;
             }
-            break;
-        case GLUT_KEY_LEFT: // Left arrow
-            if (scene.active_camera_valid()) {
-                if (scene.cameras[scene.active_camera]->focus){
-                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
-                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
-                    vec3f dir_of_movement = cross(up, dir);
-                    dir_of_movement = norm(dir_of_movement);
-                    dir_of_movement /= 10.;
-                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
-                }
-                else{
-                    vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
-                    scene.cameras[scene.active_camera]->position += left;
-                }
+            else if (current_manipulation == manipulate::height && scene.cameras[scene.active_camera]->type == "ortho")
+            {
+                ((orthohdl*)scene.cameras[scene.active_camera])->top += (float)deltay/200.0;
+                ((orthohdl*)scene.cameras[scene.active_camera])->bottom -= (float)deltay/200.0;
             }
-            break;
-        default:
-            break;
+            else if (current_manipulation == manipulate::height && scene.cameras[scene.active_camera]->type == "frustum")
+            {
+                ((frustumhdl*)scene.cameras[scene.active_camera])->top += (float)deltay/200.0;
+                ((frustumhdl*)scene.cameras[scene.active_camera])->bottom -= (float)deltay/200.0;
+            }
+            else if (current_manipulation == manipulate::near && scene.cameras[scene.active_camera]->type == "ortho")
+                ((orthohdl*)scene.cameras[scene.active_camera])->near += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::near && scene.cameras[scene.active_camera]->type == "frustum")
+                ((frustumhdl*)scene.cameras[scene.active_camera])->near += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::near && scene.cameras[scene.active_camera]->type == "perspective")
+                ((perspectivehdl*)scene.cameras[scene.active_camera])->near += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::far && scene.cameras[scene.active_camera]->type == "ortho")
+                ((orthohdl*)scene.cameras[scene.active_camera])->far += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::far && scene.cameras[scene.active_camera]->type == "frustum")
+                ((frustumhdl*)scene.cameras[scene.active_camera])->far += (float)deltay/100.0;
+            else if (current_manipulation == manipulate::far && scene.cameras[scene.active_camera]->type == "perspective")
+                ((perspectivehdl*)scene.cameras[scene.active_camera])->far += (float)deltay/100.0;
+            
+            if (current_manipulation == manipulate::fovy ||
+                current_manipulation == manipulate::aspect ||
+                current_manipulation == manipulate::width ||
+                current_manipulation == manipulate::height ||
+                current_manipulation == manipulate::near ||
+                current_manipulation == manipulate::far)
+                scene.cameras[scene.active_camera]->project(&canvas);
+        }
+        
+        glutPostRedisplay();
     }
-    glutPostRedisplay();
-
+    else if (!bound)
+    {
+        menu = false;
+        pmotionfunc(x, y);
+    }
 }
 
 void keydownfunc(unsigned char key, int x, int y)
@@ -388,15 +547,157 @@ void keyupfunc(unsigned char key, int x, int y)
 
 void idlefunc()
 {
-	bool change = false;
+    bool change = false;
+    if (scene.active_camera_valid() && scene.cameras[scene.active_camera]->focus == NULL)
+    {
+        if (keys['w'])
+        {
+            scene.cameras[scene.active_camera]->position += -0.25f*ror3(vec3f(0.0, 0.0, 1.0), scene.cameras[scene.active_camera]->orientation);
+            change = true;
+        }
+        if (keys['s'])
+        {
+            scene.cameras[scene.active_camera]->position += 0.25f*ror3(vec3f(0.0, 0.0, 1.0), scene.cameras[scene.active_camera]->orientation);
+            change = true;
+        }
+        if (keys['a'])
+        {
+            scene.cameras[scene.active_camera]->position += -0.25f*ror3(vec3f(1.0, 0.0, 0.0), scene.cameras[scene.active_camera]->orientation);
+            change = true;
+        }
+        if (keys['d'])
+        {
+            scene.cameras[scene.active_camera]->position += 0.25f*ror3(vec3f(1.0, 0.0, 0.0), scene.cameras[scene.active_camera]->orientation);
+            change = true;
+        }
+        if (keys['q'])
+        {
+            scene.cameras[scene.active_camera]->position += -0.25f*ror3(vec3f(0.0, 1.0, 0.0), scene.cameras[scene.active_camera]->orientation);
+            change = true;
+        }
+        if (keys['e'])
+        {
+            scene.cameras[scene.active_camera]->position += 0.25f*ror3(vec3f(0.0, 1.0, 0.0), scene.cameras[scene.active_camera]->orientation);
+            change = true;
+        }
+    }
+    else if (scene.active_camera_valid() && scene.cameras[scene.active_camera]->focus != NULL)
+    {
+        if (keys['w'])
+        {
+            vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+            dir_of_movement /= 10.;
+            scene.cameras[scene.active_camera]->position += dir_of_movement;
+            change = true;
+        }
+        if (keys['s'])
+        {
+            vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+            dir_of_movement /= 10.;
+            scene.cameras[scene.active_camera]->position -= dir_of_movement;
+            change = true;
+        }
+        if (keys['a'])
+        {
+            vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+            vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+            vec3f dir_of_movement = cross(up, dir);
+            dir_of_movement = norm(dir_of_movement);
+            dir_of_movement /= 10.;
+            scene.cameras[scene.active_camera]->position -= dir_of_movement;
+            change = true;
+        }
+        if (keys['d'])
+        {
+            vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+            vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+            vec3f dir_of_movement = cross(up, dir);
+            dir_of_movement = norm(dir_of_movement);
+            dir_of_movement /= 10.;
+            scene.cameras[scene.active_camera]->position += dir_of_movement;
+            change = true;
+        }
+        if (keys['q'])
+        {
+            // TODO
+            change = true;
+        }
+        if (keys['e'])
+        {
+            // TODO
+            change = true;
+        }
+    }
     
-    if ( glutGetWindow() != window_id )
-        glutSetWindow(window_id);
+    if (change)
+        glutPostRedisplay();
+}
 
-	// TODO Assignment 1: handle continuous keyboard inputs
-
-	if (change)
-		glutPostRedisplay();
+void specialfunc(int key, int x, int y)
+{
+    switch (key) {
+        case GLUT_KEY_UP: // Up arrow
+            if (scene.active_camera_valid()) {
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position += dir_of_movement;
+                } else {
+                    vec3f forward = ror3(vec3f(0.,0.,-0.1), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += forward;
+                }
+            }
+            break;
+        case GLUT_KEY_DOWN: // Down arrow
+            if (scene.active_camera_valid()) {
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f dir_of_movement = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+                }
+                else {
+                    vec3f backward = ror3(vec3f(0.,0.,0.1), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += backward;
+                }
+            }
+            break;
+        case GLUT_KEY_RIGHT: // Right arrow
+            if (scene.active_camera_valid()) {
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    vec3f dir_of_movement = cross(up, dir);
+                    dir_of_movement = norm(dir_of_movement);
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position += dir_of_movement;
+                }
+                else{
+                    vec3f right = ror3(vec3f(0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += right;
+                }
+            }
+            break;
+        case GLUT_KEY_LEFT: // Left arrow
+            if (scene.active_camera_valid()) {
+                if (scene.cameras[scene.active_camera]->focus){
+                    vec3f up = ror3(vec3f(0.,1.,0.), scene.cameras[scene.active_camera]->orientation);
+                    vec3f dir = scene.cameras[scene.active_camera]->focus->position - scene.cameras[scene.active_camera]->position;
+                    vec3f dir_of_movement = cross(up, dir);
+                    dir_of_movement = norm(dir_of_movement);
+                    dir_of_movement /= 10.;
+                    scene.cameras[scene.active_camera]->position -= dir_of_movement;
+                }
+                else{
+                    vec3f left = ror3(vec3f(-0.1,0.,0.), scene.cameras[scene.active_camera]->orientation);
+                    scene.cameras[scene.active_camera]->position += left;
+                }
+            }
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay();
+    
 }
 
 void menustatusfunc(int status, int x, int y)
@@ -480,6 +781,60 @@ void create_object (int val){
     }
     current_objects->set_int_val(index);
     glutPostRedisplay();
+}
+
+void object_menu(int num)
+{
+    if (num == 0)
+    {
+        if (scene.active_object >= 0 && scene.active_object < scene.objects.size())
+        {
+            if (scene.objects[scene.active_object] != NULL)
+            {
+                /* TODO Assignment 2: clean up the lights as well when the associated object
+                 * is deleted.
+                 */
+                
+                for (int i = 0; i < scene.cameras.size(); )
+                {
+                    if (scene.cameras[i] != NULL && scene.cameras[i]->model == scene.objects[scene.active_object])
+                    {
+                        delete scene.cameras[i];
+                        scene.cameras.erase(scene.cameras.begin() + i);
+                    }
+                    else
+                        i++;
+                }
+                delete scene.objects[scene.active_object];
+            }
+            scene.objects.erase(scene.objects.begin() + scene.active_object);
+            glutPostRedisplay();
+        }
+    }
+    else if (num == 4)
+    {
+        scene.active_camera = -1;
+        for (int i = 0; i < scene.cameras.size(); i++)
+            if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
+                scene.active_camera = i;
+        
+        if (scene.active_camera_valid())
+            scene.cameras[scene.active_camera]->project(&canvas);
+        
+        glutPostRedisplay();
+    }
+    else if (num == 1)
+        current_manipulation = manipulate::translate;
+    else if (num == 2)
+        current_manipulation = manipulate::rotate;
+    else if (num == 3)
+        current_manipulation = manipulate::scale;
+    else if (num == 5 && scene.active_object_valid() && scene.active_camera_valid())
+    {
+        scene.cameras[scene.active_camera]->focus = scene.objects[scene.active_object];
+        scene.cameras[scene.active_camera]->radius = dist(scene.objects[scene.active_object]->position, scene.cameras[scene.active_camera]->position);
+    }
+    
 }
 
 // This is so that there are only four variables displayed
@@ -693,7 +1048,7 @@ void create_menu()
     glutAddMenuEntry("Model",       Object::Model);
     
     // Add camera menu items
-    int camera_menu_id = glutCreateMenu(create_camera);
+    camera_menu_id = glutCreateMenu(create_camera);
 //    glutAddMenuEntry("Fovy", 0);
 //    glutAddMenuEntry("Aspect", 1);
 //    glutAddMenuEntry("Width", 2);
@@ -944,7 +1299,6 @@ int main(int argc, char **argv)
 
 	glutPassiveMotionFunc(pmotionfunc);
 	glutMotionFunc(motionfunc);
-    glutSpecialFunc(specialfunc);
 	//glutMouseFunc(mousefunc);
 
 	glutKeyboardFunc(keydownfunc);
