@@ -284,12 +284,13 @@ vec3f canvashdl::to_window(vec2i pixel)
  *
  * Window coordinates to pixel coordinates.
  */
-vec2i canvashdl::to_pixel(vec3f window)
+vec3i canvashdl::to_pixel(vec3f window)
 {
     int x = roundf(width*(window[0]+1.)/2.);
     int y = roundf(height*(window[1]+1.)/2.);
+    int z = 1;
     
-    return vec2i(x,y);
+    return vec3i(x,y,z);
 }
 
 /* unproject
@@ -496,31 +497,80 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
 	 * triangle as 3 points or 3 lines.
 	 */
     
-    if (polygon_mode == point) {
-        // 3 Point implementation
-        plot_point(v1, v1_varying);
-        plot_point(v2, v2_varying);
-        plot_point(v3, v3_varying);
-    }
-    else {
-        // 3 Line implementation
-        plot_line(v1, v1_varying, v2, v2_varying);
-        plot_line(v2, v2_varying, v3, v3_varying);
-        plot_line(v3, v3_varying, v1, v1_varying);
-    }
+    switch (polygon_mode) {
+        case point: {
+            // 3 Point implementation
+            plot_point(v1, v1_varying);
+            plot_point(v2, v2_varying);
+            plot_point(v3, v3_varying);
+            break;
+        }
+        case line: {
+            // 3 Line implementation
+            plot_line(v1, v1_varying, v2, v2_varying);
+            plot_line(v2, v2_varying, v3, v3_varying);
+            plot_line(v3, v3_varying, v1, v1_varying);
+            break;
+        }
+        case fill: {
+            
+            // TODO Assignment 2: Calculate the average varying vector for flat shading and call plot_half_triangle as needed.
+            
+            // Calculate average varying vector
+            vector<float> ave_varying;
+            //    for (int i=0; i < ave_varying.size(); i++){
+            //        ave_varying[i] = (v1_varying[i] + v2_varying[i] + v3_varying[i])/3.;
+            //    }
+            
+            // Divide triangle into 2 flat sided triangles and call plot_half_triangle on each one
+            
+            
+            
+            // Calculate pixel coordinates, retain z-value
+            vec3i temp, vi1, vi2, vi3;
+            vi1 = to_pixel(v1);
+            vi2 = to_pixel(v2);
+            vi3 = to_pixel(v3);
+            
+            // Sort by Y
+            // TODO: do i need to rearrange the varying values
+            if (vi1[1] > vi2[1])
+            {
+                temp = vi1;
+                vi1 = vi2;
+                vi2 = temp;
+            }
+            if (vi1[1] > vi3[1])
+            {
+                temp = vi1[1];
+                vi1 = vi3;
+                vi3 = temp;
+            }
+            if (vi2[1] > vi3[1])
+            {
+                temp = vi2;
+                vi2 = vi3;
+                vi3 = temp;
+            }
+            
 
+            // bottom-flat triangle or top-flat triangle
+            if (vi2[1] == vi3[1] || vi1[1] == vi2[1]) {
+                plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi3, v3_varying, ave_varying);
+            } else {
+                // general case - split the triangle in a topflat and bottom-flat one
+                vec3i vi4 ((int)(vi1[0] + ((float)(vi2[1] - vi1[1]) / (float)(vi3[1] - vi1[1])) * (vi3[0] - vi1[0])), vi2[1], vi2[2]);
+                
+                plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi4, v3_varying, ave_varying);
+                plot_half_triangle(vi2, v2_varying, vi4, v1_varying, vi3, v3_varying, ave_varying);
 
-	// TODO Assignment 2: Calculate the average varying vector for flat shading and call plot_half_triangle as needed.
-    
-    // Calculate average varying vector
-    vector<float> ave_varying (3);
-    for (int i=0; i < ave_varying.size(); i++){
-        ave_varying[i] = (v1_varying[i] + v2_varying[i] + v3_varying[i])/3.;
+            }
+            
+            break;
+        }
+        default:
+            break;
     }
-    
-    // Divide triangle into 2 flat sided triangles and call plot_half_triangle on each one
-    
-    // Calculate pixel coordinates, retain z-value
 }
 
 /* draw_points

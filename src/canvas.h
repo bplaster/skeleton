@@ -101,7 +101,7 @@ public:
 	void update_normal_matrix();
 	vec3f to_window(vec2i pixel);
 	vec3f unproject(vec3f window);
-    vec2i to_pixel(vec3f window);
+    vec3i to_pixel(vec3f window);
 
 	// Drawing and Shading
 	enum Polygon
