@@ -6,7 +6,6 @@ camerahdl::camerahdl()
 {
 	position = vec3f(0., 0., 3.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
-	model = NULL;
     model = new modelhdl("res/models/cow.obj");
 	type = "camera";
 	focus = NULL;

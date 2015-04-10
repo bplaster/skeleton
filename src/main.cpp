@@ -734,6 +734,7 @@ void toggle_cameras (int val){
 void toggle_lights (int val){
     if (val){
         scene.render_lights = !scene.render_lights;
+        cout << "Toggled render" <<endl;
     }
 }
 
@@ -973,31 +974,39 @@ void create_light (int val){
     
     switch (val){
         case Light::Ambient: {
-            
+            lighthdl *light = new ambienthdl;
+            scene.lights.push_back(light);
+            index = (int)scene.lights.size() - 1;
+            current_lights->add_item(index, "Ambient");
             break;
         }
         case Light::Point: {
             lighthdl *light = new pointhdl;
             scene.lights.push_back(light);
-            index = (int)scene.cameras.size() - 1;
+            index = (int)scene.lights.size() - 1;
+            cout << index << endl;
             current_lights->add_item(index, "Point");
             break;
         }
         case Light::Spot: {
             lighthdl *light = new spothdl;
             scene.lights.push_back(light);
-            index = (int)scene.cameras.size() - 1;
+            index = (int)scene.lights.size() - 1;
+            cout << index << endl;
             current_lights->add_item(index, "Spot");
             break;
         }
         case Light::Directional: {
             lighthdl *light = new directionalhdl;
             scene.lights.push_back(light);
-            index = (int)scene.cameras.size() - 1;
+            index = (int)scene.lights.size() - 1;
             current_lights->add_item(index, "Directional");
             break;
         }
+        default: break;
     }
+    current_lights->set_int_val(index);
+    glutPostRedisplay();
 }
 
 void handle_polygon (int val){
