@@ -221,10 +221,17 @@ void pmotionfunc(int x, int y)
             if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
             {
                 bool is_camera = false;
+                bool is_light = false;
                 
                 for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
                     if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
                         is_camera = true;
+                
+                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
+                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
+                        is_light = true;
+                    }
+                }
                 
                 if (!is_camera || (is_camera && scene.render_cameras))
                 {
