@@ -27,6 +27,14 @@ struct lighthdl
 	virtual void shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vertex, vec3f normal, float shininess) const = 0;
 };
 
+struct ambienthdl : lighthdl
+{
+    ambienthdl();
+    ~ambienthdl();
+    
+    void update(canvashdl *canvas);
+};
+
 struct directionalhdl : lighthdl
 {
 	directionalhdl();
