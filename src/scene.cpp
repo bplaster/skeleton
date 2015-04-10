@@ -83,6 +83,16 @@ void scenehdl::draw()
 	 * TODO Assignment 2: Update the light positions and directions
 	 * TODO Assignment 2: Render the lights
 	 */
+    
+    // Draw lights
+    if (render_lights) {
+        for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+            if ((*iter)->model) {
+                (*iter)->model->draw(canvas);
+            }
+        }
+
+    }
 }
 
 int scenehdl::object_index_at_point(vec3f point)

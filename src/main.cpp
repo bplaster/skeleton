@@ -49,6 +49,20 @@ enum Camera{
     Perspective
 };
 
+enum Light{
+    Ambient,
+    Point,
+    Spot,
+    Directional
+};
+
+enum LightColor {
+    White,
+    Red,
+    Green,
+    Blue
+};
+
 bool keys[256];
 
 // GLUI Variables
@@ -58,6 +72,7 @@ int current_culling = canvashdl::Culling::disable;
 int current_normal = scenehdl::Normal::none;
 int current_model;
 float fovy, aspect, width, height, near, far;
+int current_light_color;
 
 int object_option_menu_id;
 int canvas_menu_id;
@@ -69,20 +84,25 @@ GLUI *glui;
 GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
 GLUI_Listbox *current_cameras;
+GLUI_Listbox *current_lights;
 GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
 GLUI_Listbox *list_manipulation;
 GLUI_Panel *camera_panel;
+GLUI_Panel *light_panel;
+GLUI_Listbox *list_light_colors;
 GLUI_Panel *object_panel;
 GLUI_EditText *fovy_text;
 GLUI_EditText *aspect_text;
 GLUI_EditText *near_text;
 GLUI_EditText *far_text;
+GLUI_EditText *light_color_text;
 
 GLUI_Listbox *list_model;
 GLUI_Checkbox *focus_checkbox;
 GLUI_Panel *cam_prop_panel;
+GLUI_Panel *light_prop_panel;
 
 // Helper functions
 void create_camera(int val);
@@ -711,6 +731,13 @@ void toggle_cameras (int val){
         scene.render_cameras = !scene.render_cameras;
 }
 
+void toggle_lights (int val){
+    if (val){
+        scene.render_lights = !scene.render_lights;
+        cout << "Toggled render" <<endl;
+    }
+}
+
 void focus_object (int val) {
     if (val) {
         if (scene.active_camera_valid()){
@@ -942,6 +969,46 @@ void create_camera (int val){
     glutPostRedisplay();
 }
 
+void create_light (int val){
+    int index = -1;
+    
+    switch (val){
+        case Light::Ambient: {
+            lighthdl *light = new ambienthdl;
+            scene.lights.push_back(light);
+            index = (int)scene.lights.size() - 1;
+            current_lights->add_item(index, "Ambient");
+            break;
+        }
+        case Light::Point: {
+            lighthdl *light = new pointhdl;
+            scene.lights.push_back(light);
+            index = (int)scene.lights.size() - 1;
+            cout << index << endl;
+            current_lights->add_item(index, "Point");
+            break;
+        }
+        case Light::Spot: {
+            lighthdl *light = new spothdl;
+            scene.lights.push_back(light);
+            index = (int)scene.lights.size() - 1;
+            cout << index << endl;
+            current_lights->add_item(index, "Spot");
+            break;
+        }
+        case Light::Directional: {
+            lighthdl *light = new directionalhdl;
+            scene.lights.push_back(light);
+            index = (int)scene.lights.size() - 1;
+            current_lights->add_item(index, "Directional");
+            break;
+        }
+        default: break;
+    }
+    current_lights->set_int_val(index);
+    glutPostRedisplay();
+}
+
 void handle_polygon (int val){
     switch (val){
         case canvashdl::point:
@@ -1004,6 +1071,13 @@ void handle_menu(int val)
     }
 }
 
+void handle_update(int val)
+{
+    if (val == 1) {
+        // Get current selected light color and change current light object's color 
+    }
+}
+
 void handle_delete(int val)
 {
     if (val == 0) {
@@ -1019,6 +1093,13 @@ void handle_delete(int val)
             scene.cameras[obj_ind] = NULL; // TODO: list will keep getting bigger if you only set pointer to null
             current_cameras->delete_item(obj_ind);
             current_cameras->set_int_val(-1);
+        }
+    } else if (val == 2) {
+        int light_ind = current_lights->get_int_val();
+        if (light_ind < scene.lights.size() && light_ind >= 0) {
+            scene.lights[light_ind] = NULL;
+            current_lights->delete_item(light_ind);
+            current_lights->set_int_val(-1);
         }
     }
     glutPostRedisplay();
@@ -1186,16 +1267,31 @@ void setup_glui() {
     current_objects = glui->add_listbox_to_panel(object_panel, "", NULL, 1, selected_object);
     current_objects->add_item(-1, "");
     focus_checkbox = glui->add_checkbox_to_panel(object_panel, "Focus on Object", NULL, 1, focus_object);
-    GLUI_Panel *obj_pos_panel = glui->add_panel_to_panel(object_panel, "Position");
-    glui->add_edittext_to_panel(obj_pos_panel, "x:");
-    glui->add_edittext_to_panel(obj_pos_panel, "y:");
-    glui->add_edittext_to_panel(obj_pos_panel, "z:");
-    GLUI_Panel *obj_ori_panel = glui->add_panel_to_panel(object_panel, "Orientation");
-    glui->add_edittext_to_panel(obj_ori_panel, "x:");
-    glui->add_edittext_to_panel(obj_ori_panel, "y:");
-    glui->add_edittext_to_panel(obj_ori_panel, "z:");
+//    GLUI_Panel *obj_pos_panel = glui->add_panel_to_panel(object_panel, "Position");
+//    glui->add_edittext_to_panel(obj_pos_panel, "x:");
+//    glui->add_edittext_to_panel(obj_pos_panel, "y:");
+//    glui->add_edittext_to_panel(obj_pos_panel, "z:");
+//    GLUI_Panel *obj_ori_panel = glui->add_panel_to_panel(object_panel, "Orientation");
+//    glui->add_edittext_to_panel(obj_ori_panel, "x:");
+//    glui->add_edittext_to_panel(obj_ori_panel, "y:");
+//    glui->add_edittext_to_panel(obj_ori_panel, "z:");
     glui->add_button_to_panel(object_panel, "Delete", 0, handle_delete);
 
+    glui->add_separator_to_panel(scene_panel);
+    
+    light_panel = glui->add_panel_to_panel(scene_panel, "Light");
+    current_lights = glui->add_listbox_to_panel(light_panel, "", NULL, 2, selected_object);
+    current_lights->add_item(-1, "");
+    glui->add_checkbox_to_panel(light_panel, "Render Lights", NULL, 1, toggle_lights);
+    light_prop_panel = glui->add_panel_to_panel(light_panel, "Properties");
+    list_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Choose Color", &current_light_color);
+    list_light_colors->add_item(LightColor::White, "White");
+    list_light_colors->add_item(LightColor::Red, "Red");
+    list_light_colors->add_item(LightColor::Green, "Green");
+    list_light_colors->add_item(LightColor::Blue, "Blue");
+    glui->add_button_to_panel(light_panel, "Update", 1, handle_update);
+    glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
+    
     glui->add_separator_to_panel(scene_panel);
     
     camera_panel = glui->add_panel_to_panel(scene_panel, "Camera");
@@ -1259,6 +1355,13 @@ void setup_glui() {
     glui->add_button_to_panel(cam_panel,    "Ortho",       Camera::Ortho,         create_camera);
     glui->add_button_to_panel(cam_panel,    "Frustum",     Camera::Frustum,       create_camera);
     glui->add_button_to_panel(cam_panel,    "Perspective", Camera::Perspective,   create_camera);
+    glui->add_separator();
+    
+    GLUI_Panel *light_panel = glui->add_panel("Create Light");
+    glui->add_button_to_panel(light_panel,    "Ambient",       Light::Ambient,         create_light);
+    glui->add_button_to_panel(light_panel,    "Point",     Light::Point,       create_light);
+    glui->add_button_to_panel(light_panel,    "Spot", Light::Spot,   create_light);
+    glui->add_button_to_panel(light_panel,    "Directional", Light::Directional,   create_light);
     
     glui->add_separator();
     glui->add_button("Quit", 0, exit);

@@ -1,6 +1,7 @@
 #include "light.h"
 #include "object.h"
 #include "canvas.h"
+#include "model.h"
 
 lighthdl::lighthdl()
 {
@@ -13,7 +14,7 @@ lighthdl::lighthdl(const vec3f &ambient, const vec3f &diffuse, const vec3f &spec
 	this->ambient = ambient;
 	this->diffuse = diffuse;
 	this->specular = specular;
-	model = NULL;
+	model = new modelhdl("res/models/banana.obj");
 	type = "light";
 }
 
@@ -117,4 +118,24 @@ void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f verte
 	/* TODO Assignment 2: Implement a spot light. See the OpenGL Orange Book in the references section
 	 * of the course website. Its under the section about emulating the fixed function pipeline.
 	 */
+}
+
+ambienthdl::ambienthdl() : lighthdl(white*0.1f, white*0.5f, white)
+{
+    type = "ambient";
+}
+
+void ambienthdl::update(canvashdl *canvas)
+{
+
+}
+
+ambienthdl::~ambienthdl()
+{
+    
+}
+
+void ambienthdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vertex, vec3f normal, float shininess) const
+{
+    
 }
