@@ -2,4 +2,54 @@
 <Bucket
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/canvas.cpp"
+            timestampString = "450399183.416952"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "717"
+            endingLineNumber = "717"
+            landmarkName = "canvashdl::plot_triangle(vec3f v1, vector&lt;float&gt; v1_varying, vec3f v2, vector&lt;float&gt; v2_varying, vec3f v3, vector&lt;float&gt; v3_varying)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/canvas.cpp"
+            timestampString = "450399183.416952"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "622"
+            endingLineNumber = "622"
+            landmarkName = "canvashdl::plot_half_triangle(vec3i s1, vector&lt;float&gt; v1_varying, vec3i s2, vector&lt;float&gt; v2_varying, vec3i s3, vector&lt;float&gt; v3_varying, vector&lt;float&gt; ave_varying)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/canvas.cpp"
+            timestampString = "450399183.416952"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "619"
+            endingLineNumber = "619"
+            landmarkName = "canvashdl::plot_half_triangle(vec3i s1, vector&lt;float&gt; v1_varying, vec3i s2, vector&lt;float&gt; v2_varying, vec3i s3, vector&lt;float&gt; v3_varying, vector&lt;float&gt; ave_varying)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
