@@ -1024,6 +1024,9 @@ void handle_polygon (int val){
         case canvashdl::line:
             current_polygon = canvashdl::line;
             break;
+        case canvashdl::fill:
+            current_polygon = canvashdl::fill;
+            break;
         default:
             break;
     }
@@ -1153,6 +1156,7 @@ void create_menu()
     int polygon_menu_id = glutCreateMenu(handle_polygon);
     glutAddMenuEntry("Point",   canvashdl::Polygon::point);
     glutAddMenuEntry("Line",    canvashdl::Polygon::line);
+    glutAddMenuEntry("Fill",    canvashdl::Polygon::fill);
 
     // Add culling menu items
     int culling_menu_id = glutCreateMenu(handle_culling);
@@ -1313,6 +1317,7 @@ void setup_glui() {
     list_polygon = glui->add_listbox_to_panel(scene_panel, "Polygon", &current_polygon, -1, handle_polygon);
     list_polygon->add_item(canvashdl::Polygon::line,    "Line");
     list_polygon->add_item(canvashdl::Polygon::point,   "Point");
+    list_polygon->add_item(canvashdl::Polygon::fill,    "Fill");
     list_normal = glui->add_listbox_to_panel(scene_panel, "Normal", &current_normal, -1, handle_normal);
     list_normal->add_item(scenehdl::Normal::none,       "None");
     list_normal->add_item(scenehdl::Normal::face,       "Face");

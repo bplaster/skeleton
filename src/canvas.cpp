@@ -288,7 +288,7 @@ vec3i canvashdl::to_pixel(vec3f window)
 {
     int x = roundf(width*(window[0]+1.)/2.);
     int y = roundf(height*(window[1]+1.)/2.);
-    int z = 1;
+    int z = roundf(depth*(window[2]+1.)/2.);
     
     return vec3i(x,y,z);
 }
@@ -390,11 +390,11 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
     // Convert to Pixel coordinates here
-    vec2i vp1 = to_pixel(vec3f(v1[0],v1[1],v1[2]));
-    vec2i vp2 = to_pixel(vec3f(v2[0],v2[1],v2[2]));
+    vec3i vp1 = to_pixel(vec3f(v1[0],v1[1],v1[2]));
+    vec3i vp2 = to_pixel(vec3f(v2[0],v2[1],v2[2]));
     
     // Variables
-    vec2i xy, xy_max;
+    vec3i xy, xy_max;
     vector<float> v;
     int dy = abs(vp2[1] - vp1[1]);
     int dx = abs(vp2[0] - vp1[0]);
@@ -470,6 +470,78 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
 	// TODO Assignment 2: Interpolate the varying values before passing them into plot.
 }
 
+void canvashdl::plot_horizontal_line_portion(vec3i& vp1, vector<float>& v1_varying, vec3i& vp2, vector<float>& v2_varying) {
+
+    // Variables
+    vec3i xy = vp1;
+    vector<float> v = v1_varying;
+    int dy = abs(vp2[1] - vp1[1]);
+    int dy_sign = -2*signbit(vp2[1] - vp1[1]) + 1;
+    int dx = abs(vp2[0] - vp1[0]);
+    int dx_sign = -2*signbit(vp2[0] - vp1[0]) + 1;
+    plot(xy, v);
+
+    // Check cases
+    // abs(slope) < 1
+    if(dy<=dx){
+        
+        int d = 2*dy-dx;
+        // step through each pixel
+        while (xy[0] != vp2[0]) {
+            
+            xy[0] += dx_sign;
+            
+            // E
+            if(d < 0){
+                d+=2*dy;
+                plot(xy, v);
+            }
+            // NE/SE
+            else {
+                xy[1] += dy_sign;
+                vp1 = xy;
+                return;
+            }
+
+        }
+    }
+    // abs(slope) > 1
+    else {
+        xy[1] += dy_sign;
+        
+        int d = 2*dx-dy;
+
+        if(d>0){
+            xy[0] += dx_sign;
+        }
+        vp1 = xy;
+        return;
+    }
+}
+
+void canvashdl::plot_horizontal_line(vec3i& vp1, vector<float>& v1_varying, vec3i& vp2, vector<float>& v2_varying) {
+    int dx = abs(vp2[0] - vp1[0]);
+    int dx_sign = sign(vp2[0] - vp1[0]);
+
+    vec3i xy = vp1;
+    vector<float> v = v1_varying;
+    
+    for (int i = 0; i <= dx; i++) {
+        plot(xy, v);
+        xy[0] += dx_sign;
+    }
+}
+
+int canvashdl::sign(int x) {
+    if (x > 0) {
+        return 1;
+    } else if (x < 0) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
 /* plot_half_triangle
  *
  * Plot half of a triangle defined by three points in window coordinates (v1, v2, v3).
@@ -484,7 +556,89 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     // Interpolate z-value for every pixel to be plotted and call plot function (z-buffer algorithm)
     
 	// TODO Assignment 2: Interpolate the varying values before passing them into plot.
+    
+    // Variables
+    vec3i t2 = s1, t3 = s1;
+    vector<float> t2_varying = v2_varying, t3_varying = v3_varying; // TODO: interpolate
+    
+    int dy2 = abs(s2[1] - s1[1]);
+    int dy2_sign = sign(s2[1] - s1[1]);
+    int dx2 = abs(s2[0] - s1[0]);
+    int dx2_sign = sign(s2[0] - s1[0]);
+    
+    int dy3 = abs(s3[1] - s1[1]);
+    int dy3_sign = sign(s3[1] - s1[1]);
+    int dx3 = abs(s3[0] - s1[0]);
+    int dx3_sign = sign(s3[0] - s1[0]);
+    
+    // Swap values based on if slope > 1
+    bool swap2 = false, swap3 = false;
+    
+    if (dy2 > dx2)
+    {
+        int tmp = dx2;
+        dx2 = dy2;
+        dy2 = tmp;
+        swap2 = true;
+    }
+    
+    if (dy3 > dx3)
+    {
+        int tmp = dx3;
+        dx3 = dy3;
+        dy3 = tmp;
+        swap3 = true;
+    }
+    
+    int e2 = 2 * dy2 - dx2;
+    int e3 = 2 * dy3 - dx3;
+
+    for (int i = 0; i <= dx2; i++)
+    {
+        // Plot line between t2 and t3
+        plot_horizontal_line(t2, t2_varying, t3, t3_varying);
+        
+        // Trace next value of t2
+        while (e2 >= 0 && dx2 != 0)
+        {
+            if (swap2)
+                t2[0] += dx2_sign;
+            else
+                t2[1] += dy2_sign;
+            e2 -= 2 * dx2;
+        }
+        
+        if (swap2)
+            t2[1] += dy2_sign;
+        else
+            t2[0] += dx2_sign;
+        
+        e2 += 2 * dy2;
+        
+        // Trace next value of t3
+        while (t3[1] != t2[1])
+        {
+            while (e3 >= 0 && dx3 != 0)
+            {
+                if (swap3)
+                    t3[0] += dx3_sign;
+                else
+                    t3[1] += dy3_sign;
+                e3 = e3 - 2 * dx3;
+            }
+            
+            if (swap3)
+                t3[1] += dy3_sign;
+            else
+                t3[0] += dx3_sign;
+            
+            e3 = e3 + 2 * dy3;
+        }
+    }
 }
+
+
+
 
 /* plot_triangle
  *
@@ -522,9 +676,6 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
             //        ave_varying[i] = (v1_varying[i] + v2_varying[i] + v3_varying[i])/3.;
             //    }
             
-            // Divide triangle into 2 flat sided triangles and call plot_half_triangle on each one
-            
-            
             
             // Calculate pixel coordinates, retain z-value
             vec3i temp, vi1, vi2, vi3;
@@ -542,7 +693,7 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
             }
             if (vi1[1] > vi3[1])
             {
-                temp = vi1[1];
+                temp = vi1;
                 vi1 = vi3;
                 vi3 = temp;
             }
@@ -553,17 +704,19 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
                 vi3 = temp;
             }
             
-
-            // bottom-flat triangle or top-flat triangle
-            if (vi2[1] == vi3[1] || vi1[1] == vi2[1]) {
+            // bottom-flat triangle
+            if (vi2[1] == vi3[1]) {
                 plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi3, v3_varying, ave_varying);
+
+            } else if (vi1[1] == vi2[1]){  // top-flat triangle
+                plot_half_triangle(vi3, v3_varying, vi1, v1_varying, vi2, v2_varying, ave_varying);
+
             } else {
-                // general case - split the triangle in a topflat and bottom-flat one
+                // Divide triangle into 2 flat sided triangles and call plot_half_triangle on each one
                 vec3i vi4 ((int)(vi1[0] + ((float)(vi2[1] - vi1[1]) / (float)(vi3[1] - vi1[1])) * (vi3[0] - vi1[0])), vi2[1], vi2[2]);
                 
                 plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi4, v3_varying, ave_varying);
-                plot_half_triangle(vi2, v2_varying, vi4, v1_varying, vi3, v3_varying, ave_varying);
-
+                plot_half_triangle(vi3, v3_varying, vi2, v3_varying, vi4, v3_varying, ave_varying);
             }
             
             break;
