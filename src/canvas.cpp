@@ -519,16 +519,27 @@ void canvashdl::plot_horizontal_line_portion(vec3i& vp1, vector<float>& v1_varyi
     }
 }
 
-void canvashdl::plot_horizontal_line(vec3i& vp1, vector<float>& v1_varying, vec3i& vp2, vector<float>& v2_varying) {
-    int dx = abs(vp2[0] - vp1[0]);
-    int dx_sign = sign(vp2[0] - vp1[0]);
+void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i vp2, vector<float> v2_varying) {
+    
+    // Draw from right to left
+    if (vp1[0] > vp2[0]) {
+        vec3i temp = vp1;
+        vp1 = vp2;
+        vp2 = temp;
+    }
+    
+    int dx = vp2[0] - vp1[0];
 
     vec3i xy = vp1;
     vector<float> v = v1_varying;
-    
-    for (int i = 0; i <= dx; i++) {
+    float t123;
+    plot(xy, v);
+
+    for (int i = 0; i < dx; i++) {
+        xy[0]++;
+        t123 = (float)(vp2[0] - xy[0])/(float)(vp2[0] - vp1[0]);
+        xy[2] = (int)(t123*vp2[2] + (1-t123)*vp1[2]);
         plot(xy, v);
-        xy[0] += dx_sign;
     }
 }
 
@@ -560,6 +571,7 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     // Variables
     vec3i t2 = s1, t3 = s1;
     vector<float> t2_varying = v2_varying, t3_varying = v3_varying; // TODO: interpolate
+    float t12, t13;
     
     int dy2 = abs(s2[1] - s1[1]);
     int dy2_sign = sign(s2[1] - s1[1]);
@@ -634,6 +646,15 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
             
             e3 = e3 + 2 * dy3;
         }
+        
+        // Interpolate Z values
+        // TODO: catch case if denominator is zero
+        t12 = (float)(s2[1] - t2[1])/(float)(s2[1] - s1[1]);
+        t13 = (float)(s3[1] - t3[1])/(float)(s3[1] - s1[1]);
+        t2[2] = t12*s1[2] + (1-t12)*s2[2];
+        t3[2] = t13*s1[2] + (1-t13)*s3[2];
+
+
     }
 }
 
@@ -671,11 +692,10 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
             // TODO Assignment 2: Calculate the average varying vector for flat shading and call plot_half_triangle as needed.
             
             // Calculate average varying vector
-            vector<float> ave_varying;
-            //    for (int i=0; i < ave_varying.size(); i++){
-            //        ave_varying[i] = (v1_varying[i] + v2_varying[i] + v3_varying[i])/3.;
-            //    }
-            
+            vector<float> ave_varying(v1_varying.size(), 0);
+            for (int i=0; i < ave_varying.size(); i++){
+                ave_varying[i] = (v1_varying[i] + v2_varying[i] + v3_varying[i])/3.;
+            }
             
             // Calculate pixel coordinates, retain z-value
             vec3i temp, vi1, vi2, vi3;
@@ -713,8 +733,15 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
 
             } else {
                 // Divide triangle into 2 flat sided triangles and call plot_half_triangle on each one
-                vec3i vi4 ((int)(vi1[0] + ((float)(vi2[1] - vi1[1]) / (float)(vi3[1] - vi1[1])) * (vi3[0] - vi1[0])), vi2[1], vi2[2]);
+                int x = (int)(vi1[0] + ((float)(vi2[1] - vi1[1]) / (float)(vi3[1] - vi1[1])) * (vi3[0] - vi1[0]));
+                int y = vi2[1];
                 
+                // Interpolate Z
+                float t13 = (float)(vi3[1] - y)/(float)(vi3[1] - vi1[1]);
+                int z = (int)(t13*vi1[2] + (1-t13)*vi3[2]);
+                vec3i vi4 (x, y, z);
+                
+                // Plot top and bottom triangles
                 plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi4, v3_varying, ave_varying);
                 plot_half_triangle(vi3, v3_varying, vi2, v3_varying, vi4, v3_varying, ave_varying);
             }

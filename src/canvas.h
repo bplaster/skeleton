@@ -62,7 +62,7 @@ private:
     vector<vec8f> clip_triangle_against_plane (vector<vec8f> triangle_points, plane clipping_plane);
     void clip_line_against_plane (vec8f v1, vec8f v2, plane clipping_plane, vector<vec8f> &new_clipping_points);
     void plot_horizontal_line_portion(vec3i& vp1, vector<float>& v1_varying, vec3i& vp2, vector<float>& v2_varying);
-    void plot_horizontal_line(vec3i& vp1, vector<float>& v1_varying, vec3i& vp2, vector<float>& v2_varying);
+    void plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i vp2, vector<float> v2_varying);
 
 
 
