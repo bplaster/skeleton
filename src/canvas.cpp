@@ -325,6 +325,13 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its vertex shader.
 	 */
+    
+//    const materialhdl *material;
+//    get_uniform("material", material);
+//    
+//    vec3f eye_space_vertex = material->shade_vertex(this, v(0,3), v(3,6), varying);
+    
+    return eye_space_vertex;
 
 }
 
@@ -340,10 +347,16 @@ vec3f canvashdl::shade_fragment(vector<float> varying)
     color[red] = 255.;
     color[green] = 255.;
     color[blue] = 255.;
+    
 
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its fragment shader.
 	 */
+//    const materialhdl *material;
+//    get_uniform("material", material);
+//    
+//    vec3f color = material->shade_fragment(this, varying);
+    
 	return color;
 }
 
