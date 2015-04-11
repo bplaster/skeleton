@@ -813,7 +813,8 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
 
     construct_planes();
     vector<vec8f> new_geometry;
-    //vector<int> new_indices;
+    vector<vector<float>> new_varying;
+    
     matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
     for (int i = 0; i < indices.size(); i+= 2) {
@@ -822,17 +823,14 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
         vector<vec8f> new_points = clip_line(geometry[indices[i]], geometry[indices[i+1]]);
         
         if (!new_points.empty()){
-            
-            // Call vertex shader
+        
+            // Vertex shader
             for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
-                vector<float> varying; // TODO: Temp fix
-
-                *iter = shade_vertex(*iter,varying);
-            }
-            
-            // Insert new points into new geometry
-            for (int i = 0; i < new_points.size(); i ++){
-                new_geometry.push_back(new_points[i]);
+                
+                vector<float> varying;
+                *iter = shade_vertex(*iter, varying);
+                new_geometry.push_back(*iter);
+                new_varying.push_back(varying);
             }
         }
 
@@ -841,9 +839,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
     if (new_geometry.size()){
         // Plot lines
         for (int i = 0; i < new_geometry.size(); i+=2) {
-            vector<float> varying; // TODO: Temp fix
-
-            plot_line(new_geometry[i], varying, new_geometry[i+1], varying);
+            plot_line(new_geometry[i], new_varying[i], new_geometry[i+1], new_varying[i+1]);
         }
     }
     
@@ -865,6 +861,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     construct_planes();
     vector<vec8f> new_geometry;
     vector<int> new_indices;
+    vector<vector<float>> new_varying;
     
     matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
@@ -877,13 +874,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
             continue;
         }
         
-        // Vertex shader
-        for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
-            vector<float> varying; // TODO: Temp fix
-
-            *iter = shade_vertex(*iter, varying);
-        }
-        
         // Form new triangles (use fanning structure)
         for (int i = 0; i < new_points.size() - 2; i ++){
             new_indices.push_back((int)new_geometry.size());
@@ -891,22 +881,22 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
             new_indices.push_back((int)new_geometry.size() + i + 2);
         }
         
-        // Add actual points to new geometry
-        for (int i = 0; i < new_points.size(); i ++){
-            new_geometry.push_back(new_points[i]);
+        // Vertex shader
+        for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
+            
+            vector<float> varying;
+            *iter = shade_vertex(*iter, varying);
+            new_geometry.push_back(*iter);
+            new_varying.push_back(varying);
         }
-        
     }
     
     if (new_geometry.size()) {
         for (int i = 0; i < new_indices.size()-2; i+=3) {
-            vector<float> v1_varying;
-            vector<float> v2_varying;
-            vector<float> v3_varying;
 
             switch (culling_mode) {
                 case disable:{
-                    plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]], v2_varying, new_geometry[new_indices[i+2]], v3_varying);
+                    plot_triangle(new_geometry[new_indices[i]], new_varying[new_indices[i]], new_geometry[new_indices[i+1]], new_varying[new_indices[i+1]], new_geometry[new_indices[i+2]], new_varying[new_indices[i+2]]);
                     break;
                 }
                 case backface:{
@@ -917,7 +907,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     vec3f normal = avg_point(3,6);
                     vec3f direction(0,0,-1);
                     if (dot(direction, normal) < 0) {
-                        plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]],v2_varying, new_geometry[new_indices[i+2]], v3_varying);
+                        plot_triangle(new_geometry[new_indices[i]], new_varying[new_indices[i]], new_geometry[new_indices[i+1]], new_varying[new_indices[i+1]], new_geometry[new_indices[i+2]], new_varying[new_indices[i+2]]);
                     }
                     break;
                 }
@@ -929,7 +919,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     vec3f normal = avg_point(3,6);
                     vec3f direction(0,0,-1);
                     if (dot(direction, normal) > 0) {
-                        plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]], v2_varying, new_geometry[new_indices[i+2]], v3_varying);
+                        plot_triangle(new_geometry[new_indices[i]], new_varying[new_indices[i]], new_geometry[new_indices[i+1]], new_varying[new_indices[i+1]], new_geometry[new_indices[i+2]], new_varying[new_indices[i+2]]);
                     }
                     break;
                 }
