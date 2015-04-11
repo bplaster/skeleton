@@ -526,6 +526,10 @@ void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i 
         vec3i temp = vp1;
         vp1 = vp2;
         vp2 = temp;
+        
+        vector<float> tmpV = v1_varying;
+        v1_varying = v2_varying;
+        v2_varying = tmpV;
     }
     
     int dx = vp2[0] - vp1[0];
@@ -538,7 +542,10 @@ void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i 
     for (int i = 0; i < dx; i++) {
         xy[0]++;
         t123 = (float)(vp2[0] - xy[0])/(float)(vp2[0] - vp1[0]);
-        xy[2] = (int)(t123*vp2[2] + (1-t123)*vp1[2]);
+        xy[2] = (int)(t123*vp1[2] + (1-t123)*vp2[2]);
+        for (int j = 0; j < v1_varying.size(); j++) {
+            v[j] = t123*v1_varying[j] + (1-t123)*v2_varying[j];
+        }
         plot(xy, v);
     }
 }
@@ -570,8 +577,8 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     
     // Variables
     vec3i t2 = s1, t3 = s1;
-    vector<float> t2_varying = v2_varying, t3_varying = v3_varying; // TODO: interpolate
-    float t12, t13;
+    vector<float> t2_varying = v1_varying, t3_varying = v1_varying; // TODO: interpolate
+    float t12 = 0., t13 = 0.;
     
     int dy2 = abs(s2[1] - s1[1]);
     int dy2_sign = sign(s2[1] - s1[1]);
@@ -607,8 +614,27 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
 
     for (int i = 0; i <= dx2; i++)
     {
-        // Plot line between t2 and t3
-        plot_horizontal_line(t2, t2_varying, t3, t3_varying);
+        // Interpolate Z values
+        // TODO: catch case if denominator is zero
+        t12 = (float)(s2[1] - t2[1])/(float)(s2[1] - s1[1]);
+        t13 = (float)(s3[1] - t3[1])/(float)(s3[1] - s1[1]);
+        t2[2] = t12*s1[2] + (1-t12)*s2[2];
+        t3[2] = t13*s1[2] + (1-t13)*s3[2];
+        
+        // Plot based on shading model
+        if (shade_model == none || shade_model == flat) {
+            // Plot line between t2 and t3
+            plot_horizontal_line(t2, ave_varying, t3, ave_varying);
+            
+        } else {
+            // Interpolate varying
+            for (int j = 0; j < t2_varying.size(); j++) {
+                t2_varying[j] = t12*v1_varying[j] + (1-t12)*v2_varying[j];
+                t3_varying[j] = t13*v1_varying[j] + (1-t13)*v3_varying[j];
+            }
+            // Plot line between t2 and t3
+            plot_horizontal_line(t2, t2_varying, t3, t3_varying);
+        }
         
         // Trace next value of t2
         while (e2 >= 0 && dx2 != 0)
@@ -646,19 +672,8 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
             
             e3 = e3 + 2 * dy3;
         }
-        
-        // Interpolate Z values
-        // TODO: catch case if denominator is zero
-        t12 = (float)(s2[1] - t2[1])/(float)(s2[1] - s1[1]);
-        t13 = (float)(s3[1] - t3[1])/(float)(s3[1] - s1[1]);
-        t2[2] = t12*s1[2] + (1-t12)*s2[2];
-        t3[2] = t13*s1[2] + (1-t13)*s3[2];
-
-
     }
 }
-
-
 
 
 /* plot_triangle
@@ -699,29 +714,41 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
             
             // Calculate pixel coordinates, retain z-value
             vec3i temp, vi1, vi2, vi3;
+            vector<float> tempV;
             vi1 = to_pixel(v1);
             vi2 = to_pixel(v2);
             vi3 = to_pixel(v3);
             
             // Sort by Y
-            // TODO: do i need to rearrange the varying values
             if (vi1[1] > vi2[1])
             {
                 temp = vi1;
                 vi1 = vi2;
                 vi2 = temp;
+                
+                tempV = v1_varying;
+                v1_varying = v2_varying;
+                v2_varying = tempV;
             }
             if (vi1[1] > vi3[1])
             {
                 temp = vi1;
                 vi1 = vi3;
                 vi3 = temp;
+                
+                tempV = v1_varying;
+                v1_varying = v3_varying;
+                v3_varying = tempV;
             }
             if (vi2[1] > vi3[1])
             {
                 temp = vi2;
                 vi2 = vi3;
                 vi3 = temp;
+                
+                tempV = v2_varying;
+                v2_varying = v3_varying;
+                v3_varying = tempV;
             }
             
             // bottom-flat triangle
@@ -740,10 +767,16 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
                 float t13 = (float)(vi3[1] - y)/(float)(vi3[1] - vi1[1]);
                 int z = (int)(t13*vi1[2] + (1-t13)*vi3[2]);
                 vec3i vi4 (x, y, z);
+
+                // Interpolate Varying
+                vector<float> v4_varying = v2_varying;
+                for (int j = 0; j < v4_varying.size(); j++) {
+                    v4_varying[j] = t13*v1_varying[j] + (1-t13)*v3_varying[j];
+                }
                 
                 // Plot top and bottom triangles
-                plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi4, v3_varying, ave_varying);
-                plot_half_triangle(vi3, v3_varying, vi2, v3_varying, vi4, v3_varying, ave_varying);
+                plot_half_triangle(vi1, v1_varying, vi2, v2_varying, vi4, v4_varying, ave_varying);
+                plot_half_triangle(vi3, v3_varying, vi2, v2_varying, vi4, v4_varying, ave_varying);
             }
             
             break;
@@ -780,7 +813,8 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
 
     construct_planes();
     vector<vec8f> new_geometry;
-    //vector<int> new_indices;
+    vector<vector<float>> new_varying;
+    
     matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
     for (int i = 0; i < indices.size(); i+= 2) {
@@ -789,17 +823,14 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
         vector<vec8f> new_points = clip_line(geometry[indices[i]], geometry[indices[i+1]]);
         
         if (!new_points.empty()){
-            
-            // Call vertex shader
+        
+            // Vertex shader
             for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
-                vector<float> varying; // TODO: Temp fix
-
-                *iter = shade_vertex(*iter,varying);
-            }
-            
-            // Insert new points into new geometry
-            for (int i = 0; i < new_points.size(); i ++){
-                new_geometry.push_back(new_points[i]);
+                
+                vector<float> varying;
+                *iter = shade_vertex(*iter, varying);
+                new_geometry.push_back(*iter);
+                new_varying.push_back(varying);
             }
         }
 
@@ -808,9 +839,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
     if (new_geometry.size()){
         // Plot lines
         for (int i = 0; i < new_geometry.size(); i+=2) {
-            vector<float> varying; // TODO: Temp fix
-
-            plot_line(new_geometry[i], varying, new_geometry[i+1], varying);
+            plot_line(new_geometry[i], new_varying[i], new_geometry[i+1], new_varying[i+1]);
         }
     }
     
@@ -832,25 +861,17 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     construct_planes();
     vector<vec8f> new_geometry;
     vector<int> new_indices;
+    vector<vector<float>> new_varying;
     
     matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
     for (int i = 0; i < indices.size() - 2; i += 3) {
-        
-        //cout << "Draw triangles called: " << i << endl;
         
         // Clip triangles
         vector<vec8f> new_points = clip_triangle(geometry[indices[i]], geometry[indices[i+1]], geometry[indices[i+2]]);
         
         if (new_points.size() == 0){
             continue;
-        }
-        
-        // Vertex shader
-        for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
-            vector<float> varying; // TODO: Temp fix
-
-            *iter = shade_vertex(*iter, varying);
         }
         
         // Form new triangles (use fanning structure)
@@ -860,60 +881,30 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
             new_indices.push_back((int)new_geometry.size() + i + 2);
         }
         
-        // Add actual points to new geometry
-        for (int i = 0; i < new_points.size(); i ++){
-            new_geometry.push_back(new_points[i]);
+        // Vertex shader
+        for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
+            
+            vector<float> varying;
+            *iter = shade_vertex(*iter, varying);
+            new_geometry.push_back(*iter);
+            new_varying.push_back(varying);
         }
-        
     }
     
-    if (new_geometry.size()) {
-        for (int i = 0; i < new_indices.size()-2; i+=3) {
-            vector<float> v1_varying;
-            vector<float> v2_varying;
-            vector<float> v3_varying;
+    // Do culling and plot triangles
+    for (int i = 0; i < new_indices.size() - 2; i+=3)
+    {
+        vec3f v1 = new_geometry[new_indices[i]];
+        vec3f v2 = new_geometry[new_indices[i+1]];
+        vec3f v3 = new_geometry[new_indices[i+2]];
 
-            switch (culling_mode) {
-                case disable:{
-                    plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]], v2_varying, new_geometry[new_indices[i+2]], v3_varying);
-                    break;
-                }
-                case backface:{
-                    vec8f avg_point =   new_geometry[new_indices[i]] +
-                                        new_geometry[new_indices[i+1]] +
-                                        new_geometry[new_indices[i+2]];
-                    avg_point /= 3.;
-                    vec3f normal = avg_point(3,6);
-                    vec3f direction(0,0,-1);
-                    if (dot(direction, normal) < 0) {
-                        plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]],v2_varying, new_geometry[new_indices[i+2]], v3_varying);
-                    }
-                    break;
-                }
-                case frontface:{
-                    vec8f avg_point =   new_geometry[new_indices[i]] +
-                                        new_geometry[new_indices[i+1]] +
-                                        new_geometry[new_indices[i+2]];
-                    avg_point /= 3.;
-                    vec3f normal = avg_point(3,6);
-                    vec3f direction(0,0,-1);
-                    if (dot(direction, normal) > 0) {
-                        plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]], v2_varying, new_geometry[new_indices[i+2]], v3_varying);
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
+        vec3f normal = cross(norm(v3 - v2), norm(v2 - v1));
+        
+        if (culling_mode == disable || (normal[2] >= 0.0 && culling_mode == backface) || (normal[2] <= 0.0 && culling_mode == frontface))
+        {
+            plot_triangle(v1, new_varying[new_indices[i]], v2, new_varying[new_indices[i+1]], v3, new_varying[new_indices[i+2]]);
         }
     }
-    
-//    for (int i = 0; i < new_indices.size()-2; i+=3) {
-//        //cout << "Plot triangle called: " << i << endl;
-//        //cout << new_geometry.size() << endl;
-//        //cout << new_indices.size() << endl;
-//        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
-//    }
 
     // TODO Assignment 2: Update the normal matrix.
 

@@ -153,6 +153,7 @@ public:
 	void draw_points(const vector<vec8f> &geometry);
 	void draw_lines(const vector<vec8f> &geometry, const vector<int> &indices);
 	void draw_triangles(const vector<vec8f> &geometry, const vector<int> &indices);
+
 };
 
 #endif
