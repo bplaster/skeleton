@@ -68,7 +68,13 @@ void objecthdl::draw(canvashdl *canvas)
     canvas->rotate(orientation[0], vec3f(1.,0.,0.));
     
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+        // TODO Assignment 2: Pass the material as a uniform into the renderer
+        canvas->uniform[(*iter).material] = material[(*iter).material];
         (*iter).draw(canvas);
+        
+        // TODO Assignment 2: clear the material in the uniform list
+        canvas->uniform.erase((*iter).material);
+
     }
     
     // Undo transformations
@@ -78,7 +84,6 @@ void objecthdl::draw(canvashdl *canvas)
     canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
     canvas->translate(-position);
 
-	// TODO Assignment 2: Pass the material as a uniform into the renderer
 }
 
 /* draw_bound
@@ -156,7 +161,6 @@ void objecthdl::draw_bound(canvashdl *canvas)
     canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
     canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
     canvas->translate(-position);
-	// TODO Assignment 2: clear the material in the uniform list
 }
 
 /* draw_normals
@@ -236,17 +240,4 @@ void objecthdl::draw_normals(canvashdl *canvas, bool face)
     canvas->translate(-position);
 }
 
-// bound(left, right, bottom, top, front, back)
-bool objecthdl::contains_point(vec3f point)
-{
-    if ((point[0] > position[0] + scale*bound[0]) &&
-        (point[0] < position[0] + scale*bound[1]) &&
-        (point[1] > position[1] + scale*bound[2]) &&
-        (point[1] < position[1] + scale*bound[3])) {
-        
-        return true;
-    }
-    return false;
-	// TODO Assignment 2: clear the material in the uniform list before rendering
-}
 
