@@ -10,60 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/canvas.cpp"
-            timestampString = "450405558.238164"
+            timestampString = "450462792.864833"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "635"
-            endingLineNumber = "635"
-            landmarkName = "canvashdl::plot_half_triangle(vec3i s1, vector&lt;float&gt; v1_varying, vec3i s2, vector&lt;float&gt; v2_varying, vec3i s3, vector&lt;float&gt; v3_varying, vector&lt;float&gt; ave_varying)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/canvas.cpp"
-            timestampString = "450405558.238164"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "632"
-            endingLineNumber = "632"
-            landmarkName = "canvashdl::plot_half_triangle(vec3i s1, vector&lt;float&gt; v1_varying, vec3i s2, vector&lt;float&gt; v2_varying, vec3i s3, vector&lt;float&gt; v3_varying, vector&lt;float&gt; ave_varying)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/canvas.cpp"
-            timestampString = "450405558.238164"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "542"
-            endingLineNumber = "542"
+            startingLineNumber = "549"
+            endingLineNumber = "549"
             landmarkName = "canvashdl::plot_horizontal_line(vec3i vp1, vector&lt;float&gt; v1_varying, vec3i vp2, vector&lt;float&gt; v2_varying)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/canvas.cpp"
-            timestampString = "450405070.077187"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "611"
-            endingLineNumber = "611"
-            landmarkName = "canvashdl::plot_half_triangle(vec3i s1, vector&lt;float&gt; v1_varying, vec3i s2, vector&lt;float&gt; v2_varying, vec3i s3, vector&lt;float&gt; v3_varying, vector&lt;float&gt; ave_varying)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
