@@ -47,19 +47,18 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
     }
     
     vec3f intensity = this->emission + ambient + diffuse + specular;
-    // Overflow
-    for (int i = 0; i < 3; i++) {
-        if (intensity[i] > 1) {
-            intensity[i] = 1;
+
+    // Store varying
+    if(canvas->shade_model == canvashdl::phong) {
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(normal[i]);
         }
-        varying.push_back(intensity[i]);
+    } else {
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(intensity[i]);
+        }
     }
-    
-    // Normals for Phong shading
-    for (int i = 0; i < 3; i++) {
-        varying.push_back(normal[i]);
-    }
-    
+
 	/* TODO Assignment 2: Implement flat and gouraud shading: Get the lights from the canvas using get_uniform.
 	 * Add up the results of the shade functions for the lights. Transform the vertex and normal from world
 	 * coordinates to eye coordinates before passing them into the shade functions. Calculate the final color
