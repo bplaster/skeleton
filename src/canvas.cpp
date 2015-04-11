@@ -390,8 +390,8 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
     // Convert to Pixel coordinates here
-    vec3i vp1 = to_pixel(vec3f(v1[0],v1[1],v1[2]));
-    vec3i vp2 = to_pixel(vec3f(v2[0],v2[1],v2[2]));
+    vec3i vp1 = to_pixel(v1);
+    vec3i vp2 = to_pixel(v2);
     
     // Variables
     vec3i xy, xy_max;
@@ -468,55 +468,6 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
     }
 
 	// TODO Assignment 2: Interpolate the varying values before passing them into plot.
-}
-
-void canvashdl::plot_horizontal_line_portion(vec3i& vp1, vector<float>& v1_varying, vec3i& vp2, vector<float>& v2_varying) {
-
-    // Variables
-    vec3i xy = vp1;
-    vector<float> v = v1_varying;
-    int dy = abs(vp2[1] - vp1[1]);
-    int dy_sign = -2*signbit(vp2[1] - vp1[1]) + 1;
-    int dx = abs(vp2[0] - vp1[0]);
-    int dx_sign = -2*signbit(vp2[0] - vp1[0]) + 1;
-    plot(xy, v);
-
-    // Check cases
-    // abs(slope) < 1
-    if(dy<=dx){
-        
-        int d = 2*dy-dx;
-        // step through each pixel
-        while (xy[0] != vp2[0]) {
-            
-            xy[0] += dx_sign;
-            
-            // E
-            if(d < 0){
-                d+=2*dy;
-                plot(xy, v);
-            }
-            // NE/SE
-            else {
-                xy[1] += dy_sign;
-                vp1 = xy;
-                return;
-            }
-
-        }
-    }
-    // abs(slope) > 1
-    else {
-        xy[1] += dy_sign;
-        
-        int d = 2*dx-dy;
-
-        if(d>0){
-            xy[0] += dx_sign;
-        }
-        vp1 = xy;
-        return;
-    }
 }
 
 void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i vp2, vector<float> v2_varying) {
@@ -833,7 +784,6 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
                 new_varying.push_back(varying);
             }
         }
-
     }
     
     if (new_geometry.size()){
