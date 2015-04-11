@@ -216,6 +216,7 @@ void pmotionfunc(int x, int y)
         
         int old_active_object = scene.active_object;
         scene.active_object = -1;
+        scene.active_light = -1;
         for (int i = 0; i < scene.objects.size(); i++)
         {
             if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
@@ -227,11 +228,11 @@ void pmotionfunc(int x, int y)
                     if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
                         is_camera = true;
                 
-                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
-                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
-                        is_light = true;
-                    }
-                }
+//                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
+//                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
+//                        is_light = true;
+//                    }
+//                }
                 
                 if (!is_camera || (is_camera && scene.render_cameras))
                 {
@@ -263,6 +264,38 @@ void pmotionfunc(int x, int y)
             }
         }
         
+        // Draw bounding box for light
+        if (scene.render_lights) {
+            
+            for (int i = 0; i < scene.lights.size(); i++) {
+                vec3f invdir = 1.0f/direction;
+                vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+                vec3f origin = position - scene.lights[i]->model->position;
+                float tmin, tmax, tymin, tymax, tzmin, tzmax;
+                tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+                tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+                tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+                tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+                if ((tmin <= tymax) && (tymin <= tmax))
+                {
+                    if (tymin > tmin)
+                        tmin = tymin;
+                    if (tymax < tmax)
+                        tmax = tymax;
+                    
+                    tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+                    tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+                    
+                    if ((tmin <= tzmax) && (tzmin <= tmax))
+                    {
+                        scene.active_light = i;
+                        i = scene.lights.size();
+                    }
+                }
+            }
+            glutPostRedisplay();
+        }
+        
         if (scene.active_object != old_active_object)
         {
             bool is_camera = false;
@@ -281,6 +314,7 @@ void pmotionfunc(int x, int y)
 //            glutAttachMenu(GLUT_RIGHT_BUTTON);
             glutPostRedisplay();
         }
+        
     }
 //	if (bound)
 //	{
@@ -431,6 +465,7 @@ void motionfunc(int x, int y)
             }
         }
         
+        // Manipulation Logic
         if (scene.active_object_valid() && scene.active_camera_valid())
         {
             if (current_manipulation == manipulate::translate)
@@ -450,6 +485,17 @@ void motionfunc(int x, int y)
                     scene.cameras[i]->orientation = scene.objects[scene.active_object]->orientation;
                 }
         }
+        
+        if (scene.active_light_valid()){
+            if (current_manipulation == manipulate::translate)
+            {
+                float d = mag(scene.lights[scene.active_light]->model->position - position);
+                scene.lights[scene.active_light]->model->position = d*direction + position;
+            }
+            else if (current_manipulation == manipulate::rotate)
+                scene.lights[scene.active_light]->model->orientation += vec3f(-(float)deltay/100.0, (float)deltax/100.0, 0.0);
+        }
+        
         if (scene.active_camera_valid())
         {
             if (current_manipulation == manipulate::fovy && scene.cameras[scene.active_camera]->type == "perspective")

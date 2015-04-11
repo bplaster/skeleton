@@ -19,6 +19,7 @@ struct scenehdl
 
 	int active_camera;
 	int active_object;
+    int active_light;
     int object_index_at_point(vec3f point);
 
 	// Whether and how to render the normals
@@ -37,6 +38,7 @@ struct scenehdl
 
 	bool active_camera_valid();
 	bool active_object_valid();
+    bool active_light_valid();
 
 	void create_camera();
 

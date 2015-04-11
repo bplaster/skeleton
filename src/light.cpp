@@ -15,7 +15,7 @@ lighthdl::lighthdl(const vec3f &ambient, const vec3f &diffuse, const vec3f &spec
 	this->diffuse = diffuse;
 	this->specular = specular;
 	//model = new modelhdl("res/models/banana.obj");
-    model = new cylinderhdl(0.2, 1.0, 4.0);
+    model = new pyramidhdl(0.2, 1.0, 4.0);
 	type = "light";
 }
 
