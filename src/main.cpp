@@ -60,7 +60,13 @@ enum LightColor {
     White,
     Red,
     Green,
-    Blue
+    Blue,
+    Orange,
+    Yellow,
+    Indigo,
+    Violet,
+    Black,
+    Brown
 };
 
 bool keys[256];
@@ -70,8 +76,10 @@ int current_manipulation = manipulate::translate;
 int current_polygon = canvashdl::Polygon::line;
 int current_culling = canvashdl::Culling::disable;
 int current_normal = scenehdl::Normal::none;
+int current_shading = canvashdl::Shading::none;
 int current_model;
 float fovy, aspect, width, height, near, far;
+float attenuation;
 int current_light_color;
 
 int object_option_menu_id;
@@ -85,12 +93,14 @@ GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
 GLUI_Listbox *current_cameras;
 GLUI_Listbox *current_lights;
+GLUI_Listbox *list_shading;
 GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
 GLUI_Listbox *list_manipulation;
 GLUI_Panel *camera_panel;
 GLUI_Panel *light_panel;
+GLUI_Panel *shading_panel;
 GLUI_Listbox *list_light_colors;
 GLUI_Panel *object_panel;
 GLUI_EditText *fovy_text;
@@ -98,6 +108,7 @@ GLUI_EditText *aspect_text;
 GLUI_EditText *near_text;
 GLUI_EditText *far_text;
 GLUI_EditText *light_color_text;
+GLUI_EditText *attenuation_text;
 
 GLUI_Listbox *list_model;
 GLUI_Checkbox *focus_checkbox;
@@ -789,6 +800,7 @@ void toggle_lights (int val){
         scene.render_lights = !scene.render_lights;
         cout << "Toggled render" <<endl;
     }
+    glutPostRedisplay();
 }
 
 void focus_object (int val) {
@@ -1080,6 +1092,27 @@ void handle_polygon (int val){
     glutPostRedisplay();
 }
 
+void handle_shading (int val){
+    switch (val){
+        case canvashdl::Shading::none:
+            current_shading = canvashdl::Shading::none;
+            break;
+        case canvashdl::Shading::flat:
+            current_shading = canvashdl::Shading::flat;
+            break;
+        case canvashdl::Shading::gouraud:
+            current_shading = canvashdl::Shading::gouraud;
+            break;
+        case canvashdl::Shading::phong:
+            current_shading = canvashdl::Shading::phong;
+            break;
+        default:
+            break;
+    }
+    canvas.shade_model = (canvashdl::Shading)current_shading;
+    glutPostRedisplay();
+}
+
 void handle_culling (int val){
     switch (val){
         case canvashdl::Culling::disable:
@@ -1124,10 +1157,75 @@ void handle_menu(int val)
     }
 }
 
+vec3f get_color()
+{
+    vec3f color;
+    switch (current_light_color){
+        case LightColor::White:
+            color = white;
+            break;
+        case LightColor::Red:
+            color = red;
+            break;
+        case LightColor::Green:
+            color = green;
+            break;
+        case LightColor::Blue:
+            color = blue;
+            break;
+        case LightColor::Black:
+            color = black;
+            break;
+        case LightColor::Brown :
+            color = brown;
+            break;
+        case LightColor::Indigo:
+            color = indigo;
+            break;
+        case LightColor::Orange:
+            color = orange;
+            break;
+        case LightColor::Violet:
+            color = violet;
+            break;
+        default: break;
+    }
+    return color;
+}
+
 void handle_update(int val)
 {
     if (val == 1) {
-        // Get current selected light color and change current light object's color 
+        
+        // Change the current light color and attenuation, if applicable
+        int light_ind = current_lights->get_int_val();
+        if (scene.lights[light_ind] != NULL && scene.lights.size() > light_ind) {
+            
+            string type = scene.lights[light_ind]->type;
+            vec3f color = get_color();
+            
+            if (type.compare("ambient")){
+                scene.lights[light_ind]->ambient = color*0.2f;
+            }
+            else if (type.compare("directional")){
+                scene.lights[light_ind]->ambient = color*0.1f;
+                scene.lights[light_ind]->diffuse = color*0.5f;
+                scene.lights[light_ind]->specular = color;
+            }
+            else if (type.compare("point")){
+                static_cast<pointhdl*>(scene.lights[light_ind])->attenuation = attenuation;
+                scene.lights[light_ind]->ambient = color*0.1f;
+                scene.lights[light_ind]->diffuse = color*0.5f;
+                scene.lights[light_ind]->specular = color;
+                
+            }
+            else if (type.compare("spot")){
+                static_cast<spothdl*>(scene.lights[light_ind])->attenuation = attenuation;
+                scene.lights[light_ind]->ambient = color*0.1f;
+                scene.lights[light_ind]->diffuse = color*0.5f;
+                scene.lights[light_ind]->specular = color;
+            }
+        }
     }
 }
 
@@ -1333,15 +1431,21 @@ void setup_glui() {
     glui->add_separator_to_panel(scene_panel);
     
     light_panel = glui->add_panel_to_panel(scene_panel, "Light");
-    current_lights = glui->add_listbox_to_panel(light_panel, "", NULL, 2, selected_object);
+    current_lights = glui->add_listbox_to_panel(light_panel, "", NULL, 1, selected_object);
     current_lights->add_item(-1, "");
     glui->add_checkbox_to_panel(light_panel, "Render Lights", NULL, 1, toggle_lights);
     light_prop_panel = glui->add_panel_to_panel(light_panel, "Properties");
-    list_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Choose Color", &current_light_color);
+    list_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Color", &current_light_color);
     list_light_colors->add_item(LightColor::White, "White");
     list_light_colors->add_item(LightColor::Red, "Red");
     list_light_colors->add_item(LightColor::Green, "Green");
     list_light_colors->add_item(LightColor::Blue, "Blue");
+    list_light_colors->add_item(LightColor::Orange, "Orange");
+    list_light_colors->add_item(LightColor::Violet, "Violet");
+    list_light_colors->add_item(LightColor::Indigo, "Indigo");
+    list_light_colors->add_item(LightColor::Brown, "Brown");
+    list_light_colors->add_item(LightColor::Black, "Black");
+    attenuation_text = glui->add_edittext_to_panel(light_panel, "Attenuation:", GLUI_EDITTEXT_FLOAT, &attenuation);
     glui->add_button_to_panel(light_panel, "Update", 1, handle_update);
     glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
     
@@ -1376,6 +1480,12 @@ void setup_glui() {
     list_manipulation->add_item(manipulate::translate,"Translate");
     list_manipulation->add_item(manipulate::rotate,   "Rotate");
     list_manipulation->add_item(manipulate::scale,    "Scale");
+    list_shading = glui->add_listbox_to_panel(scene_panel, "Shading", &current_shading, -1, handle_shading);
+    list_shading->add_item(canvashdl::Shading::none,"None");
+    list_shading->add_item(canvashdl::Shading::flat, "Flat");
+    list_shading->add_item(canvashdl::Shading::gouraud, "Gouraud");
+    list_shading->add_item(canvashdl::Shading::phong, "Phong");
+
     glui->add_separator_to_panel(scene_panel);
 
     glui->add_column(true);
