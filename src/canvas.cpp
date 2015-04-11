@@ -335,6 +335,8 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
         eye_space_vertex /= eye_space_vertex[3];
     }
     
+    //vec3f eye_space_vertex = material->shade_vertex(this, v(0,3), v(3,6), varying);
+    //vec3f eye_space_vertex = shade_vertex(this,v(0,3), v(3,6), varying);
     return eye_space_vertex;
 
 }

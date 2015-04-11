@@ -101,6 +101,36 @@ void scenehdl::draw()
     if(active_object_valid()){
         objects[active_object]->draw_bound(canvas);
     }
+    
+	/* TODO Assignment 2: Clear the uniform variables and pass the vector of
+	 * lights into the renderer as a uniform variable.
+	 * TODO Assignment 2: Update the light positions and directions
+	 * TODO Assignment 2: Render the lights
+	 */
+    
+    
+    canvas->uniform.clear();
+    canvas->uniform["lights"] = &lights;
+    
+    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+        if (*iter) {
+            
+            // Update light position and direction where applicable
+            (*iter)->update(canvas);
+            
+            // Render lights
+            if (render_lights){
+                (*iter)->model->draw(canvas);
+            }
+            (*iter)->update(canvas);
+        }
+    }
+    
+    // Bounding box for light
+    if (active_light_valid()) {
+        lights[active_light]->model->draw_bound(canvas);
+    }
+
 }
 
 

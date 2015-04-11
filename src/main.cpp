@@ -1469,31 +1469,32 @@ void setup_glui() {
     
     glui->add_separator_to_panel(scene_panel);
 
-    list_polygon = glui->add_listbox_to_panel(scene_panel, "Polygon", &current_polygon, -1, handle_polygon);
+    glui->add_column(true);
+    GLUI_Panel *options_panel = glui->add_panel("Scene Options");
+    list_polygon = glui->add_listbox_to_panel(options_panel, "Polygon", &current_polygon, -1, handle_polygon);
     list_polygon->add_item(canvashdl::Polygon::line,    "Line");
     list_polygon->add_item(canvashdl::Polygon::point,   "Point");
     list_polygon->add_item(canvashdl::Polygon::fill,    "Fill");
-    list_normal = glui->add_listbox_to_panel(scene_panel, "Normal", &current_normal, -1, handle_normal);
+    list_normal = glui->add_listbox_to_panel(options_panel, "Normal", &current_normal, -1, handle_normal);
     list_normal->add_item(scenehdl::Normal::none,       "None");
     list_normal->add_item(scenehdl::Normal::face,       "Face");
     list_normal->add_item(scenehdl::Normal::vertex,     "Vertex");
-    list_culling = glui->add_listbox_to_panel(scene_panel, "Culling", &current_culling, -1, handle_culling);
+    list_culling = glui->add_listbox_to_panel(options_panel, "Culling", &current_culling, -1, handle_culling);
     list_culling->add_item(canvashdl::Culling::disable,     "None");
     list_culling->add_item(canvashdl::Culling::backface,    "Back");
     list_culling->add_item(canvashdl::Culling::frontface,   "Front");
-    list_manipulation = glui->add_listbox_to_panel(scene_panel, "Manipulation", &current_manipulation);
+    list_manipulation = glui->add_listbox_to_panel(options_panel, "Manipulation", &current_manipulation);
     list_manipulation->add_item(manipulate::translate,"Translate");
     list_manipulation->add_item(manipulate::rotate,   "Rotate");
     list_manipulation->add_item(manipulate::scale,    "Scale");
-    list_shading = glui->add_listbox_to_panel(scene_panel, "Shading", &current_shading, -1, handle_shading);
+    list_shading = glui->add_listbox_to_panel(options_panel, "Shading", &current_shading, -1, handle_shading);
     list_shading->add_item(canvashdl::Shading::none,"None");
     list_shading->add_item(canvashdl::Shading::flat, "Flat");
     list_shading->add_item(canvashdl::Shading::gouraud, "Gouraud");
     list_shading->add_item(canvashdl::Shading::phong, "Phong");
+    
+    glui->add_separator_to_panel(options_panel);
 
-    glui->add_separator_to_panel(scene_panel);
-
-    glui->add_column(true);
     GLUI_Panel *obj_panel = glui->add_panel("Create Object");
     glui->add_button_to_panel(obj_panel,    "Box",         Object::Box,       create_object);
     glui->add_button_to_panel(obj_panel,    "Cylinder",    Object::Cylinder,  create_object);
