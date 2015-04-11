@@ -33,27 +33,43 @@ uniformhdl::~uniformhdl()
 vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, vector<float> &varying) const
 {
 	vec4f eye_space_vertex = canvas->matrices[canvashdl::modelview_matrix]*homogenize(vertex);
+    vec4f eye_space_normal = canvas->matrices[canvashdl::modelview_matrix]*homogenize(normal);
 
+    vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
+    
+    const vector<lighthdl*> *lights;
+    canvas->get_uniform("lights", lights);
+    
+    for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
+        (*iter)->shade(ambient, diffuse, specular, eye_space_vertex, eye_space_normal, this->shininess);
+    }
+    
+    vec3f intensity = this->emission + ambient + diffuse + specular;
+    // Overflow
+    for (int i = 0; i < 3; i++) {
+        if (intensity[i] > 1) {
+            intensity[i] = 1;
+        }
+        varying.push_back(intensity[i]);
+    }
+    
+    // Normals for Phong shading
+    for (int i = 0; i < 3; i++) {
+        varying.push_back(normal[i]);
+    }
+    
 	/* TODO Assignment 2: Implement flat and gouraud shading: Get the lights from the canvas using get_uniform.
 	 * Add up the results of the shade functions for the lights. Transform the vertex and normal from world
 	 * coordinates to eye coordinates before passing them into the shade functions. Calculate the final color
 	 * and pass that to the fragment shader through the varying array. Pass the necessary data for phong shading
 	 * through the varying array.
 	 */
-    
-    const vector<lighthdl*> *lights;
-    canvas->get_uniform ("lights",lights); // Changed const type* to const type in canvas.h
-    
-    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
-        if(*iter){
-            (*iter)->shade(this->ambient, this->diffuse, this->specular, eye_space_vertex, normal, shininess);
-        }
-    }
 
 	eye_space_vertex = canvas->matrices[canvashdl::projection_matrix]*eye_space_vertex;
 	eye_space_vertex /= eye_space_vertex[3];
 	return eye_space_vertex;
 }
+
 
 vec3f uniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) const
 {
@@ -62,6 +78,7 @@ vec3f uniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) cons
 	 * is that the normals have been interpolated. Implement the none shading model, this just returns the
 	 * color of the material without lighting.
 	 */
+    
 
 	return vec3f(1.0, 1.0, 1.0);
 }
@@ -108,6 +125,7 @@ vec3f nonuniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) c
 	 * implement as many as you want, just make sure to make the correct changes in model.cpp when you load
 	 * the material library. Same thing goes if you decide to rename this class.
 	 */
+    
 
 	return vec3f(1.0, 1.0, 1.0);
 }
