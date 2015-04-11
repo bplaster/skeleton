@@ -320,7 +320,6 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
     vec4f eye_space_vertex = matrices[projection_matrix]*matrices[modelview_matrix]*homogenize(v);
     eye_space_vertex /= eye_space_vertex[3];
-    return eye_space_vertex;
     
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its vertex shader.
