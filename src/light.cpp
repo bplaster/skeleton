@@ -1,7 +1,7 @@
 #include "light.h"
 #include "object.h"
 #include "canvas.h"
-#include "model.h"
+#include "primitive.h"
 
 lighthdl::lighthdl()
 {
@@ -14,7 +14,8 @@ lighthdl::lighthdl(const vec3f &ambient, const vec3f &diffuse, const vec3f &spec
 	this->ambient = ambient;
 	this->diffuse = diffuse;
 	this->specular = specular;
-	model = new modelhdl("res/models/banana.obj");
+	//model = new modelhdl("res/models/banana.obj");
+    model = new cylinderhdl(0.2, 1.0, 4.0);
 	type = "light";
 }
 
