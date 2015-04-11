@@ -869,11 +869,13 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     
     if (new_geometry.size()) {
         for (int i = 0; i < new_indices.size()-2; i+=3) {
-            vector<float> varying; // TODO: Temp fix
+            vector<float> v1_varying;
+            vector<float> v2_varying;
+            vector<float> v3_varying;
 
             switch (culling_mode) {
                 case disable:{
-                    plot_triangle(new_geometry[new_indices[i]], varying, new_geometry[new_indices[i+1]], varying, new_geometry[new_indices[i+2]], varying);
+                    plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]], v2_varying, new_geometry[new_indices[i+2]], v3_varying);
                     break;
                 }
                 case backface:{
@@ -884,7 +886,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     vec3f normal = avg_point(3,6);
                     vec3f direction(0,0,-1);
                     if (dot(direction, normal) < 0) {
-                        plot_triangle(new_geometry[new_indices[i]], varying, new_geometry[new_indices[i+1]],varying, new_geometry[new_indices[i+2]], varying);
+                        plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]],v2_varying, new_geometry[new_indices[i+2]], v3_varying);
                     }
                     break;
                 }
@@ -896,7 +898,7 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
                     vec3f normal = avg_point(3,6);
                     vec3f direction(0,0,-1);
                     if (dot(direction, normal) > 0) {
-                        plot_triangle(new_geometry[new_indices[i]], varying, new_geometry[new_indices[i+1]], varying, new_geometry[new_indices[i+2]], varying);
+                        plot_triangle(new_geometry[new_indices[i]], v1_varying, new_geometry[new_indices[i+1]], v2_varying, new_geometry[new_indices[i+2]], v3_varying);
                     }
                     break;
                 }

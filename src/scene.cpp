@@ -84,14 +84,22 @@ void scenehdl::draw()
 	 * TODO Assignment 2: Render the lights
 	 */
     
+    //
+    
+    canvas->uniform.clear();
+    //canvas->uniform.insert(pair<string,vector<lighthdl *>>("lights", &lights));
+    canvas->uniform["lights"] = &lights;
+    
     // Draw lights
-    if (render_lights) {
-        for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
-            if (*iter) {
+    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+        if (*iter) {
+            if (render_lights){
                 (*iter)->model->draw(canvas);
             }
+            (*iter)->update(canvas);
         }
     }
+    
     
     // Bounding box for light
     if (active_light_valid()) {

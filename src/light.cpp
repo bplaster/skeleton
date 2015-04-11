@@ -52,6 +52,19 @@ void directionalhdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3
 	/* TODO Assignment 2: Implement a directional light. See the OpenGL Orange Book in the references section
 	 * of the course website. Its under the section about emulating the fixed function pipeline.
 	 */
+    
+    float nDotVP; // normal . light direction
+    //float nDotHV; // normal . light half vector
+    float pf; // power factor
+    nDotVP = fmax(0.0, dot(normal, norm(this->direction)));
+    //nDotHV = fmax(0.0, dot(normal, vec3(LightSource[i].halfVector)));
+    if (nDotVP == 0.0)
+        pf = 0.0;
+    else
+        pf = pow(nDotVP, shininess);
+    ambient  += this->ambient;
+    diffuse  += this->diffuse * nDotVP;
+    specular += this->specular * pf;
 }
 
 pointhdl::pointhdl() : lighthdl(white*0.1f, white*0.5f, white)
@@ -121,14 +134,14 @@ void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f verte
 	 */
 }
 
-ambienthdl::ambienthdl() : lighthdl(white*0.1f, white*0.5f, white)
+ambienthdl::ambienthdl() : lighthdl(white*0.1f, white*0.0f, white*0.0f)
 {
     type = "ambient";
 }
 
 void ambienthdl::update(canvashdl *canvas)
 {
-
+    
 }
 
 ambienthdl::~ambienthdl()
@@ -138,5 +151,5 @@ ambienthdl::~ambienthdl()
 
 void ambienthdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vertex, vec3f normal, float shininess) const
 {
-    
+    ambient += this->ambient;
 }
