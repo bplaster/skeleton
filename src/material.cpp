@@ -41,7 +41,6 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
 	 * through the varying array.
 	 */
     
-    this->shininess = 0.2;
     const vector<lighthdl*> *lights;
     canvas->get_uniform ("lights",lights); // Changed const type* to const type in canvas.h
     

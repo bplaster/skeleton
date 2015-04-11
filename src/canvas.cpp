@@ -325,7 +325,8 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its vertex shader.
 	 */
-    vec4f eye_space_vertex = uniformhdl::shade_vertex(canvashdl, <#vec3f vertex#>, <#vec3f normal#>, <#vector<float> &varying#>)
+    vec3f normal = vec3f(v[3],v[4],v[5]);
+    vec4f eye_space_vertex = uniformhdl::shade_vertex(this, v, normal, varying);
 }
 
 /* shade_fragment
