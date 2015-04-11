@@ -77,6 +77,8 @@ void scenehdl::draw()
     if(active_object_valid()){
         objects[active_object]->draw_bound(canvas);
     }
+    
+    
 
 	/* TODO Assignment 2: Clear the uniform variables and pass the vector of
 	 * lights into the renderer as a uniform variable.
@@ -105,19 +107,6 @@ void scenehdl::draw()
     if (active_light_valid()) {
         lights[active_light]->model->draw_bound(canvas);
     }
-}
-
-int scenehdl::object_index_at_point(vec3f point)
-{
-    int index = -1;
-    for (int i = 0; i < objects.size(); i++) {
-        if (objects[i]) {
-            if (objects[i]->contains_point(point)) {
-                index = i;
-            }
-        }
-    }
-    return index;
 }
 
 
