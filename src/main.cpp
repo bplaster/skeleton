@@ -79,7 +79,7 @@ int current_normal = scenehdl::Normal::none;
 int current_shading = canvashdl::Shading::none;
 int current_model;
 float fovy, aspect, width, height, near, far;
-float attenuation;
+vec3f attenuation;
 int current_light_color;
 
 int object_option_menu_id;
@@ -108,7 +108,9 @@ GLUI_EditText *aspect_text;
 GLUI_EditText *near_text;
 GLUI_EditText *far_text;
 GLUI_EditText *light_color_text;
-GLUI_EditText *attenuation_text;
+GLUI_EditText *attenuation_text_x;
+GLUI_EditText *attenuation_text_y;
+GLUI_EditText *attenuation_text_z;
 
 GLUI_Listbox *list_model;
 GLUI_Checkbox *focus_checkbox;
@@ -1227,6 +1229,7 @@ void handle_update(int val)
             }
         }
     }
+    glutPostRedisplay();
 }
 
 void handle_delete(int val)
@@ -1445,7 +1448,9 @@ void setup_glui() {
     list_light_colors->add_item(LightColor::Indigo, "Indigo");
     list_light_colors->add_item(LightColor::Brown, "Brown");
     list_light_colors->add_item(LightColor::Black, "Black");
-    attenuation_text = glui->add_edittext_to_panel(light_prop_panel, "Attenuation:", GLUI_EDITTEXT_FLOAT, &attenuation);
+    attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (x):", GLUI_EDITTEXT_FLOAT, &attenuation[0]);
+    attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (y):", GLUI_EDITTEXT_FLOAT, &attenuation[1]);
+    attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (z):", GLUI_EDITTEXT_FLOAT, &attenuation[2]);
     glui->add_button_to_panel(light_prop_panel, "Update", 1, handle_update);
     glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
     

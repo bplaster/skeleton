@@ -40,6 +40,16 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
 	 * and pass that to the fragment shader through the varying array. Pass the necessary data for phong shading
 	 * through the varying array.
 	 */
+    
+    this->shininess = 0.2;
+    const vector<lighthdl*> *lights;
+    canvas->get_uniform ("lights",lights); // Changed const type* to const type in canvas.h
+    
+    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+        if(*iter){
+            (*iter)->shade(this->ambient, this->diffuse, this->specular, eye_space_vertex, normal, shininess);
+        }
+    }
 
 	eye_space_vertex = canvas->matrices[canvashdl::projection_matrix]*eye_space_vertex;
 	eye_space_vertex /= eye_space_vertex[3];
