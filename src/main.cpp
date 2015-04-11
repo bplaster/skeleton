@@ -74,7 +74,7 @@ bool keys[256];
 // GLUI Variables
 int current_manipulation = manipulate::translate;
 int current_polygon = canvashdl::Polygon::line;
-int current_culling = canvashdl::Culling::disable;
+int current_culling = canvashdl::Culling::backface;
 int current_normal = scenehdl::Normal::none;
 int current_shading = canvashdl::Shading::none;
 int current_model;
@@ -139,13 +139,6 @@ void init(string working_directory)
     
     // Setup GLUI
     setup_glui();
-    
-//    mat4f test (11, 12, 13, 14,
-//                21, 22, 23, 24,
-//                31, 32, 33, 34,
-//                41, 42, 43, 44);
-//    vec<float,4> a = -test[3];
-//    cout << "Test matrix " << a[3] << endl;
     
     // Create camera
     create_camera(Camera::Ortho);
@@ -279,30 +272,31 @@ void pmotionfunc(int x, int y)
         
         // Draw bounding box for light
         if (scene.render_lights) {
-            
             for (int i = 0; i < scene.lights.size(); i++) {
-                vec3f invdir = 1.0f/direction;
-                vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
-                vec3f origin = position - scene.lights[i]->model->position;
-                float tmin, tmax, tymin, tymax, tzmin, tzmax;
-                tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
-                tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
-                tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
-                tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
-                if ((tmin <= tymax) && (tymin <= tmax))
-                {
-                    if (tymin > tmin)
-                        tmin = tymin;
-                    if (tymax < tmax)
-                        tmax = tymax;
-                    
-                    tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
-                    tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
-                    
-                    if ((tmin <= tzmax) && (tzmin <= tmax))
+                if (scene.lights[i]) {
+                    vec3f invdir = 1.0f/direction;
+                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+                    vec3f origin = position - scene.lights[i]->model->position;
+                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+                    tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+                    tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+                    tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+                    tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+                    if ((tmin <= tymax) && (tymin <= tmax))
                     {
-                        scene.active_light = i;
-                        i = scene.lights.size();
+                        if (tymin > tmin)
+                            tmin = tymin;
+                        if (tymax < tmax)
+                            tmax = tymax;
+                        
+                        tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+                        tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+                        
+                        if ((tmin <= tzmax) && (tzmin <= tmax))
+                        {
+                            scene.active_light = i;
+                            i = scene.lights.size();
+                        }
                     }
                 }
             }
@@ -1480,9 +1474,9 @@ void setup_glui() {
     list_normal->add_item(scenehdl::Normal::face,       "Face");
     list_normal->add_item(scenehdl::Normal::vertex,     "Vertex");
     list_culling = glui->add_listbox_to_panel(options_panel, "Culling", &current_culling, -1, handle_culling);
-    list_culling->add_item(canvashdl::Culling::disable,     "None");
     list_culling->add_item(canvashdl::Culling::backface,    "Back");
     list_culling->add_item(canvashdl::Culling::frontface,   "Front");
+    list_culling->add_item(canvashdl::Culling::disable,     "None");
     list_manipulation = glui->add_listbox_to_panel(options_panel, "Manipulation", &current_manipulation);
     list_manipulation->add_item(manipulate::translate,"Translate");
     list_manipulation->add_item(manipulate::rotate,   "Rotate");

@@ -863,17 +863,17 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     }
     
     // Do culling and plot triangles
-    for (int i = 0; i < new_indices.size() - 2; i+=3)
+    for (int i = 2; i < new_indices.size(); i+=3)
     {
-        vec3f v1 = new_geometry[new_indices[i]];
-        vec3f v2 = new_geometry[new_indices[i+1]];
-        vec3f v3 = new_geometry[new_indices[i+2]];
+        vec3f v1 = new_geometry[new_indices[i-2]];
+        vec3f v2 = new_geometry[new_indices[i-1]];
+        vec3f v3 = new_geometry[new_indices[i]];
 
         vec3f normal = cross(norm(v3 - v2), norm(v2 - v1));
         
         if (culling_mode == disable || (normal[2] >= 0.0 && culling_mode == backface) || (normal[2] <= 0.0 && culling_mode == frontface))
         {
-            plot_triangle(v1, new_varying[new_indices[i]], v2, new_varying[new_indices[i+1]], v3, new_varying[new_indices[i+2]]);
+            plot_triangle(v1, new_varying[new_indices[i-2]], v2, new_varying[new_indices[i-1]], v3, new_varying[new_indices[i]]);
         }
     }
 }
