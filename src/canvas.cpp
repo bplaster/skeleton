@@ -318,15 +318,22 @@ vec3f canvashdl::unproject(vec3f window)
 vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
-    vec4f eye_space_vertex = matrices[projection_matrix]*matrices[modelview_matrix]*homogenize(v);
-    eye_space_vertex /= eye_space_vertex[3];
     
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its vertex shader.
 	 */
     
     const materialhdl *material;
-    //get_uniform("material", material);
+    get_uniform("material", material);
+    
+    vec4f eye_space_vertex;
+    
+    if(material) {
+        eye_space_vertex = material->shade_vertex(this, vec3f(v[0],v[1],v[2]), vec3f(v[3],v[4],v[5]), varying);
+    } else {
+        eye_space_vertex = matrices[projection_matrix]*matrices[modelview_matrix]*homogenize(v);
+        eye_space_vertex /= eye_space_vertex[3];
+    }
     
     //vec3f eye_space_vertex = material->shade_vertex(this, v(0,3), v(3,6), varying);
     //vec3f eye_space_vertex = shade_vertex(this,v(0,3), v(3,6), varying);
@@ -342,19 +349,20 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 vec3f canvashdl::shade_fragment(vector<float> varying)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
-    vec3f color;
-    color[red] = 255.;
-    color[green] = 255.;
-    color[blue] = 255.;
-    
 
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its fragment shader.
 	 */
-//    const materialhdl *material;
-//    get_uniform("material", material);
-//    
-//    vec3f color = material->shade_fragment(this, varying);
+    const materialhdl *material;
+    get_uniform("material", material);
+    
+    vec3f color;
+    if(material) {
+        color = material->shade_fragment(this, varying);
+        color *= 255.;
+    } else {
+        color = vec3f(255.0,255.0,255.0);
+    }
     
 	return color;
 }
@@ -390,7 +398,7 @@ void canvashdl::plot(vec3i xyz, vector<float> varying)
 void canvashdl::plot_point(vec3f v, vector<float> varying)
 {
 	// TODO Assignment 1: Plot a point given in window coordinates.
-    vec2i vp = to_pixel(vec3f(v[0],v[1],v[2]));
+    vec2i vp = to_pixel(v);
     plot(vp,varying);
 }
 
@@ -756,6 +764,9 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
  */
 void canvashdl::draw_points(const vector<vec8f> &geometry)
 {
+    // TODO Assignment 2: Update the normal matrix
+    update_normal_matrix();
+    
 	// TODO Assignment 1: Clip the points against the frustum, call the vertex shader, and then draw them.
     vector<vec8f> new_geometry = geometry;
     
@@ -764,7 +775,6 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
         *iter = shade_vertex(*iter, varying);
         plot_point(*iter, varying);
     }
-	// TODO Assignment 2: Update the normal matrix
 }
 
 /* Draw a set of 3D lines on the canvas. Each point in geometry
@@ -772,13 +782,13 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
  */
 void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &indices)
 {
+    // TODO Assignment 2: Update the normal matrix
+    update_normal_matrix();
+    
 	// TODO Assignment 1: Clip the lines against the frustum, call the vertex shader, and then draw them.
-
     construct_planes();
     vector<vec8f> new_geometry;
     vector<vector<float>> new_varying;
-    
-    matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
     for (int i = 0; i < indices.size(); i+= 2) {
         
@@ -804,8 +814,6 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
             plot_line(new_geometry[i], new_varying[i], new_geometry[i+1], new_varying[i+1]);
         }
     }
-    
-	// TODO Assignment 2: Update the normal matrix
 }
 
 /* Draw a set of 3D triangles on the canvas. Each point in geometry is
@@ -816,6 +824,9 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
  */
 void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> &indices)
 {
+    // TODO Assignment 2: Update the normal matrix
+    update_normal_matrix();
+    
 	/* TODO Assignment 1: Clip the triangles against the frustum, call the vertex shader,
 	 * break the resulting polygons back into triangles, implement front and back face
 	 * culling, and then draw the remaining triangles.
@@ -824,8 +835,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     vector<vec8f> new_geometry;
     vector<int> new_indices;
     vector<vector<float>> new_varying;
-    
-    matrices[normal_matrix] = transpose(inverse(matrices[modelview_matrix]));
     
     for (int i = 0; i < indices.size() - 2; i += 3) {
         
@@ -867,9 +876,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
             plot_triangle(v1, new_varying[new_indices[i]], v2, new_varying[new_indices[i+1]], v3, new_varying[new_indices[i+2]]);
         }
     }
-
-    // TODO Assignment 2: Update the normal matrix.
-
 }
 
 vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
