@@ -79,22 +79,23 @@ void scenehdl::draw()
     }
     
     
-
 	/* TODO Assignment 2: Clear the uniform variables and pass the vector of
 	 * lights into the renderer as a uniform variable.
 	 * TODO Assignment 2: Update the light positions and directions
 	 * TODO Assignment 2: Render the lights
 	 */
     
-    //
     
     canvas->uniform.clear();
-    //canvas->uniform.insert(pair<string,vector<lighthdl *>>("lights", &lights));
     canvas->uniform["lights"] = &lights;
     
-    // Draw lights
     for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
         if (*iter) {
+            
+            // Update light position and direction where applicable
+            (*iter)->update(canvas);
+            
+            // Render lights
             if (render_lights){
                 (*iter)->model->draw(canvas);
             }
