@@ -318,8 +318,6 @@ vec3f canvashdl::unproject(vec3f window)
 vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 {
 	// TODO Assignment 1: Do all of the necessary transformations (normal, projection, modelview, etc)
-//    vec4f eye_space_vertex = matrices[projection_matrix]*matrices[modelview_matrix]*homogenize(v);
-//    eye_space_vertex /= eye_space_vertex[3];
     
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its vertex shader.
@@ -349,11 +347,6 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
 vec3f canvashdl::shade_fragment(vector<float> varying)
 {
 	// TODO Assignment 1: Pick a color, any color (as long as it is distinguishable from the background color).
-//    vec3f color;
-//    color[red] = 255.;
-//    color[green] = 255.;
-//    color[blue] = 255.;
-    
 
 	/* TODO Assignment 2: Get the material from the list of uniform variables and
 	 * call its fragment shader.
