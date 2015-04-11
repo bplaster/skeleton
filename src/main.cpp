@@ -1445,8 +1445,8 @@ void setup_glui() {
     list_light_colors->add_item(LightColor::Indigo, "Indigo");
     list_light_colors->add_item(LightColor::Brown, "Brown");
     list_light_colors->add_item(LightColor::Black, "Black");
-    attenuation_text = glui->add_edittext_to_panel(light_panel, "Attenuation:", GLUI_EDITTEXT_FLOAT, &attenuation);
-    glui->add_button_to_panel(light_panel, "Update", 1, handle_update);
+    attenuation_text = glui->add_edittext_to_panel(light_prop_panel, "Attenuation:", GLUI_EDITTEXT_FLOAT, &attenuation);
+    glui->add_button_to_panel(light_prop_panel, "Update", 1, handle_update);
     glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
     
     glui->add_separator_to_panel(scene_panel);
