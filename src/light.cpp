@@ -205,7 +205,7 @@ void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f verte
 
 }
 
-ambienthdl::ambienthdl() : lighthdl(white*0.1f, white*0.0f, white*0.0f)
+ambienthdl::ambienthdl() : lighthdl(white*0.2f, white*0.0f, white*0.0f)
 {
     type = "ambient";
 }
