@@ -12,56 +12,75 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid.push_back(rigidhdl());
     
     rigid[0].geometry.reserve(24);
+    rigid[0].indices.reserve(36);
     
-    // Near Face
-    rigid[0].geometry.push_back(vec8f((width/2), (height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), (depth/2), 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].indices.push_back(0);
+    rigid[0].indices.push_back(1);
+    rigid[0].indices.push_back(2);
+    rigid[0].indices.push_back(0);
+    rigid[0].indices.push_back(2);
+    rigid[0].indices.push_back(3);
     
-    // Far face
-    rigid[0].geometry.push_back(vec8f((width/2), (height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), -(depth/2), 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].indices.push_back(4);
+    rigid[0].indices.push_back(5);
+    rigid[0].indices.push_back(6);
+    rigid[0].indices.push_back(4);
+    rigid[0].indices.push_back(6);
+    rigid[0].indices.push_back(7);
     
-    // Left face
-    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), (depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), -(depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), (depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), -(depth/2), -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].indices.push_back(10);
+    rigid[0].indices.push_back(9);
+    rigid[0].indices.push_back(8);
+    rigid[0].indices.push_back(11);
+    rigid[0].indices.push_back(10);
+    rigid[0].indices.push_back(8);
     
-    // Right face
-    rigid[0].geometry.push_back(vec8f((width/2), (height/2), (depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), (height/2), -(depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), (depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), -(depth/2), 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].indices.push_back(12);
+    rigid[0].indices.push_back(13);
+    rigid[0].indices.push_back(14);
+    rigid[0].indices.push_back(12);
+    rigid[0].indices.push_back(14);
+    rigid[0].indices.push_back(15);
     
-    // Top face
-    rigid[0].geometry.push_back(vec8f((width/2), (height/2), (depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), (height/2), -(depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), (depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), (height/2), -(depth/2), 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2,  depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].indices.push_back(16);
+    rigid[0].indices.push_back(17);
+    rigid[0].indices.push_back(18);
+    rigid[0].indices.push_back(16);
+    rigid[0].indices.push_back(18);
+    rigid[0].indices.push_back(19);
     
-    // Bottom face
-    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), (depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f((width/2), -(height/2), -(depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), (depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-(width/2), -(height/2), -(depth/2), 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2,  depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].indices.push_back(20);
+    rigid[0].indices.push_back(21);
+    rigid[0].indices.push_back(22);
+    rigid[0].indices.push_back(20);
+    rigid[0].indices.push_back(22);
+    rigid[0].indices.push_back(23);
     
-    // Indices
-    for (int i = 0; i < 24; i += 4) {
-        rigid[0].indices.push_back(i);
-        rigid[0].indices.push_back(i + 1);
-        rigid[0].indices.push_back(i + 2);
-        
-        rigid[0].indices.push_back(i + 1);
-        rigid[0].indices.push_back(i + 2);
-        rigid[0].indices.push_back(i + 3);
-    }
-    
-    // Bounding box (same as box in this case)
-    bound = vec6f(-(width/2) - 0.1, (width/2) + 0.1, -(height/2) - 0.1, (height/2) + 0.1, -(depth/2) - 0.1, (depth/2) + 0.1);
+    bound = vec6f(-width/2.0 - 0.1, width/2.0 + 0.1, -height/2.0 - 0.1, height/2.0 + 0.1, -depth/2.0 - 0.1, depth/2.0 + 0.1);
 
 	// TODO Assignment 2: Set up the material properties for this object
 }
@@ -138,93 +157,65 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
 	 * Calculate its bounding box.
 	 */
     rigid.push_back(rigidhdl());
-    rigid[0].geometry.reserve(2 + 4*slices);
     
-    vector<vec2f> dir (slices);
+    rigid[0].geometry.push_back(vec8f(0.0, -height/2.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
+                                          -height/2.0,
+                                          radius*sin(2*m_pi*(float)i/(float)slices),
+                                          0.0, -1.0, 0.0, 0.0, 0.0));
     
-    // Calculate directions along X and Z axes
-    for (int i = 0; i < slices; i++){
-        vec2f temp(sin(2.0*m_pi*((float)i/(float)slices)), cos(2.0*m_pi*((float)i/(float)slices)));
-        dir[i] = temp;
-    };
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
+                                          -height/2.0,
+                                          radius*sin(2*m_pi*(float)i/(float)slices),
+                                          cos(2*m_pi*(float)i/(float)slices),
+                                          0.0,
+                                          sin(2*m_pi*(float)i/(float)slices), 0.0, 0.0));
     
-    // Enter geometry for all faces of cylinder
-    for (int i = 0; i < 3; i++){
-        
-        for (int j = 0; j < slices; j++){
-            
-            if (i == 0)
-            {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], (height/2), radius*dir[j][1], dir[j][0], 0.0, dir[j][1], 0.0, 0.0));
-            }
-            else if (i == 1)
-            {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], (height/2), radius*dir[j][1], 0.0, 1.0, 0.0, 0.0, 0.0));
-            }
-            else if (i == 2)
-            {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/2), radius*dir[j][1], 0.0, -1.0, 0.0, 0.0, 0.0));
-            }
-        }
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
+                                          height/2.0,
+                                          radius*sin(2*m_pi*(float)i/(float)slices),
+                                          cos(2*m_pi*(float)i/(float)slices),
+                                          0.0,
+                                          sin(2*m_pi*(float)i/(float)slices), 0.0, 0.0));
+    
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
+                                          height/2.0,
+                                          radius*sin(2*m_pi*(float)i/(float)slices),
+                                          0.0, 1.0, 0.0, 0.0, 0.0));
+    
+    rigid[0].geometry.push_back(vec8f(0.0, height/2.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
+    
+    for (int i = 0; i < slices; i++)
+    {
+        rigid[0].indices.push_back(1 + (i+1)%slices);
+        rigid[0].indices.push_back(1 + i);
+        rigid[0].indices.push_back(0);
     }
     
-    // Add points representing centre of top and bottom surfaces
-    rigid[0].geometry.push_back(vec8f(0.0, (height/2), 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(0.0, -(height/2), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
-    
-    // Indices
-    
-    for (int i = 0; i < 2*slices - 2; i++){
+    for (int i = 0; i < slices; i++)
+    {
+        rigid[0].indices.push_back(1 + slices + i);
+        rigid[0].indices.push_back(1 + slices + (i+1)%slices);
+        rigid[0].indices.push_back(1 + 2*slices + i);
         
-        // Lateral surface area
-        rigid[0].indices.push_back(i);
-        rigid[0].indices.push_back(i + 1);
-        rigid[0].indices.push_back(i + 2);
+        rigid[0].indices.push_back(1 + 2*slices + i);
+        rigid[0].indices.push_back(1 + slices + (i+1)%slices);
+        rigid[0].indices.push_back(1 + 2*slices + (i+1)%slices);
     }
     
-    // Wrap around Lateral surface area
-    rigid[0].indices.push_back(0);
-    rigid[0].indices.push_back(2*slices - 2);
-    rigid[0].indices.push_back(2*slices - 1);
-    
-    rigid[0].indices.push_back(0);
-    rigid[0].indices.push_back(1);
-    rigid[0].indices.push_back(2*slices - 1);
-    
-    // Top and Bottom surfaces
-    for (int i = 0; i < slices; i++){
-        
-        if (i < slices - 1){
-            
-            // Top surface
-            rigid[0].indices.push_back(2*slices + i);
-            rigid[0].indices.push_back(2*slices + i + 1);
-            rigid[0].indices.push_back(4*slices);
-            
-            // Bottom surface
-            rigid[0].indices.push_back(3*slices + i);
-            rigid[0].indices.push_back(3*slices + i + 1);
-            rigid[0].indices.push_back(4*slices + 1);
-        }
-        else if (i == slices - 1) {
-            // Wrap around top surface
-            rigid[0].indices.push_back(2*slices + i);
-            rigid[0].indices.push_back(2*slices);
-            rigid[0].indices.push_back(4*slices);
-            
-            // Wrap around bottom surface
-            rigid[0].indices.push_back(3*slices + i);
-            rigid[0].indices.push_back(3*slices);
-            rigid[0].indices.push_back(4*slices + 1);
-        }
-                
+    for (int i = 0; i < slices; i++)
+    {
+        rigid[0].indices.push_back(1 + 3*slices + i);
+        rigid[0].indices.push_back(1 + 3*slices + (i+1)%slices);
+        rigid[0].indices.push_back(1 + 4*slices);
     }
     
-    // Bounding box
-    bound = vec6f(-radius, radius, -(height/2), (height/2), -radius, radius);
+    bound = vec6f(-radius, radius, -height/2.0, height/2.0, -radius, radius);
     
-
 	// TODO Assignment 2: Set up the material properties for this object
 }
 
@@ -243,74 +234,49 @@ pyramidhdl::pyramidhdl(float radius, float height, int slices)
 	 * Calculate its bounding box.
 	 */
     rigid.push_back(rigidhdl());
-    rigid[0].geometry.reserve(1 + 3*slices);
     
-    vector<vec3f> dir (slices);
-    float cone_angle = atan2f(radius, height);
+    float nheight = sqrt(1.0f/(1.0f + (height*height)/(radius*radius)));
+    float nlength = height*nheight/radius;
     
-    // Calculate directions along X, Y and Z axes
-    for (int i = 0; i < slices; i ++){
-        vec3f temp(cos(cone_angle)*sin(2.0*m_pi*((float)i/(float)slices)), sin(cone_angle),
-                   cos(cone_angle)*cos(2.0*m_pi*((float)i/(float)slices)));
-        dir[i] = temp;
-    };
+    rigid[0].geometry.push_back(vec8f(0.0, -height/2.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
+                                          -height/2.0,
+                                          radius*sin(2*m_pi*(float)i/(float)slices),
+                                          0.0, -1.0, 0.0, 0.0, 0.0));
     
-    // Enter geometry for all faces of pyramid
-    for (int i = 0; i < 2; i++){
-        for (int j = 0; j < slices; j++){
-            
-            if (i == 0)
-            {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/3), radius*dir[j][2], dir[j][0], dir[j][1], dir[j][2], 0.0, 0.0));
-                rigid[0].geometry.push_back(vec8f(0.0, 2*(height/3), 0.0, dir[j][0], dir[j][1], dir[j][2], 0.0, 0.0));
-            }
-            else if (i == 1)
-            {
-                rigid[0].geometry.push_back(vec8f(radius*dir[j][0], -(height/3), radius*dir[j][2], 0.0, -1.0, 0.0, 0.0, 0.0));
-            }
-        }
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
+                                          -height/2.0,
+                                          radius*sin(2*m_pi*(float)i/(float)slices),
+                                          nlength*cos(2*m_pi*(float)i/(float)slices),
+                                          nheight,
+                                          nlength*sin(2*m_pi*(float)i/(float)slices), 0.0, 0.0));
+    
+    for (int i = 0; i < slices; i++)
+        rigid[0].geometry.push_back(vec8f(0.0, height/2.0, 0.0,
+                                          nlength*cos(2*m_pi*((float)i + 0.5)/(float)slices),
+                                          nheight,
+                                          nlength*sin(2*m_pi*((float)i + 0.5)/(float)slices), 0.0, 0.0));
+    
+    for (int i = 0; i < slices; i++)
+    {
+        rigid[0].indices.push_back(1 + (i+1)%slices);
+        rigid[0].indices.push_back(1 + i);
+        rigid[0].indices.push_back(0);
     }
     
-    // Add point representing centre of bottom of pyramid
-    rigid[0].geometry.push_back(vec8f(0.0, -(height/3), 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
-    
-    // Indices
-    
-    for (int i = 0; i < 2*slices - 2; i += 2){
-        
-        // Curved surface area
-        rigid[0].indices.push_back(i);
-        rigid[0].indices.push_back(i + 1);
-        rigid[0].indices.push_back(i + 2);
+    for (int i = 0; i < slices; i++)
+    {
+        rigid[0].indices.push_back(1 + slices + i);
+        rigid[0].indices.push_back(1 + slices + (i+1)%slices);
+        rigid[0].indices.push_back(1 + 2*slices + i);
     }
     
-    // Wrap around curved surface area
-    rigid[0].indices.push_back(2*slices - 2);
-    rigid[0].indices.push_back(2*slices - 1);
-    rigid[0].indices.push_back(0);
+    bound = vec6f(-radius, radius, -height/2.0, height/2.0, -radius, radius);
     
-    for (int i = 0; i < slices; i++){
-        if (i < slices - 1){
-            
-            // Bottom surface
-            rigid[0].indices.push_back(2*slices + i);
-            rigid[0].indices.push_back(2*slices + i + 1);
-            rigid[0].indices.push_back(3*slices);
-        }
-        else if (i == slices - 1) {
-            
-            // Wrap around bottom surface
-            rigid[0].indices.push_back(2*slices + i);
-            rigid[0].indices.push_back(2*slices);
-            rigid[0].indices.push_back(3*slices);
-        }
-        
-    }
+    // TODO Assignment 2: Set up the material properties for this object
     
-    // Bounding box
-    bound = vec6f(-radius, radius, -(height/3), 2*(height/3), -radius, radius);
-
-	// TODO Assignment 2: Set up the material properties for this object
 }
 
 pyramidhdl::~pyramidhdl()

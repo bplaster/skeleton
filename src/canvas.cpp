@@ -891,50 +891,20 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
         }
     }
     
-    if (new_geometry.size()) {
-        for (int i = 0; i < new_indices.size()-2; i+=3) {
+    // Do culling and plot triangles
+    for (int i = 0; i < new_indices.size() - 2; i+=3)
+    {
+        vec3f v1 = new_geometry[new_indices[i]];
+        vec3f v2 = new_geometry[new_indices[i+1]];
+        vec3f v3 = new_geometry[new_indices[i+2]];
 
-            switch (culling_mode) {
-                case disable:{
-                    plot_triangle(new_geometry[new_indices[i]], new_varying[new_indices[i]], new_geometry[new_indices[i+1]], new_varying[new_indices[i+1]], new_geometry[new_indices[i+2]], new_varying[new_indices[i+2]]);
-                    break;
-                }
-                case backface:{
-                    vec8f avg_point =   new_geometry[new_indices[i]] +
-                                        new_geometry[new_indices[i+1]] +
-                                        new_geometry[new_indices[i+2]];
-                    avg_point /= 3.;
-                    vec3f normal = avg_point(3,6);
-                    vec3f direction(0,0,-1);
-                    if (dot(direction, normal) < 0) {
-                        plot_triangle(new_geometry[new_indices[i]], new_varying[new_indices[i]], new_geometry[new_indices[i+1]], new_varying[new_indices[i+1]], new_geometry[new_indices[i+2]], new_varying[new_indices[i+2]]);
-                    }
-                    break;
-                }
-                case frontface:{
-                    vec8f avg_point =   new_geometry[new_indices[i]] +
-                                        new_geometry[new_indices[i+1]] +
-                                        new_geometry[new_indices[i+2]];
-                    avg_point /= 3.;
-                    vec3f normal = avg_point(3,6);
-                    vec3f direction(0,0,-1);
-                    if (dot(direction, normal) > 0) {
-                        plot_triangle(new_geometry[new_indices[i]], new_varying[new_indices[i]], new_geometry[new_indices[i+1]], new_varying[new_indices[i+1]], new_geometry[new_indices[i+2]], new_varying[new_indices[i+2]]);
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
+        vec3f normal = cross(norm(v3 - v2), norm(v2 - v1));
+        
+        if (culling_mode == disable || (normal[2] >= 0.0 && culling_mode == backface) || (normal[2] <= 0.0 && culling_mode == frontface))
+        {
+            plot_triangle(v1, new_varying[new_indices[i]], v2, new_varying[new_indices[i+1]], v3, new_varying[new_indices[i+2]]);
         }
     }
-    
-//    for (int i = 0; i < new_indices.size()-2; i+=3) {
-//        //cout << "Plot triangle called: " << i << endl;
-//        //cout << new_geometry.size() << endl;
-//        //cout << new_indices.size() << endl;
-//        plot_triangle(new_geometry[new_indices[i]], new_geometry[new_indices[i+1]], new_geometry[new_indices[i+2]]);
-//    }
 
     // TODO Assignment 2: Update the normal matrix.
 
