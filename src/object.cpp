@@ -70,11 +70,11 @@ void objecthdl::draw(canvashdl *canvas)
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
         // TODO Assignment 2: Pass the material as a uniform into the renderer
         canvas->uniform[(*iter).material] = material[(*iter).material];
+        
         (*iter).draw(canvas);
         
         // TODO Assignment 2: clear the material in the uniform list
         canvas->uniform.erase((*iter).material);
-
     }
     
     // Undo transformations

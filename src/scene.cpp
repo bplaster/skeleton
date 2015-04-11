@@ -57,6 +57,30 @@ void scenehdl::draw()
         }
     }
     
+    /* TODO Assignment 2: Clear the uniform variables and pass the vector of
+     * lights into the renderer as a uniform variable.
+     * TODO Assignment 2: Update the light positions and directions
+     * TODO Assignment 2: Render the lights
+     */
+    
+    canvas->uniform.clear();
+    canvas->uniform["lights"] = &lights;
+    
+    // Draw lights
+    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+        if (*iter) {
+            if (render_lights){
+                (*iter)->model->draw(canvas);
+            }
+            (*iter)->update(canvas);
+        }
+    }
+    
+    // Bounding box for light
+    if (active_light_valid()) {
+        lights[active_light]->model->draw_bound(canvas);
+    }
+    
     // Draw objects
     for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
         if (*iter) {
@@ -76,36 +100,6 @@ void scenehdl::draw()
     // Draw bound
     if(active_object_valid()){
         objects[active_object]->draw_bound(canvas);
-    }
-    
-    
-
-	/* TODO Assignment 2: Clear the uniform variables and pass the vector of
-	 * lights into the renderer as a uniform variable.
-	 * TODO Assignment 2: Update the light positions and directions
-	 * TODO Assignment 2: Render the lights
-	 */
-    
-    //
-    
-    canvas->uniform.clear();
-    //canvas->uniform.insert(pair<string,vector<lighthdl *>>("lights", &lights));
-    canvas->uniform["lights"] = &lights;
-    
-    // Draw lights
-    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
-        if (*iter) {
-            if (render_lights){
-                (*iter)->model->draw(canvas);
-            }
-            (*iter)->update(canvas);
-        }
-    }
-    
-    
-    // Bounding box for light
-    if (active_light_valid()) {
-        lights[active_light]->model->draw_bound(canvas);
     }
 }
 

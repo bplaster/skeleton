@@ -33,7 +33,7 @@ uniformhdl::~uniformhdl()
 vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, vector<float> &varying) const
 {
 	vec4f eye_space_vertex = canvas->matrices[canvashdl::modelview_matrix]*homogenize(vertex);
-    vec4f eye_space_normal = canvas->matrices[canvashdl::modelview_matrix]*homogenize(normal);
+    vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(normal);
 
     vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
     
@@ -41,7 +41,9 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
     canvas->get_uniform("lights", lights);
     
     for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
-        (*iter)->shade(ambient, diffuse, specular, eye_space_vertex, eye_space_normal, this->shininess);
+        if (*iter) {
+            (*iter)->shade(ambient, diffuse, specular, eye_space_vertex, eye_space_normal, this->shininess);
+        }
     }
     
     vec3f intensity = this->emission + ambient + diffuse + specular;
@@ -79,8 +81,38 @@ vec3f uniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) cons
 	 * is that the normals have been interpolated. Implement the none shading model, this just returns the
 	 * color of the material without lighting.
 	 */
+    vec3f color = vec3f(1.0, 1.0, 1.0);
+    
+    switch (canvas->shade_model) {
+        case canvashdl::none: {
+            color = this->emission + this->ambient + this->diffuse + this->specular;
+            break;
+        }
+        case canvashdl::flat: {
+            color = vec3f(varying[0], varying[1], varying[2]);
+            break;
+        }
+        case canvashdl::gouraud: {
+            color = vec3f(varying[0], varying[1], varying[2]);
+            break;
+        }
+        case canvashdl::phong: {
+            
+            break;
+        }
+            
+        default:
+            break;
+    }
+    
+    // Overflow
+    for (int i = 0; i < 3; i++) {
+        if (color[i] > 1) {
+            color[i] = 1;
+        }
+    }
 
-	return vec3f(1.0, 1.0, 1.0);
+    return color;
 }
 
 materialhdl *uniformhdl::clone() const
