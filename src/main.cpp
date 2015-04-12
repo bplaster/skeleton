@@ -131,6 +131,7 @@ void handle_manip(int val);
 
 void setup_glui();
 void set_camera_info(int obj_ind);
+void set_light_info(int obj_ind);
 
 
 void init(string working_directory)
@@ -943,6 +944,7 @@ void create_light (int val){
         default: break;
     }
     current_lights->set_int_val(index);
+    set_light_info(index);
     glutPostRedisplay();
 }
 
@@ -1105,37 +1107,24 @@ void handle_update(int val)
 }
 
 void set_light_info(int obj_ind){
-    string type = scene.lights[obj_ind]->type;
-    if (type == "ambient") {
-        orthohdl *cam = (orthohdl*)scene.cameras[obj_ind];
-        near_text->set_float_val(cam->near);
-        far_text->set_float_val(cam->far);
-        aspect_text->set_name("width");
-        fovy_text->set_name("height");
-        aspect_text->set_float_val(cam->right - cam->left);
-        fovy_text->set_float_val(cam->top - cam->bottom);
-        cout << "ortho" << endl;
-        
-    } else if (	type == "frustum") {
-        frustumhdl *cam = (frustumhdl*)scene.cameras[obj_ind];
-        near_text->set_float_val(cam->near);
-        far_text->set_float_val(cam->far);
-        aspect_text->set_name("width");
-        fovy_text->set_name("height");
-        aspect_text->set_float_val(cam->right - cam->left);
-        fovy_text->set_float_val(cam->top - cam->bottom);
-        cout << "frustum" << endl;
-        
-    } else if (type == "perspective"){
-        perspectivehdl *cam = (perspectivehdl*)scene.cameras[obj_ind];
-        near_text->set_float_val(cam->near);
-        far_text->set_float_val(cam->far);
-        aspect_text->set_name("aspect");
-        fovy_text->set_name("fovy");
-        aspect_text->set_float_val(cam->aspect);
-        fovy_text->set_float_val(cam->fovy);
-        
-        cout << "perspective" << endl;
+    attenuation_text_x->set_float_val(0.0);
+    attenuation_text_y->set_float_val(0.0);
+    attenuation_text_z->set_float_val(0.0);
+    
+    if (scene.lights[obj_ind]) {
+        string type = scene.lights[obj_ind]->type;
+        if (type == "spot") {
+            spothdl *light = (spothdl*)scene.lights[obj_ind];
+            attenuation_text_x->set_float_val(light->attenuation[0]);
+            attenuation_text_y->set_float_val(light->attenuation[1]);
+            attenuation_text_z->set_float_val(light->attenuation[2]);
+            
+        } else if (	type == "point") {
+            pointhdl *light = (pointhdl*)scene.lights[obj_ind];
+            attenuation_text_x->set_float_val(light->attenuation[0]);
+            attenuation_text_y->set_float_val(light->attenuation[1]);
+            attenuation_text_z->set_float_val(light->attenuation[2]);
+        }
     }
 }
 
@@ -1259,7 +1248,6 @@ void set_camera_info(int obj_ind){
         fovy_text->set_name("height");
         aspect_text->set_float_val(cam->right - cam->left);
         fovy_text->set_float_val(cam->top - cam->bottom);
-        cout << "ortho" << endl;
         
     } else if (	type == "frustum") {
         frustumhdl *cam = (frustumhdl*)scene.cameras[obj_ind];
@@ -1269,7 +1257,6 @@ void set_camera_info(int obj_ind){
         fovy_text->set_name("height");
         aspect_text->set_float_val(cam->right - cam->left);
         fovy_text->set_float_val(cam->top - cam->bottom);
-        cout << "frustum" << endl;
         
     } else if (type == "perspective"){
         perspectivehdl *cam = (perspectivehdl*)scene.cameras[obj_ind];
@@ -1280,17 +1267,17 @@ void set_camera_info(int obj_ind){
         aspect_text->set_float_val(cam->aspect);
         fovy_text->set_float_val(cam->fovy);
 
-        cout << "perspective" << endl;
     }
 }
 
 void selected_object(int id) {
     switch (id) {
-        case 1:{ //Object
-//            int obj_ind = current_objects->get_int_val();
-//            if (obj_ind < scene.objects.size() && obj_ind >= 0) {
-//                scene.objects[obj_ind]
-            
+        case 1:{ //Light
+            int obj_ind = current_lights->get_int_val();
+            if (obj_ind < scene.lights.size() && obj_ind >= 0) {
+                set_light_info(obj_ind);
+            }
+
             break;
         }
         case 2:{ //Camera
@@ -1355,10 +1342,10 @@ void setup_glui() {
     list_light_colors->add_item(LightColor::Indigo, "Indigo");
     list_light_colors->add_item(LightColor::Brown, "Brown");
     list_light_colors->add_item(LightColor::Black, "Black");
-    attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (const):", GLUI_EDITTEXT_FLOAT, &attenuation0);
-    attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power1):", GLUI_EDITTEXT_FLOAT, &attenuation1);
-    attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power2):", GLUI_EDITTEXT_FLOAT, &attenuation2);
-    glui->add_button_to_panel(light_prop_panel, "Update", 1, handle_update);
+    attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (const):", GLUI_EDITTEXT_FLOAT, &attenuation0, 1, handle_update);
+    attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power1):", GLUI_EDITTEXT_FLOAT, &attenuation1, 1, handle_update);
+    attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power2):", GLUI_EDITTEXT_FLOAT, &attenuation2, 1, handle_update);
+//    glui->add_button_to_panel(light_prop_panel, "Update", 1, handle_update);
     glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
     
     glui->add_separator_to_panel(scene_panel);
