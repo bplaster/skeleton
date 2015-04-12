@@ -69,6 +69,11 @@ enum LightColor {
     Brown
 };
 
+enum Material {
+    Uniform,
+    NonUniform
+};
+
 bool keys[256];
 
 // GLUI Variables
@@ -83,6 +88,7 @@ float attenuation0;
 float attenuation1;
 float attenuation2;
 int current_light_color;
+int current_material;
 
 int object_option_menu_id;
 int canvas_menu_id;
@@ -100,6 +106,7 @@ GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
 GLUI_Listbox *list_manipulation;
+GLUI_Listbox *list_material;
 GLUI_Panel *camera_panel;
 GLUI_Panel *light_panel;
 GLUI_Panel *shading_panel;
@@ -1021,6 +1028,35 @@ void handle_normal (int val){
     glutPostRedisplay();
 }
 
+void handle_material (int val) {
+    string name = "material";
+    materialhdl *material;
+    switch (val) {
+        case Material::Uniform:
+            current_material = Material::Uniform;
+            material = new uniformhdl();
+            break;
+        case Material::NonUniform:
+            current_material = Material::NonUniform;
+            material = new nonuniformhdl();
+            break;
+        default:
+            material = new uniformhdl();
+            break;
+    }
+    int obj_ind = current_objects->get_int_val();
+    
+    if (scene.objects[obj_ind] != NULL && scene.objects.size() > obj_ind) {
+        scene.objects[obj_ind]->material.clear();
+        scene.objects[obj_ind]->material[name] = material;
+        for (vector<rigidhdl>::iterator iter = scene.objects[obj_ind]->rigid.begin(); iter != scene.objects[obj_ind]->rigid.end(); ++iter) {
+            iter->material = name;
+        }
+        
+    }
+    glutPostRedisplay();
+}
+
 void handle_menu(int val)
 {
     if (val == 5){
@@ -1059,6 +1095,9 @@ vec3f get_color()
             break;
         case LightColor::Violet:
             color = violet;
+            break;
+        case LightColor::Yellow:
+            color = yellow;
             break;
         default: break;
     }
@@ -1101,6 +1140,7 @@ void handle_update(int val)
             }
         }
     }
+
     glutPostRedisplay();
 }
 
@@ -1328,6 +1368,9 @@ void setup_glui() {
     current_objects = glui->add_listbox_to_panel(object_panel, "", NULL, 1, selected_object);
     current_objects->add_item(-1, "");
     focus_checkbox = glui->add_checkbox_to_panel(object_panel, "Focus on Object", NULL, 1, focus_object);
+    list_material = glui->add_listbox_to_panel(object_panel, "Material", &current_material, -1, handle_material);
+    list_material->add_item(Material::Uniform, "Uniform");
+    list_material->add_item(Material::NonUniform, "Non-uniform");
 //    GLUI_Panel *obj_pos_panel = glui->add_panel_to_panel(object_panel, "Position");
 //    glui->add_edittext_to_panel(obj_pos_panel, "x:");
 //    glui->add_edittext_to_panel(obj_pos_panel, "y:");
@@ -1355,6 +1398,7 @@ void setup_glui() {
     list_light_colors->add_item(LightColor::Indigo, "Indigo");
     list_light_colors->add_item(LightColor::Brown, "Brown");
     list_light_colors->add_item(LightColor::Black, "Black");
+    list_light_colors->add_item(LightColor::Yellow, "Yellow");
     attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (const):", GLUI_EDITTEXT_FLOAT, &attenuation0);
     attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power1):", GLUI_EDITTEXT_FLOAT, &attenuation1);
     attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power2):", GLUI_EDITTEXT_FLOAT, &attenuation2);
