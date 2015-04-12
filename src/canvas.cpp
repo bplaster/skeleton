@@ -401,8 +401,8 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
     vec3i vp2 = to_pixel(v2);
     
     // Variables
-    vec3i xy, xy_max;
-    vector<float> v;
+    vec3i xy, tmp;
+    vector<float> v, tmpv;
     int dy = abs(vp2[1] - vp1[1]);
     int dx = abs(vp2[0] - vp1[0]);
     
@@ -412,17 +412,24 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
         // orient points for E/NE/SE movement
         if(vp2[0]>=vp1[0]){
             xy = vp1;
-            xy_max = vp2;
             v = v1_varying;
+
         } else {
             xy = vp2;
-            xy_max = vp1;
+            tmp = vp2;
+            vp2 = vp1;
+            vp1 = tmp;
+            
             v = v2_varying;
+            tmpv = v2_varying;
+            v2_varying = v1_varying;
+            v1_varying = tmpv;
         }
+        
         plot(xy, v);
         int d = 2*dy-dx;
         // step through each pixel
-        while (xy[0] <= xy_max[0]){
+        while (xy[0] <= vp2[0]){
             xy[0]++;
             // E
             if(d < 0){
@@ -430,13 +437,21 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
             }
             // NE/SE
             else {
-                if(xy_max[1]>xy[1]){
+                if(vp2[1]>xy[1]){
                     xy[1]++;
                 } else {
                     xy[1]--;
                 }
                 d+=2*(dy-dx);
             }
+            
+            // Interpolate varying
+            float t12 = (float)(vp2[0] - xy[0])/(float)(vp2[0] - vp1[0]);
+            xy[2] = (int)(t12*vp1[2] + (1.-t12)*vp2[2]);
+            for (int j = 0; j < v1_varying.size(); j++) {
+                v[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
+            }
+
             plot(xy, v);
         }
     }
@@ -445,17 +460,24 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
         // orient points for E/NE/SE movement
         if(vp2[1]>=vp1[1]) {
             xy = vp1;
-            xy_max = vp2;
             v = v1_varying;
+            
         } else {
             xy = vp2;
-            xy_max = vp1;
+            tmp = vp2;
+            vp2 = vp1;
+            vp1 = tmp;
+            
             v = v2_varying;
+            tmpv = v2_varying;
+            v2_varying = v1_varying;
+            v1_varying = tmpv;
         }
+        
         plot(xy, v);
         int d = 2*dx-dy;
         // step through each pixel
-        while (xy[1] <= xy_max[1]){
+        while (xy[1] <= vp2[1]){
             xy[1]++;
             // E
             if(d<=0){
@@ -463,13 +485,21 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
             }
             // NE/SE
             else {
-                if(xy_max[0]>xy[0]){
+                if(vp2[0]>xy[0]){
                     xy[0]++;
                 } else {
                     xy[0]--;
                 }
                 d+=2*(dx-dy);
             }
+            
+            // Interpolate varying
+            float t12 = (float)(vp2[1] - xy[1])/(float)(vp2[1] - vp1[1]);
+            xy[2] = (int)(t12*vp1[2] + (1.-t12)*vp2[2]);
+            for (int j = 0; j < v1_varying.size(); j++) {
+                v[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
+            }
+            
             plot(xy, v);
         }
     }

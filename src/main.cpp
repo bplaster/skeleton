@@ -715,7 +715,7 @@ void create_object (int val){
         case Object::Sphere : {
             
             // Create dynamic sphere object
-            spherehdl *sphere = new spherehdl(1.0, 8.0, 16.0);
+            spherehdl *sphere = new spherehdl(1.0, 16.0, 16.0);
             scene.objects.push_back(sphere);
             index = (int)scene.objects.size()-1;
             current_objects->add_item(index, "Sphere");
