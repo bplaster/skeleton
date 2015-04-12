@@ -79,7 +79,9 @@ int current_normal = scenehdl::Normal::none;
 int current_shading = canvashdl::Shading::none;
 int current_model;
 float fovy, aspect, width, height, near, far;
-vec3f attenuation;
+float attenuation0;
+float attenuation1;
+float attenuation2;
 int current_light_color;
 
 int object_option_menu_id;
@@ -1083,14 +1085,16 @@ void handle_update(int val)
                 scene.lights[light_ind]->specular = color;
             }
             else if (type.compare("point")){
-                static_cast<pointhdl*>(scene.lights[light_ind])->attenuation = attenuation;
+                vec3f attenuation_vector = {attenuation0,attenuation1,attenuation2};
+                ((pointhdl*)scene.lights[light_ind])->attenuation = attenuation_vector;
                 scene.lights[light_ind]->ambient = color*0.1f;
                 scene.lights[light_ind]->diffuse = color*0.5f;
                 scene.lights[light_ind]->specular = color;
                 
             }
             else if (type.compare("spot")){
-                static_cast<spothdl*>(scene.lights[light_ind])->attenuation = attenuation;
+                vec3f attenuation_vector = {attenuation0,attenuation1,attenuation2};
+                ((spothdl*)scene.lights[light_ind])->attenuation = attenuation_vector;
                 scene.lights[light_ind]->ambient = color*0.1f;
                 scene.lights[light_ind]->diffuse = color*0.5f;
                 scene.lights[light_ind]->specular = color;
@@ -1316,9 +1320,9 @@ void setup_glui() {
     list_light_colors->add_item(LightColor::Indigo, "Indigo");
     list_light_colors->add_item(LightColor::Brown, "Brown");
     list_light_colors->add_item(LightColor::Black, "Black");
-    attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (x):", GLUI_EDITTEXT_FLOAT, &attenuation[0]);
-    attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (y):", GLUI_EDITTEXT_FLOAT, &attenuation[1]);
-    attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (z):", GLUI_EDITTEXT_FLOAT, &attenuation[2]);
+    attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (const):", GLUI_EDITTEXT_FLOAT, &attenuation0);
+    attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power1):", GLUI_EDITTEXT_FLOAT, &attenuation1);
+    attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power2):", GLUI_EDITTEXT_FLOAT, &attenuation2);
     glui->add_button_to_panel(light_prop_panel, "Update", 1, handle_update);
     glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
     

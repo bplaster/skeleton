@@ -874,8 +874,6 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
 
 vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
 {
-    //cout << "Clip triangle called" << endl;
-    
     vector<vec8f> clipped_points = {v1,v2,v3};
     
     for (int i = 0; i < planes.capacity(); i++) {
@@ -891,55 +889,40 @@ vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
 
 // clips a triangle against a single plane
 vector<vec8f> canvashdl::clip_triangle_against_plane (vector<vec8f> triangle_points, plane clipping_plane) {
-    //cout << "Clip triangle against plane called" << endl;
-    //cout << triangle_points.size() << endl;
+    
     vector<vec8f> new_clipping_points;
     
     for (int i = 0; i < triangle_points.size(); i++) {
-        clip_line_against_plane (triangle_points[i], triangle_points[(i+1)%triangle_points.size()], clipping_plane, new_clipping_points);
+        //clip_line_against_plane (triangle_points[i], triangle_points[(i+1)%triangle_points.size()], clipping_plane, new_clipping_points);
+        vec8f v1 = triangle_points[i];
+        vec8f v2 = triangle_points[(i+1)%triangle_points.size()];
+        vec3f v1_coords = {v1[0], v1[1], v1[2]};
+        vec3f v2_coords = {v2[0], v2[1], v2[2]};
+        
+        float d1 = dot(v1_coords, clipping_plane.normal) + clipping_plane.distance;
+        float d2 = dot(v2_coords, clipping_plane.normal) + clipping_plane.distance;
+        
+        if (d1 < 0 && d2 >= 0){ // Outside to inside (first point outside and second point inside)
+            
+            float s = d2/(d2 - d1);
+            vec3f intersection_point = get_intersection_point (v2_coords, v1_coords, s);
+            v1.set(0, 3, intersection_point);
+            new_clipping_points.push_back(v1);
+            new_clipping_points.push_back(v2);
+            
+        } else if (d1 >= 0 && d2 < 0) { // Inside to outside (first point inside and second point outside)
+            
+            float s = d1/(d1 - d2);
+            vec3f intersection_point = get_intersection_point (v1_coords, v2_coords, s);
+            //v1_coords = intersection_point;
+            v1.set(0, 3, intersection_point);
+            new_clipping_points.push_back(v1);
+            
+        } else if (d1 >= 0 && d2>= 0){ // Both points inside plane
+            new_clipping_points.push_back(v2);
+        }
     }
-    //clip_line_against_plane (triangle_points[triangle_points.size() - 1], triangle_points[0], clipping_plane, new_clipping_points);
-    
     return new_clipping_points;
-}
-
-void canvashdl::clip_line_against_plane (vec8f v1, vec8f v2, plane clipping_plane, vector<vec8f> &new_clipping_points) {
-    //cout << "Clip line against plane called" << endl;
-    vec3f v1_coords = {v1[0], v1[1], v1[2]};
-    vec3f v2_coords = {v2[0], v2[1], v2[2]};
-    
-    float d1 = dot(v1_coords, clipping_plane.normal) + clipping_plane.distance;
-    float d2 = dot(v2_coords, clipping_plane.normal) + clipping_plane.distance;
-    
-    if (d1 < 0 && d2 >= 0){ // Outside to inside (first point outside and second point inside)
-        
-        float s = d2/(d2 - d1);
-        vec3f intersection_point = get_intersection_point (v2_coords, v1_coords, s);
-        //v1_coords = intersection_point;
-        v1.set(0, 3, intersection_point);
-        new_clipping_points.push_back(v1);
-        new_clipping_points.push_back(v2);
-        
-        //cout << "Outside to inside" << endl;
-        
-    } else if (d1 >= 0 && d2 < 0) { // Inside to outside (first point inside and second point outside)
-        
-        float s = d1/(d1 - d2);
-        vec3f intersection_point = get_intersection_point (v1_coords, v2_coords, s);
-        //v1_coords = intersection_point;
-        v1.set(0, 3, intersection_point);
-        new_clipping_points.push_back(v1);
-        
-        //cout << "Inside to outside" << endl;
-        
-    } else if (d1 >= 0 && d2>= 0){ // Both points inside plane
-        new_clipping_points.push_back(v2);
-        
-        //cout << "Both inside" << endl;
-    } else {
-        //cout << "Both outside" << endl;
-    }
-    
 }
 
 //vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
