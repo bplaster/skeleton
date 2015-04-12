@@ -335,8 +335,6 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
         eye_space_vertex /= eye_space_vertex[3];
     }
     
-    //vec3f eye_space_vertex = material->shade_vertex(this, v(0,3), v(3,6), varying);
-    //vec3f eye_space_vertex = shade_vertex(this,v(0,3), v(3,6), varying);
     return eye_space_vertex;
 
 }
@@ -771,7 +769,7 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
     vector<vec8f> new_geometry = geometry;
     
     for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
-        vector<float> varying; // TODO: Temp fix
+        vector<float> varying;
         *iter = shade_vertex(*iter, varying);
         plot_point(*iter, varying);
     }
@@ -839,7 +837,14 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     for (int i = 0; i < indices.size() - 2; i += 3) {
         
         // Clip triangles
-        vector<vec8f> new_points = clip_triangle(geometry[indices[i]], geometry[indices[i+1]], geometry[indices[i+2]]);
+//        vector<vec8f> new_points = clip_triangle(geometry[indices[i]], geometry[indices[i+1]], geometry[indices[i+2]]);
+        vector<vec8f> new_points = {geometry[indices[i]], geometry[indices[i+1]], geometry[indices[i+2]]};
+        for (int i = 0; i < planes.capacity(); i++) {
+            new_points = clip_triangle_against_plane (new_points, planes[i]);
+            if (new_points.size() == 0) {
+                break;
+            }
+        }
         
         if (new_points.size() == 0){
             continue;
