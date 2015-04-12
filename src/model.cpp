@@ -16,6 +16,15 @@ modelhdl::modelhdl()
 modelhdl::modelhdl(string filename)
 {
 	load_obj(filename);
+    
+    string name = "material";
+    materialhdl *material = new uniformhdl();
+    this->material[name] = material;
+    
+    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+        iter->material = name;
+    }
+
 }
 
 modelhdl::~modelhdl()

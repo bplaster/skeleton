@@ -495,7 +495,8 @@ void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i 
     vec3i xy = vp1;
     vector<float> v = v1_varying;
     float t123;
-    plot(xy, v);
+    
+    plot(vp1, v1_varying);
 
     for (int i = 0; i < dx; i++) {
         xy[0]++;
@@ -506,6 +507,8 @@ void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i 
         }
         plot(xy, v);
     }
+    
+    plot(vp2, v2_varying);
 }
 
 int canvashdl::sign(int x) {
@@ -570,20 +573,7 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     int e2 = 2 * dy2 - dx2;
     int e3 = 2 * dy3 - dx3;
     
-    // Plot based on shading model
-    if (shade_model == none || shade_model == flat) {
-        // Plot line between t2 and t3
-        plot_horizontal_line(t2, ave_varying, t3, ave_varying);
-        
-    } else {
-        // Interpolate varying
-        for (int j = 0; j < t2_varying.size(); j++) {
-            t2_varying[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
-            t3_varying[j] = t13*v1_varying[j] + (1.-t13)*v3_varying[j];
-        }
-        // Plot line between t2 and t3
-        plot_horizontal_line(t2, t2_varying, t3, t3_varying);
-    }
+    plot(s1, v1_varying);
 
     for (int i = 0; i < dx2; i++)
     {
@@ -607,13 +597,13 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
         // Trace next value of t3
         while (t3[1] != t2[1])
         {
-            while (e3 >= 0 && dx3 != 0)
+            while (e3 >= 0)
             {
                 if (swap3)
                     t3[0] += dx3_sign;
                 else
                     t3[1] += dy3_sign;
-                e3 = e3 - 2 * dx3;
+                e3 -= 2 * dx3;
             }
             
             if (swap3)
@@ -621,7 +611,7 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
             else
                 t3[0] += dx3_sign;
             
-            e3 = e3 + 2 * dy3;
+            e3 += 2 * dy3;
         }
         
         // Interpolate Z values
@@ -646,6 +636,8 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
             plot_horizontal_line(t2, t2_varying, t3, t3_varying);
         }
     }
+    plot_horizontal_line(s2, v2_varying, s3, v3_varying);
+
 }
 
 
