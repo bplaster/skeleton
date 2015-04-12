@@ -22,15 +22,17 @@ lighthdl::~lighthdl()
 
 }
 
-directionalhdl::directionalhdl() : lighthdl(white*0.1f, white*0.4f, white*0.4f)
+directionalhdl::directionalhdl() : lighthdl(white*0.1f, white*0.5f, white)
 {
     model = new cylinderhdl(0.2, 1.0, 4.0);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 	type = "directional";
 }
 
 directionalhdl::directionalhdl(const vec3f &direction, const vec3f &ambient, const vec3f &diffuse, const vec3f &specular) : lighthdl(ambient, diffuse, specular)
 {
     model = new cylinderhdl(0.2, 1.0, 4.0);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 	type = "directional";
 }
 
@@ -78,10 +80,11 @@ void directionalhdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3
     specular += this->specular * pf;
 }
 
-pointhdl::pointhdl() : lighthdl(white*0.1f, white*0.4f, white*0.4f)
+pointhdl::pointhdl() : lighthdl(white*0.1f, white*0.5f, white)
 {
 	this->attenuation = vec3f(1.0, 0.14, 0.7);
     model = new spherehdl(0.2, 4.0, 8.0);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 	type = "point";
 }
 
@@ -89,6 +92,7 @@ pointhdl::pointhdl(const vec3f &position, const vec3f &attenuation, const vec3f 
 {
 	this->attenuation = attenuation;
     model = new spherehdl(0.2, 4.0, 8.0);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 	type = "point";
 }
 
@@ -115,12 +119,12 @@ void pointhdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vert
 	 */
     
     float nDotVP; // normal . light direction
-    float nDotHV; // normal . light half vector
+//    float nDotHV; // normal . light half vector
     float pf; // power factor
     float attenuation; // computed attenuation factor
     float d; // distance from surface to light source
     vec3f VP; // direction from surface to light position
-    vec3f halfVector; // direction of maximum highlights
+//    vec3f halfVector; // direction of maximum highlights
     // Compute vector from surface to light position
     VP = this->position - vertex;
     // Compute distance between surface and light position
@@ -132,25 +136,26 @@ void pointhdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vert
                          this->attenuation[1] * d +
                          this->attenuation[2] * d * d);
 
-    halfVector = norm(VP);
+//    halfVector = norm(VP);
     nDotVP = fmax(0.0, dot(normal, VP));
-    nDotHV = fmax(0.0, dot(normal, halfVector));
+//    nDotHV = fmax(0.0, dot(normal, halfVector));
     if (nDotVP == 0.0)
         pf = 0.0;
     else
-        pf = pow(nDotHV, shininess);
+        pf = pow(nDotVP, shininess);
     ambient += this->ambient * attenuation;
     diffuse += this->diffuse * nDotVP * attenuation;
     specular += this->specular * pf * attenuation;
     
 }
 
-spothdl::spothdl() : lighthdl(white*0.1f, white*0.3f, white*0.2f)
+spothdl::spothdl() : lighthdl(white*0.1f, white*0.5f, white)
 {
 	this->attenuation = vec3f(1.0, 0.14, 0.7);
 	this->cutoff = 0.5;
 	this->exponent = 1.0;
     model = new pyramidhdl(0.2, 1.0, 8.0);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 	type = "spot";
 }
 
@@ -160,6 +165,7 @@ spothdl::spothdl(const vec3f &attenuation, const float &cutoff, const float &exp
 	this->cutoff = cutoff;
 	this->exponent = exponent;
     model = new pyramidhdl(0.2, 1.0, 8.0);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 	type = "spot";
 }
 
@@ -194,14 +200,14 @@ void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f verte
 	 */
     
     float nDotVP; // normal . light direction
-    float nDotHV; // normal . light half vector
+//    float nDotHV; // normal . light half vector
     float pf; // power factor
     float spotDot; // cosine of angle between spotlight
     float spotAttenuation; // spotlight attenuation factor
     float attenuation; // computed attenuation factor
     float d; // distance from surface to light source
     vec3f VP; // direction from surface to light position
-    vec3f halfVector; // direction of maximum highlights
+//    vec3f halfVector; // direction of maximum highlights
     // Compute vector from surface to light position
     VP = this->position - vertex;
     // Compute distance between surface and light position
@@ -222,23 +228,24 @@ void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f verte
         spotAttenuation = pow(spotDot, this->exponent);
     // Combine the spotlight and distance attenuation.
     attenuation *= spotAttenuation;
-    halfVector = norm(VP);
+//    halfVector = norm(VP);
     nDotVP = fmax(0.0, dot(normal, VP));
-    nDotHV = fmax(0.0, dot(normal, halfVector));
+//    nDotHV = fmax(0.0, dot(normal, halfVector));
     if (nDotVP == 0.0)
         pf = 0.0;
     else
-        pf = pow(nDotHV, shininess);
+        pf = pow(nDotVP, shininess);
     ambient += this->ambient * attenuation;
     diffuse += this->diffuse * nDotVP * attenuation;
     specular += this->specular * pf * attenuation;
 
 }
 
-ambienthdl::ambienthdl() : lighthdl(white*0.2f, white*0.0f, white*0.0f)
+ambienthdl::ambienthdl() : lighthdl(white*0.5f, white*0.0f, white*0.0f)
 {
     type = "ambient";
     model = new boxhdl(0.5, 0.5, 0.5);
+    ((uniformhdl *)model->material["material"])->emission = vec3f(1.0,1.0,1.0);
 }
 
 void ambienthdl::update(canvashdl *canvas)

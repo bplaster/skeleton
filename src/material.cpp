@@ -15,9 +15,9 @@ uniformhdl::uniformhdl()
 {
 	type = "uniform";
 	emission = vec3f(0.0, 0.0, 0.0);
-	ambient = vec3f(0.1, 0.1, 0.1);
-	diffuse = vec3f(0.2, 0.2, 0.2);
-	specular = vec3f(0.2, 0.2, 0.2);
+	ambient = vec3f(0.2, 0.2, 0.2);
+    diffuse = vec3f(1.0, 1.0, 1.0);
+    specular = vec3f(1.0, 1.0, 1.0);
 	shininess = 1.0;
 }
 
@@ -35,19 +35,6 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
 	vec4f eye_space_vertex = canvas->matrices[canvashdl::modelview_matrix]*homogenize(vertex);
     vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(normal);
 
-    vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
-    
-    const vector<lighthdl*> *lights;
-    canvas->get_uniform("lights", lights);
-    
-    for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
-        if (*iter) {
-            (*iter)->shade(ambient, diffuse, specular, eye_space_vertex, eye_space_normal, this->shininess);
-        }
-    }
-    
-    vec3f intensity = this->emission + ambient + diffuse + specular;
-
     // Store varying
     if(canvas->shade_model == canvashdl::phong) {
         for (int i = 0; i < 3; i++) {
@@ -57,8 +44,21 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
             varying.push_back(normal[i]);
         }
     } else {
+        
+        vec3f light_ambient(0.,0.,0.), light_diffuse(0.,0.,0.), light_specular(0.,0.,0.);
+        
+        const vector<lighthdl*> *lights;
+        canvas->get_uniform("lights", lights);
+        
+        for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
+            if (*iter) {
+                (*iter)->shade(light_ambient, light_diffuse, light_specular, eye_space_vertex, eye_space_normal, this->shininess);
+            }
+        }
+        
+        vec3f color = this->emission + light_ambient*this->ambient + light_diffuse*this->diffuse + light_specular*this->specular;
         for (int i = 0; i < 3; i++) {
-            varying.push_back(intensity[i]);
+            varying.push_back(color[i]);
         }
     }
 
@@ -101,18 +101,18 @@ vec3f uniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) cons
             vec4f eye_space_vertex = canvas->matrices[canvashdl::modelview_matrix]*homogenize(vec3f(varying[0],varying[1],varying[2]));
             vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(vec3f(varying[3],varying[4],varying[5]));
             
-            vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
+            vec3f light_ambient(0.,0.,0.), light_diffuse(0.,0.,0.), light_specular(0.,0.,0.);
             
             const vector<lighthdl*> *lights;
             canvas->get_uniform("lights", lights);
             
             for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
                 if (*iter) {
-                    (*iter)->shade(ambient, diffuse, specular, eye_space_vertex, eye_space_normal, this->shininess);
+                    (*iter)->shade(light_ambient, light_diffuse, light_specular, eye_space_vertex, eye_space_normal, this->shininess);
                 }
             }
             
-            color = this->emission + ambient + diffuse + specular;
+            color = this->emission + light_ambient*this->ambient + light_diffuse*this->diffuse + light_specular*this->specular;
             
             break;
         }
@@ -146,6 +146,11 @@ materialhdl *uniformhdl::clone() const
 nonuniformhdl::nonuniformhdl()
 {
 	type = "non_uniform";
+    emission = vec3f(0.0, 0.0, 0.0);
+    ambient = vec3f(0.1, 0.1, 0.1);
+    diffuse = vec3f(1.0, 1.0, 1.0);
+    specular = vec3f(1.0, 1.0, 1.0);
+    shininess = 1.0;
 }
 
 nonuniformhdl::~nonuniformhdl()
@@ -162,9 +167,43 @@ vec3f nonuniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal,
 	 * the material library. Same thing goes if you decide to rename this class.
 	 */
 
-	eye_space_vertex = canvas->matrices[canvashdl::projection_matrix]*eye_space_vertex;
-	eye_space_vertex /= eye_space_vertex[3];
-	return eye_space_vertex;
+    vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(normal);
+    
+    vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
+    ambient *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+    diffuse *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+    specular *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+
+    // Store varying
+    if(canvas->shade_model == canvashdl::phong) {
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(vertex[i]);
+        }
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(normal[i]);
+        }
+    } else {
+        
+        vec3f light_ambient(0.,0.,0.), light_diffuse(0.,0.,0.), light_specular(0.,0.,0.);
+        
+        const vector<lighthdl*> *lights;
+        canvas->get_uniform("lights", lights);
+        
+        for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
+            if (*iter) {
+                (*iter)->shade(light_ambient, light_diffuse, light_specular, eye_space_vertex, eye_space_normal, this->shininess);
+            }
+        }
+        
+        vec3f color = this->emission + light_ambient*this->ambient + light_diffuse*this->diffuse + light_specular*this->specular;
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(color[i]);
+        }
+    }
+    
+    eye_space_vertex = canvas->matrices[canvashdl::projection_matrix]*eye_space_vertex;
+    eye_space_vertex /= eye_space_vertex[3];
+    return eye_space_vertex;
 }
 
 vec3f nonuniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) const
@@ -174,8 +213,54 @@ vec3f nonuniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) c
 	 * the material library. Same thing goes if you decide to rename this class.
 	 */
     
-
-	return vec3f(1.0, 1.0, 1.0);
+    vec3f color = vec3f(1.0, 1.0, 1.0);
+    
+    switch (canvas->shade_model) {
+        case canvashdl::none: {
+            color = this->emission + this->ambient + this->diffuse + this->specular;
+            break;
+        }
+        case canvashdl::flat: {
+            color = vec3f(varying[0], varying[1], varying[2]);
+            break;
+        }
+        case canvashdl::gouraud: {
+            color = vec3f(varying[0], varying[1], varying[2]);
+            break;
+        }
+        case canvashdl::phong: {
+            vec4f eye_space_vertex = canvas->matrices[canvashdl::modelview_matrix]*homogenize(vec3f(varying[0],varying[1],varying[2]));
+            vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(vec3f(varying[3],varying[4],varying[5]));
+            
+            vec3f light_ambient(0.,0.,0.), light_diffuse(0.,0.,0.), light_specular(0.,0.,0.);
+            
+            const vector<lighthdl*> *lights;
+            canvas->get_uniform("lights", lights);
+            
+            for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
+                if (*iter) {
+                    (*iter)->shade(light_ambient, light_diffuse, light_specular, eye_space_vertex, eye_space_normal, this->shininess);
+                }
+            }
+            
+            color = this->emission + light_ambient*this->ambient + light_diffuse*this->diffuse + light_specular*this->specular;
+            
+            
+            break;
+        }
+            
+        default:
+            break;
+    }
+    
+    // Overflow
+    for (int i = 0; i < 3; i++) {
+        if (color[i] > 1.0) {
+            color[i] = 1.0;
+        }
+    }
+    
+    return color;
 }
 
 materialhdl *nonuniformhdl::clone() const

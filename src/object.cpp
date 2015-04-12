@@ -154,7 +154,7 @@ void objecthdl::draw_bound(canvashdl *canvas)
 
     // Give bound material
     uniformhdl *bound_material = new uniformhdl();
-    bound_material->ambient = vec3f(1.0,1.0,1.0);
+    bound_material->emission = vec3f(1.0,1.0,1.0);
     canvas->uniform["material"] = bound_material;
 
     // Draw bounding lines

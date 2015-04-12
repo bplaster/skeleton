@@ -120,10 +120,13 @@ GLUI_Panel *light_prop_panel;
 // Helper functions
 void create_camera(int val);
 void create_object(int val);
+void create_light (int val);
+
 void handle_culling(int val);
 void handle_polygon(int val);
 void handle_normal(int val);
 void handle_manip(int val);
+
 void setup_glui();
 void set_camera_info(int obj_ind);
 
@@ -141,12 +144,18 @@ void init(string working_directory)
     setup_glui();
     
     // Create camera
-    create_camera(Camera::Ortho);
+    create_camera(Camera::Frustum);
     
     // Setup settings
     handle_culling(current_culling);
     handle_polygon(current_polygon);
     handle_normal(current_normal);
+    
+    // Create object
+    create_object(Object::Sphere);
+    
+    // Create light
+    create_light(Light::Point);
 }
 
 void displayfunc()
@@ -1066,7 +1075,7 @@ void handle_update(int val)
             vec3f color = get_color();
             
             if (type.compare("ambient")){
-                scene.lights[light_ind]->ambient = color*0.2f;
+                scene.lights[light_ind]->ambient = color;
             }
             else if (type.compare("directional")){
                 scene.lights[light_ind]->ambient = color*0.1f;
