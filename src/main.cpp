@@ -1076,15 +1076,15 @@ void handle_update(int val)
             string type = scene.lights[light_ind]->type;
             vec3f color = get_color();
             
-            if (type.compare("ambient")){
+            if (type.compare("ambient") == 0){
                 scene.lights[light_ind]->ambient = color;
             }
-            else if (type.compare("directional")){
+            else if (type.compare("directional") == 0){
                 scene.lights[light_ind]->ambient = color*0.1f;
                 scene.lights[light_ind]->diffuse = color*0.5f;
                 scene.lights[light_ind]->specular = color;
             }
-            else if (type.compare("point")){
+            else if (type.compare("point") == 0){
                 vec3f attenuation_vector = {attenuation0,attenuation1,attenuation2};
                 ((pointhdl*)scene.lights[light_ind])->attenuation = attenuation_vector;
                 scene.lights[light_ind]->ambient = color*0.1f;
@@ -1092,7 +1092,7 @@ void handle_update(int val)
                 scene.lights[light_ind]->specular = color;
                 
             }
-            else if (type.compare("spot")){
+            else if (type.compare("spot") == 0){
                 vec3f attenuation_vector = {attenuation0,attenuation1,attenuation2};
                 ((spothdl*)scene.lights[light_ind])->attenuation = attenuation_vector;
                 scene.lights[light_ind]->ambient = color*0.1f;
@@ -1102,6 +1102,41 @@ void handle_update(int val)
         }
     }
     glutPostRedisplay();
+}
+
+void set_light_info(int obj_ind){
+    string type = scene.lights[obj_ind]->type;
+    if (type == "ambient") {
+        orthohdl *cam = (orthohdl*)scene.cameras[obj_ind];
+        near_text->set_float_val(cam->near);
+        far_text->set_float_val(cam->far);
+        aspect_text->set_name("width");
+        fovy_text->set_name("height");
+        aspect_text->set_float_val(cam->right - cam->left);
+        fovy_text->set_float_val(cam->top - cam->bottom);
+        cout << "ortho" << endl;
+        
+    } else if (	type == "frustum") {
+        frustumhdl *cam = (frustumhdl*)scene.cameras[obj_ind];
+        near_text->set_float_val(cam->near);
+        far_text->set_float_val(cam->far);
+        aspect_text->set_name("width");
+        fovy_text->set_name("height");
+        aspect_text->set_float_val(cam->right - cam->left);
+        fovy_text->set_float_val(cam->top - cam->bottom);
+        cout << "frustum" << endl;
+        
+    } else if (type == "perspective"){
+        perspectivehdl *cam = (perspectivehdl*)scene.cameras[obj_ind];
+        near_text->set_float_val(cam->near);
+        far_text->set_float_val(cam->far);
+        aspect_text->set_name("aspect");
+        fovy_text->set_name("fovy");
+        aspect_text->set_float_val(cam->aspect);
+        fovy_text->set_float_val(cam->fovy);
+        
+        cout << "perspective" << endl;
+    }
 }
 
 void handle_delete(int val)

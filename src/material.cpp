@@ -147,9 +147,9 @@ nonuniformhdl::nonuniformhdl()
 {
 	type = "non_uniform";
     emission = vec3f(0.0, 0.0, 0.0);
-    ambient = vec3f(0.1, 0.1, 0.1);
-    diffuse = vec3f(1.0, 1.0, 1.0);
-    specular = vec3f(1.0, 1.0, 1.0);
+    ambient = vec3f(0.1, 0.0, 0.1);
+    diffuse = vec3f(1.0, 0.0, 1.0);
+    specular = vec3f(1.0, 0.0, 1.0);
     shininess = 1.0;
 }
 
@@ -192,9 +192,9 @@ vec3f nonuniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal,
         }
         
         vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
-        ambient *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
-        diffuse *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
-        specular *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+        ambient *= (pow(cosf(vertex[0]*M_PI*4),2) + pow(sinf(vertex[1]*M_PI*4),2));
+        diffuse *= (pow(cosf(vertex[0]*M_PI*4),2) + pow(sinf(vertex[1]*M_PI*4),2));
+        specular *= (pow(cosf(vertex[0]*M_PI*4),2) + pow(sinf(vertex[1]*M_PI*4),2));
         
         vec3f color = this->emission + light_ambient*ambient + light_diffuse*diffuse + light_specular*specular;
         for (int i = 0; i < 3; i++) {

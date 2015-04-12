@@ -71,10 +71,10 @@ void scenehdl::draw()
     // Draw lights
     for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
         if (*iter) {
-            (*iter)->update(canvas);
             if (render_lights){
                 (*iter)->model->draw(canvas);
             }
+            (*iter)->update(canvas);
         }
     }
     
