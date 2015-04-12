@@ -52,6 +52,8 @@ void scenehdl::draw()
     if (render_cameras) {
         for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); ++iter) {
             if (*iter) {
+                (*iter)->model->position = (*iter)->position;
+                (*iter)->model->orientation = (*iter)->orientation;
                 (*iter)->model->draw(canvas);
             }
         }
@@ -69,10 +71,10 @@ void scenehdl::draw()
     // Draw lights
     for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
         if (*iter) {
+            (*iter)->update(canvas);
             if (render_lights){
                 (*iter)->model->draw(canvas);
             }
-            (*iter)->update(canvas);
         }
     }
     

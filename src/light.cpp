@@ -22,7 +22,7 @@ lighthdl::~lighthdl()
 
 }
 
-directionalhdl::directionalhdl() : lighthdl(white*0.1f, white*0.1f, white*0.1f)
+directionalhdl::directionalhdl() : lighthdl(white*0.1f, white*0.4f, white*0.4f)
 {
     model = new cylinderhdl(0.2, 1.0, 4.0);
 	type = "directional";
@@ -78,7 +78,7 @@ void directionalhdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3
     specular += this->specular * pf;
 }
 
-pointhdl::pointhdl() : lighthdl(white*0.1f, white*0.1f, white*0.1f)
+pointhdl::pointhdl() : lighthdl(white*0.1f, white*0.4f, white*0.4f)
 {
 	this->attenuation = vec3f(1.0, 0.14, 0.7);
     model = new spherehdl(0.2, 4.0, 8.0);
@@ -145,12 +145,12 @@ void pointhdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vert
     
 }
 
-spothdl::spothdl() : lighthdl(white*0.1f, white*0.1f, white*0.1f)
+spothdl::spothdl() : lighthdl(white*0.1f, white*0.3f, white*0.2f)
 {
 	this->attenuation = vec3f(1.0, 0.14, 0.7);
 	this->cutoff = 0.5;
 	this->exponent = 1.0;
-    model = new pyramidhdl(0.2, 1.0, 4.0);
+    model = new pyramidhdl(0.2, 1.0, 8.0);
 	type = "spot";
 }
 
@@ -159,7 +159,7 @@ spothdl::spothdl(const vec3f &attenuation, const float &cutoff, const float &exp
 	this->attenuation = attenuation;
 	this->cutoff = cutoff;
 	this->exponent = exponent;
-    model = new pyramidhdl(0.2, 1.0, 4.0);
+    model = new pyramidhdl(0.2, 1.0, 8.0);
 	type = "spot";
 }
 

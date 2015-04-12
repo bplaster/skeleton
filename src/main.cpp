@@ -169,7 +169,7 @@ void pmotionfunc(int x, int y)
 {
     if (bound)
     {
-        glutSetMenu(canvas_menu_id);
+//        glutSetMenu(canvas_menu_id);
         
         int deltax = x - mousex;
         int deltay = y - mousey;
@@ -321,120 +321,7 @@ void pmotionfunc(int x, int y)
 //            glutAttachMenu(GLUT_RIGHT_BUTTON);
             glutPostRedisplay();
         }
-        
     }
-//	if (bound)
-//	{
-//		int deltax = x - mousex;
-//		int deltay = y - mousey;
-//
-//		mousex = x;
-//		mousey = y;
-//
-//		bool warp = false;
-//		if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
-//		{
-//			mousex = canvas.get_width()/2;
-//			warp = true;
-//		}
-//
-//		if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
-//		{
-//			mousey = canvas.get_height()/2;
-//			warp = true;
-//		}
-//
-//		if (warp)
-//			glutWarpPointer(mousex, mousey);
-//
-//		// TODO Assignment 1: Use the mouse delta to change the orientation of the active camera
-//        if (scene.active_camera_valid()) {
-//            scene.cameras[scene.active_camera]->orientation[1] += (float)deltax/500.;
-//            scene.cameras[scene.active_camera]->orientation[0] += (float)deltay/500.;
-//        }
-//
-//		glutPostRedisplay();
-//	}
-//	else if (scene.active_camera_valid())
-//	{
-//        vec3f direction;
-//        vec3f position;
-//        
-//        if (scene.active_camera_valid())
-//        {
-//            if (scene.cameras[scene.active_camera]->type == "ortho")
-//            {
-//                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
-//                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
-//            }
-//            else
-//            {
-//                position = scene.cameras[scene.active_camera]->position;
-//                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
-//            }
-//        }
-//        
-//        int old_active_object = scene.active_object;
-//        scene.active_object = -1;
-//        for (int i = 0; i < scene.objects.size(); i++)
-//        {
-//            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
-//            {
-//                bool is_camera = false;
-//                
-//                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
-//                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
-//                        is_camera = true;
-//                
-//                if (!is_camera || (is_camera && scene.render_cameras))
-//                {
-//                    vec3f invdir = 1.0f/direction;
-//                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
-//                    vec3f origin = position - scene.objects[i]->position;
-//                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
-//                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
-//                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
-//                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
-//                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
-//                    if ((tmin <= tymax) && (tymin <= tmax))
-//                    {
-//                        if (tymin > tmin)
-//                            tmin = tymin;
-//                        if (tymax < tmax)
-//                            tmax = tymax;
-//                        
-//                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
-//                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
-//                        
-//                        if ((tmin <= tzmax) && (tzmin <= tmax))
-//                        {
-//                            scene.active_object = i;
-//                            i = (int)scene.objects.size();
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        
-//        if (scene.active_object != old_active_object)
-//        {
-//            bool is_camera = false;
-//            
-//            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
-//                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
-//                    is_camera = true;
-//            
-////            glutDetachMenu(GLUT_RIGHT_BUTTON);
-////            if (scene.active_object == -1)
-////                glutSetMenu(canvas_menu_id);
-////            else if (is_camera)
-////                glutSetMenu(camera_menu_id);
-////            else
-////                glutSetMenu(object_menu_id);
-////            glutAttachMenu(GLUT_RIGHT_BUTTON);
-//            glutPostRedisplay();
-//        }
-//	}
 }
 
 void mousefunc(int button, int state, int x, int y)
@@ -573,11 +460,11 @@ void keydownfunc(unsigned char key, int x, int y)
             if (bound) {
                 bound = false;
                 glutSetCursor(GLUT_CURSOR_INHERIT);
-                glutAttachMenu(GLUT_RIGHT_BUTTON);
+//                glutAttachMenu(GLUT_RIGHT_BUTTON);
             } else {
                 bound = true;
                 glutSetCursor(GLUT_CURSOR_NONE);
-                glutDetachMenu(GLUT_RIGHT_BUTTON);
+//                glutDetachMenu(GLUT_RIGHT_BUTTON);
                 mousex = x;
                 mousey = y;
             }
@@ -598,26 +485,6 @@ void keydownfunc(unsigned char key, int x, int y)
             break;
     }
     
-    
-//	if (key == 27) // Escape Key Pressed
-//	{
-//		glutDestroyWindow(window_id);
-//		exit(0);
-//	}
-//	else if (key == 'm' && bound)
-//	{
-//		bound = false;
-//		glutSetCursor(GLUT_CURSOR_INHERIT);
-//		glutAttachMenu(GLUT_RIGHT_BUTTON);
-//	}
-//	else if (key == 'm' && !bound)
-//	{
-//		bound = true;
-//		glutSetCursor(GLUT_CURSOR_NONE);
-//		glutDetachMenu(GLUT_RIGHT_BUTTON);
-//		mousex = x;
-//		mousey = y;
-//	}
 }
 
 void keyupfunc(unsigned char key, int x, int y)
@@ -789,12 +656,12 @@ void menustatusfunc(int status, int x, int y)
 void toggle_cameras (int val){
     if (val)
         scene.render_cameras = !scene.render_cameras;
+    glutPostRedisplay();
 }
 
 void toggle_lights (int val){
     if (val){
         scene.render_lights = !scene.render_lights;
-        cout << "Toggled render" <<endl;
     }
     glutPostRedisplay();
 }
@@ -1045,7 +912,6 @@ void create_light (int val){
             lighthdl *light = new pointhdl;
             scene.lights.push_back(light);
             index = (int)scene.lights.size() - 1;
-            cout << index << endl;
             current_lights->add_item(index, "Point");
             break;
         }
@@ -1053,7 +919,6 @@ void create_light (int val){
             lighthdl *light = new spothdl;
             scene.lights.push_back(light);
             index = (int)scene.lights.size() - 1;
-            cout << index << endl;
             current_lights->add_item(index, "Spot");
             break;
         }
@@ -1195,7 +1060,7 @@ void handle_update(int val)
         
         // Change the current light color and attenuation, if applicable
         int light_ind = current_lights->get_int_val();
-        if (scene.lights[light_ind] != NULL && scene.lights.size() > light_ind) {
+        if (scene.lights.size() > light_ind && scene.lights[light_ind] != NULL) {
             
             string type = scene.lights[light_ind]->type;
             vec3f color = get_color();
@@ -1432,7 +1297,7 @@ void setup_glui() {
     current_lights->add_item(-1, "");
     glui->add_checkbox_to_panel(light_panel, "Render Lights", NULL, 1, toggle_lights);
     light_prop_panel = glui->add_panel_to_panel(light_panel, "Properties");
-    list_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Color", &current_light_color);
+    list_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Color", &current_light_color, 1, handle_update);
     list_light_colors->add_item(LightColor::White, "White");
     list_light_colors->add_item(LightColor::Red, "Red");
     list_light_colors->add_item(LightColor::Green, "Green");

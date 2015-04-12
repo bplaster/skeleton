@@ -274,7 +274,7 @@ vec3f canvashdl::to_window(vec2i pixel)
 	 * convert it into window coordinates (x from -1 to 1 and y from -1 to 1).
 	 */
     vec3f result(2.0*(float)pixel[0]/(float)(width-1) - 1.0,
-                 2.0*(float)(height - 1 - pixel[1])/(float)(height-1) - 1.0,
+                 2.0*(float)(height - 1.0 - pixel[1])/(float)(height-1.0) - 1.0,
                  1.0);
     
     return result;
@@ -327,14 +327,7 @@ vec3f canvashdl::shade_vertex(vec8f v, vector<float> &varying)
     get_uniform("material", material);
     
     vec4f eye_space_vertex;
-    
-    if(material) {
-        eye_space_vertex = material->shade_vertex(this, vec3f(v[0],v[1],v[2]), vec3f(v[3],v[4],v[5]), varying);
-    } else {
-        eye_space_vertex = matrices[projection_matrix]*matrices[modelview_matrix]*homogenize(v);
-        eye_space_vertex /= eye_space_vertex[3];
-    }
-    
+    eye_space_vertex = material->shade_vertex(this, vec3f(v[0],v[1],v[2]), vec3f(v[3],v[4],v[5]), varying);
     return eye_space_vertex;
 
 }
@@ -355,12 +348,8 @@ vec3f canvashdl::shade_fragment(vector<float> varying)
     get_uniform("material", material);
     
     vec3f color;
-    if(material) {
-        color = material->shade_fragment(this, varying);
-        color *= 255.;
-    } else {
-        color = vec3f(255.0,255.0,255.0);
-    }
+    color = material->shade_fragment(this, varying);
+    color *= 255.;
     
 	return color;
 }
@@ -511,9 +500,9 @@ void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i 
     for (int i = 0; i < dx; i++) {
         xy[0]++;
         t123 = (float)(vp2[0] - xy[0])/(float)(vp2[0] - vp1[0]);
-        xy[2] = (int)(t123*vp1[2] + (1-t123)*vp2[2]);
+        xy[2] = (int)(t123*vp1[2] + (1.-t123)*vp2[2]);
         for (int j = 0; j < v1_varying.size(); j++) {
-            v[j] = t123*v1_varying[j] + (1-t123)*v2_varying[j];
+            v[j] = t123*v1_varying[j] + (1.-t123)*v2_varying[j];
         }
         plot(xy, v);
     }
@@ -580,33 +569,26 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     
     int e2 = 2 * dy2 - dx2;
     int e3 = 2 * dy3 - dx3;
-
-    for (int i = 0; i <= dx2; i++)
-    {
-        // Interpolate Z values
-        // TODO: catch case if denominator is zero
-        t12 = (float)(s2[1] - t2[1])/(float)(s2[1] - s1[1]);
-        t13 = (float)(s3[1] - t3[1])/(float)(s3[1] - s1[1]);
-        t2[2] = t12*s1[2] + (1-t12)*s2[2];
-        t3[2] = t13*s1[2] + (1-t13)*s3[2];
+    
+    // Plot based on shading model
+    if (shade_model == none || shade_model == flat) {
+        // Plot line between t2 and t3
+        plot_horizontal_line(t2, ave_varying, t3, ave_varying);
         
-        // Plot based on shading model
-        if (shade_model == none || shade_model == flat) {
-            // Plot line between t2 and t3
-            plot_horizontal_line(t2, ave_varying, t3, ave_varying);
-            
-        } else {
-            // Interpolate varying
-            for (int j = 0; j < t2_varying.size(); j++) {
-                t2_varying[j] = t12*v1_varying[j] + (1-t12)*v2_varying[j];
-                t3_varying[j] = t13*v1_varying[j] + (1-t13)*v3_varying[j];
-            }
-            // Plot line between t2 and t3
-            plot_horizontal_line(t2, t2_varying, t3, t3_varying);
+    } else {
+        // Interpolate varying
+        for (int j = 0; j < t2_varying.size(); j++) {
+            t2_varying[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
+            t3_varying[j] = t13*v1_varying[j] + (1.-t13)*v3_varying[j];
         }
-        
+        // Plot line between t2 and t3
+        plot_horizontal_line(t2, t2_varying, t3, t3_varying);
+    }
+
+    for (int i = 0; i < dx2; i++)
+    {
         // Trace next value of t2
-        while (e2 >= 0 && dx2 != 0)
+        while (e2 >= 0)
         {
             if (swap2)
                 t2[0] += dx2_sign;
@@ -640,6 +622,28 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
                 t3[0] += dx3_sign;
             
             e3 = e3 + 2 * dy3;
+        }
+        
+        // Interpolate Z values
+        t12 = (float)(s2[1] - t2[1])/(float)(s2[1] - s1[1]);
+        t13 = (float)(s3[1] - t3[1])/(float)(s3[1] - s1[1]);
+        
+        t2[2] = t12*s1[2] + (1.-t12)*s2[2];
+        t3[2] = t13*s1[2] + (1.-t13)*s3[2];
+        
+        // Plot based on shading model
+        if (shade_model == none || shade_model == flat) {
+            // Plot line between t2 and t3
+            plot_horizontal_line(t2, ave_varying, t3, ave_varying);
+            
+        } else {
+            // Interpolate varying
+            for (int j = 0; j < t2_varying.size(); j++) {
+                t2_varying[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
+                t3_varying[j] = t13*v1_varying[j] + (1.-t13)*v3_varying[j];
+            }
+            // Plot line between t2 and t3
+            plot_horizontal_line(t2, t2_varying, t3, t3_varying);
         }
     }
 }
@@ -734,13 +738,13 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
                 
                 // Interpolate Z
                 float t13 = (float)(vi3[1] - y)/(float)(vi3[1] - vi1[1]);
-                int z = (int)(t13*vi1[2] + (1-t13)*vi3[2]);
+                int z = (int)(t13*vi1[2] + (1.-t13)*vi3[2]);
                 vec3i vi4 (x, y, z);
 
                 // Interpolate Varying
                 vector<float> v4_varying = v2_varying;
                 for (int j = 0; j < v4_varying.size(); j++) {
-                    v4_varying[j] = t13*v1_varying[j] + (1-t13)*v3_varying[j];
+                    v4_varying[j] = t13*v1_varying[j] + (1.-t13)*v3_varying[j];
                 }
                 
                 // Plot top and bottom triangles

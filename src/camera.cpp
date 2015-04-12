@@ -1,12 +1,12 @@
 #include "camera.h"
 #include "object.h"
-#include "model.h"
+#include "primitive.h"
 
 camerahdl::camerahdl()
 {
 	position = vec3f(0., 0., 3.0);
 	orientation = vec3f(0.0, 0.0, 0.0);
-    model = new modelhdl("res/models/cow.obj");
+    model = new pyramidhdl(0.2, 0.5, 4.0);
 	type = "camera";
 	focus = NULL;
 	radius = 10.0f;

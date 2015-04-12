@@ -152,8 +152,15 @@ void objecthdl::draw_bound(canvashdl *canvas)
     bound_indices.push_back(6);
     bound_indices.push_back(7);
 
+    // Give bound material
+    uniformhdl *bound_material = new uniformhdl();
+    bound_material->ambient = vec3f(1.0,1.0,1.0);
+    canvas->uniform["material"] = bound_material;
+
     // Draw bounding lines
     canvas->draw_lines(bound_geometry, bound_indices);
+    
+    canvas->uniform.erase("material");
     
     // Undo transformations
     canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
