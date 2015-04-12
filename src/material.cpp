@@ -169,10 +169,6 @@ vec3f nonuniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal,
 
     vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(normal);
     
-    vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
-    ambient *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
-    diffuse *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
-    specular *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
 
     // Store varying
     if(canvas->shade_model == canvashdl::phong) {
@@ -195,7 +191,12 @@ vec3f nonuniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal,
             }
         }
         
-        vec3f color = this->emission + light_ambient*this->ambient + light_diffuse*this->diffuse + light_specular*this->specular;
+        vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
+        ambient *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+        diffuse *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+        specular *= (cosf(vertex[0]*M_PI*4)+2.0)/2.0;
+        
+        vec3f color = this->emission + light_ambient*ambient + light_diffuse*diffuse + light_specular*specular;
         for (int i = 0; i < 3; i++) {
             varying.push_back(color[i]);
         }
@@ -242,6 +243,7 @@ vec3f nonuniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) c
                     (*iter)->shade(light_ambient, light_diffuse, light_specular, eye_space_vertex, eye_space_normal, this->shininess);
                 }
             }
+            
             
             color = this->emission + light_ambient*this->ambient + light_diffuse*this->diffuse + light_specular*this->specular;
             
