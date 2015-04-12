@@ -879,66 +879,54 @@ vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
     vector<vec8f> clipped_points = {v1,v2,v3};
     
     for (int i = 0; i < planes.capacity(); i++) {
-        clipped_points = clip_triangle_against_plane (clipped_points, planes[i]);
+        //clipped_points = clip_triangle_against_plane (clipped_points, planes[i]);
+        vector<vec8f> new_clipping_points;
+        
+        for (int j = 0; j < clipped_points.size(); j++) {
+            //clip_line_against_plane (clipped_points[j], clipped_points[(j+1)%clipped_points.size()], planes[i], new_clipping_points);
+            vec8f v1 = clipped_points[j];
+            vec8f v2 = clipped_points[(j+1)%clipped_points.size()];
+            vec3f v1_coords = {v1[0], v1[1], v1[2]};
+            vec3f v2_coords = {v2[0], v2[1], v3[2]};
+            
+            float d1 = dot(v1_coords, planes[i].normal) + planes[i].distance;
+            float d2 = dot(v2_coords, planes[i].normal) + planes[i].distance;
+            
+            if (d1 < 0 && d2 >= 0){ // Outside to inside (first point outside and second point inside)
+                
+                float s = d2/(d2 - d1);
+                vec3f intersection_point = get_intersection_point (v2_coords, v1_coords, s);
+                //v1_coords = intersection_point;
+                v1.set(0, 3, intersection_point);
+                new_clipping_points.push_back(v1);
+                new_clipping_points.push_back(v2);
+                
+                //cout << "Outside to inside" << endl;
+                
+            } else if (d1 >= 0 && d2 < 0) { // Inside to outside (first point inside and second point outside)
+                
+                float s = d1/(d1 - d2);
+                vec3f intersection_point = get_intersection_point (v1_coords, v2_coords, s);
+                //v1_coords = intersection_point;
+                v1.set(0, 3, intersection_point);
+                new_clipping_points.push_back(v1);
+                
+                //cout << "Inside to outside" << endl;
+                
+            } else if (d1 >= 0 && d2>= 0){ // Both points inside plane
+                new_clipping_points.push_back(v2);
+                
+                //cout << "Both inside" << endl;
+            }
+        }
+        clipped_points = new_clipping_points;
+        //return new_clipping_points;
         if (clipped_points.size() == 0) {
             break;
         }
     }
     
     return clipped_points;
-}
-
-// clips a triangle against a single plane
-vector<vec8f> canvashdl::clip_triangle_against_plane (vector<vec8f> triangle_points, plane clipping_plane) {
-    //cout << "Clip triangle against plane called" << endl;
-    //cout << triangle_points.size() << endl;
-    vector<vec8f> new_clipping_points;
-    
-    for (int i = 0; i < triangle_points.size() - 1; i++) {
-        clip_line_against_plane (triangle_points[i], triangle_points[i+1], clipping_plane, new_clipping_points);
-    }
-    clip_line_against_plane (triangle_points[triangle_points.size() - 1], triangle_points[0], clipping_plane, new_clipping_points);
-    
-    return new_clipping_points;
-}
-
-void canvashdl::clip_line_against_plane (vec8f v1, vec8f v2, plane clipping_plane, vector<vec8f> &new_clipping_points) {
-    //cout << "Clip line against plane called" << endl;
-    vec3f v1_coords = {v1[0], v1[1], v1[2]};
-    vec3f v2_coords = {v2[0], v2[1], v2[2]};
-    
-    float d1 = dot(v1_coords, clipping_plane.normal) + clipping_plane.distance;
-    float d2 = dot(v2_coords, clipping_plane.normal) + clipping_plane.distance;
-    
-    if (d1 < 0 && d2 >= 0){ // Outside to inside (first point outside and second point inside)
-        
-        float s = d2/(d2 - d1);
-        vec3f intersection_point = get_intersection_point (v2_coords, v1_coords, s);
-        v1_coords = intersection_point;
-        v1.set(0, 3, v1_coords);
-        new_clipping_points.push_back(v1);
-        new_clipping_points.push_back(v2);
-        
-        //cout << "Outside to inside" << endl;
-        
-    } else if (d1 >= 0 && d2 < 0) { // Inside to outside (first point inside and second point outside)
-        
-        float s = d1/(d1 - d2);
-        vec3f intersection_point = get_intersection_point (v1_coords, v2_coords, s);
-        v1_coords = intersection_point;
-        v1.set(0, 3, v1_coords);
-        new_clipping_points.push_back(v1);
-        
-        //cout << "Inside to outside" << endl;
-        
-    } else if (d1 >= 0 && d2>= 0){ // Both points inside plane
-        new_clipping_points.push_back(v2);
-        
-        //cout << "Both inside" << endl;
-    } else {
-        //cout << "Both outside" << endl;
-    }
-
 }
 
 // Clip given line with all 6 frustum planes and return final points
