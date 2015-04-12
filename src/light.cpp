@@ -50,7 +50,7 @@ void directionalhdl::update(canvashdl *canvas)
     canvas->rotate(this->model->orientation[1], vec3f(0.,1.,0.));
     canvas->rotate(this->model->orientation[0], vec3f(1.,0.,0.));
     
-    this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1,0.,1.);
+    this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1.,0.,1.);
     
     // Undo transformations
     canvas->rotate(-this->model->orientation[0], vec3f(1.,0.,0.));
@@ -179,7 +179,7 @@ void spothdl::update(canvashdl *canvas)
     canvas->rotate(this->model->orientation[0], vec3f(1.,0.,0.));
     
     this->position = canvas->matrices[canvashdl::modelview_matrix]*vec4f(0.,0.,0.,1.);
-    this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1,0.,1.);
+    this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1.,0.,1.);
     
     canvas->rotate(-this->model->orientation[0], vec3f(1.,0.,0.));
     canvas->rotate(-this->model->orientation[1], vec3f(0.,1.,0.));

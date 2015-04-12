@@ -16,8 +16,8 @@ uniformhdl::uniformhdl()
 	type = "uniform";
 	emission = vec3f(0.0, 0.0, 0.0);
 	ambient = vec3f(0.1, 0.1, 0.1);
-	diffuse = vec3f(1.0, 1.0, 1.0);
-	specular = vec3f(1.0, 1.0, 1.0);
+	diffuse = vec3f(0.2, 0.2, 0.2);
+	specular = vec3f(0.2, 0.2, 0.2);
 	shininess = 1.0;
 }
 
@@ -47,19 +47,21 @@ vec3f uniformhdl::shade_vertex(canvashdl *canvas, vec3f vertex, vec3f normal, ve
     }
     
     vec3f intensity = this->emission + ambient + diffuse + specular;
-    // Overflow
-    for (int i = 0; i < 3; i++) {
-        if (intensity[i] > 1) {
-            intensity[i] = 1;
+
+    // Store varying
+    if(canvas->shade_model == canvashdl::phong) {
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(vertex[i]);
         }
-        varying.push_back(intensity[i]);
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(normal[i]);
+        }
+    } else {
+        for (int i = 0; i < 3; i++) {
+            varying.push_back(intensity[i]);
+        }
     }
-    
-    // Normals for Phong shading
-    for (int i = 0; i < 3; i++) {
-        varying.push_back(normal[i]);
-    }
-    
+
 	/* TODO Assignment 2: Implement flat and gouraud shading: Get the lights from the canvas using get_uniform.
 	 * Add up the results of the shade functions for the lights. Transform the vertex and normal from world
 	 * coordinates to eye coordinates before passing them into the shade functions. Calculate the final color
@@ -96,6 +98,21 @@ vec3f uniformhdl::shade_fragment(canvashdl *canvas, vector<float> &varying) cons
             break;
         }
         case canvashdl::phong: {
+            vec4f eye_space_vertex = canvas->matrices[canvashdl::modelview_matrix]*homogenize(vec3f(varying[0],varying[1],varying[2]));
+            vec4f eye_space_normal = canvas->matrices[canvashdl::normal_matrix]*homogenize(vec3f(varying[3],varying[4],varying[5]));
+            
+            vec3f ambient = this->ambient, diffuse = this->diffuse, specular = this->specular;
+            
+            const vector<lighthdl*> *lights;
+            canvas->get_uniform("lights", lights);
+            
+            for (vector<lighthdl*>::const_iterator iter = lights->begin(); iter != lights->end(); ++iter) {
+                if (*iter) {
+                    (*iter)->shade(ambient, diffuse, specular, eye_space_vertex, eye_space_normal, this->shininess);
+                }
+            }
+            
+            color = this->emission + ambient + diffuse + specular;
             
             break;
         }
