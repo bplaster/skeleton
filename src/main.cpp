@@ -139,6 +139,7 @@ void handle_manip(int val);
 void setup_glui();
 void set_camera_info(int obj_ind);
 void set_light_info(int obj_ind);
+void set_material_info(int obj_ind);
 
 
 void init(string working_directory)
@@ -754,6 +755,7 @@ void create_object (int val){
             break;
     }
     current_objects->set_int_val(index);
+    set_material_info(index);
     glutPostRedisplay();
 }
 
@@ -1033,13 +1035,11 @@ void handle_normal (int val){
 void handle_material (int val) {
     string name = "material";
     materialhdl *material;
-    switch (val) {
+    switch (current_material) {
         case Material::Uniform:
-            current_material = Material::Uniform;
             material = new uniformhdl();
             break;
         case Material::NonUniform:
-            current_material = Material::NonUniform;
             material = new nonuniformhdl();
             break;
         default:
@@ -1057,6 +1057,20 @@ void handle_material (int val) {
         
     }
     glutPostRedisplay();
+}
+
+void set_material_info(int obj_ind){
+    list_material->set_int_val(0);
+    
+    if (scene.objects[obj_ind]->material["material"]) {
+        string type = scene.objects[obj_ind]->material["material"]->type;
+        if (type == "uniform") {
+            list_material->set_int_val(Material::Uniform);
+            
+        } else if (	type == "non_uniform") {
+            list_material->set_int_val(Material::NonUniform);
+        }
+    }
 }
 
 void handle_menu(int val)
@@ -1165,6 +1179,7 @@ void set_light_info(int obj_ind){
             attenuation_text_y->set_float_val(light->attenuation[1]);
             attenuation_text_z->set_float_val(light->attenuation[2]);
         }
+        
     }
 }
 
@@ -1333,6 +1348,14 @@ void selected_object(int id) {
             }
             break;
         }
+        case 3: { // Object
+            int obj_ind = current_objects->get_int_val();
+            if (obj_ind < scene.objects.size() && obj_ind >= 0) {
+                set_material_info(obj_ind);
+            }
+
+            break;
+        }
         default:
             break;
     }
@@ -1352,7 +1375,7 @@ void setup_glui() {
     GLUI_Panel *scene_panel = glui->add_panel("Current Scene");
     
     object_panel = glui->add_panel_to_panel(scene_panel, "Object");
-    current_objects = glui->add_listbox_to_panel(object_panel, "", NULL, 1, selected_object);
+    current_objects = glui->add_listbox_to_panel(object_panel, "", NULL, 3, selected_object);
     current_objects->add_item(-1, "");
     focus_checkbox = glui->add_checkbox_to_panel(object_panel, "Focus on Object", NULL, 1, focus_object);
     list_material = glui->add_listbox_to_panel(object_panel, "Material", &current_material, -1, handle_material);

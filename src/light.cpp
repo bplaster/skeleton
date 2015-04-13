@@ -241,7 +241,7 @@ void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f verte
 
 }
 
-ambienthdl::ambienthdl() : lighthdl(white*0.5f, white*0.0f, white*0.0f)
+ambienthdl::ambienthdl() : lighthdl(white*0.7f, white*0.0f, white*0.0f)
 {
     type = "ambient";
     model = new boxhdl(0.5, 0.5, 0.5);
