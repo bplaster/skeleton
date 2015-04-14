@@ -40,8 +40,8 @@ private:
 
 	// Bresenham's Algorithms
     void plot(vec3i xyz, vector<float> varying);
-    void plot_point(vec3f v, vector<float> varying);
-    void plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<float> v2_varying);
+    void plot_point(vec3i v, vector<float> varying);
+    void plot_line(vec3i vp1, vector<float> v1_varying, vec3i vp2, vector<float> v2_varying);
     void plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2, vector<float> v2_varying, vec3i s3, vector<float> v3_varying, vector<float> ave_varying);
     void plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vector<float> v2_varying, vec3f v3, vector<float> v3_varying);
     int sign(int x);

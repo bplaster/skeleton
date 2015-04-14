@@ -382,25 +382,24 @@ void canvashdl::plot(vec3i xyz, vector<float> varying)
 
 /* plot_point
  *
- * Plot a point given in window coordinates.
+ * Plot a point given in pixel coordinates.
  */
-void canvashdl::plot_point(vec3f v, vector<float> varying)
+void canvashdl::plot_point(vec3i v, vector<float> varying)
 {
 	// TODO Assignment 1: Plot a point given in window coordinates.
-    vec2i vp = to_pixel(v);
-    plot(vp,varying);
+    plot(v,varying);
 }
 
 /* plot_line
  *
- * Plot a line defined by two points in window coordinates.
+ * Plot a line defined by two points in pixel coordinates.
  */
-void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<float> v2_varying)
+void canvashdl::plot_line(vec3i vp1, vector<float> v1_varying, vec3i vp2, vector<float> v2_varying)
 {
 	// TODO Assignment 1: Implement Bresenham's Algorithm.
     // Convert to Pixel coordinates here
-    vec3i vp1 = to_pixel(v1);
-    vec3i vp2 = to_pixel(v2);
+//    vec3i vp1 = to_pixel(v1);
+//    vec3i vp2 = to_pixel(v2);
     
     // Variables
     vec3i xy, tmp;
@@ -585,8 +584,14 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     
     if (shade_model == flat || shade_model == none) {
         t2_varying = t3_varying = ave_varying;
+        plot_line(s1, ave_varying, s2, ave_varying);
+        plot_line(s2, ave_varying, s3, ave_varying);
+        plot_line(s3, ave_varying, s1, ave_varying);
     } else {
         t2_varying = t3_varying = v1_varying;
+        plot_line(s1, v1_varying, s2, v2_varying);
+        plot_line(s2, v2_varying, s3, v3_varying);
+        plot_line(s3, v3_varying, s1, v1_varying);
     }
     
     // Swap values based on if slope > 1
@@ -684,19 +689,21 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
 	 * triangle as 3 points or 3 lines.
 	 */
     
+    vec3i vi1 = to_pixel(v1), vi2 = to_pixel(v2), vi3 = to_pixel(v3);
+    
     switch (polygon_mode) {
         case point: {
             // 3 Point implementation
-            plot_point(v1, v1_varying);
-            plot_point(v2, v2_varying);
-            plot_point(v3, v3_varying);
+            plot_point(vi1, v1_varying);
+            plot_point(vi2, v2_varying);
+            plot_point(vi3, v3_varying);
             break;
         }
         case line: {
             // 3 Line implementation
-            plot_line(v1, v1_varying, v2, v2_varying);
-            plot_line(v2, v2_varying, v3, v3_varying);
-            plot_line(v3, v3_varying, v1, v1_varying);
+            plot_line(vi1, v1_varying, vi2, v2_varying);
+            plot_line(vi2, v2_varying, vi3, v3_varying);
+            plot_line(vi3, v3_varying, vi1, v1_varying);
             break;
         }
         case fill: {
@@ -710,11 +717,11 @@ void canvashdl::plot_triangle(vec3f v1, vector<float> v1_varying, vec3f v2, vect
             }
             
             // Calculate pixel coordinates, retain z-value
-            vec3i temp, vi1, vi2, vi3;
+            vec3i temp;
             vector<float> tempV;
-            vi1 = to_pixel(v1);
-            vi2 = to_pixel(v2);
-            vi3 = to_pixel(v3);
+//            vi1 = to_pixel(v1);
+//            vi2 = to_pixel(v2);
+//            vi3 = to_pixel(v3);
             
             // Sort by Y
             if (vi1[1] > vi2[1])
@@ -799,7 +806,7 @@ void canvashdl::draw_points(const vector<vec8f> &geometry)
     for (vector<vec8f>::iterator iter = new_geometry.begin(); iter != new_geometry.end(); ++iter) {
         vector<float> varying;
         *iter = shade_vertex(*iter, varying);
-        plot_point(*iter, varying);
+        plot_point(to_pixel(*iter), varying);
     }
 }
 
@@ -836,7 +843,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
     
     // Plot lines
     for (int i = 0; i < new_geometry.size(); i+=2) {
-        plot_line(new_geometry[i], new_varying[i], new_geometry[i+1], new_varying[i+1]);
+        plot_line(to_pixel(new_geometry[i]), new_varying[i], to_pixel(new_geometry[i+1]), new_varying[i+1]);
     }
 }
 

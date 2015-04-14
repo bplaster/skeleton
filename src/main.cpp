@@ -714,7 +714,7 @@ void create_object (int val){
         }
         case Object::Cylinder : {
             
-            // Create dynamic sphere object
+            // Create dynamic cylinder object
             cylinderhdl *cylinder = new cylinderhdl(1.0, 4.0, 10.0);
             scene.objects.push_back(cylinder);
             index = (int)scene.objects.size()-1;
@@ -724,7 +724,7 @@ void create_object (int val){
         case Object::Sphere : {
             
             // Create dynamic sphere object
-            spherehdl *sphere = new spherehdl(1.0, 16.0, 16.0);
+            spherehdl *sphere = new spherehdl(1.0, 16.0, 24.0);
             scene.objects.push_back(sphere);
             index = (int)scene.objects.size()-1;
             current_objects->add_item(index, "Sphere");
