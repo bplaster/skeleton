@@ -84,10 +84,9 @@ int current_normal = scenehdl::Normal::none;
 int current_shading = canvashdl::Shading::none;
 int current_model;
 float fovy, aspect, width, height, near, far;
-float attenuation0;
-float attenuation1;
-float attenuation2;
-int current_light_color;
+float attenuation0, attenuation1, attenuation2;
+float ambient, diffuse, specular;
+int current_ambient, current_specular, current_diffuse;
 int current_material;
 
 int object_option_menu_id;
@@ -110,16 +109,15 @@ GLUI_Listbox *list_material;
 GLUI_Panel *camera_panel;
 GLUI_Panel *light_panel;
 GLUI_Panel *shading_panel;
-GLUI_Listbox *list_light_colors;
+GLUI_Listbox *ambient_light_colors, *diffuse_light_colors, *specular_light_colors;
 GLUI_Panel *object_panel;
 GLUI_EditText *fovy_text;
 GLUI_EditText *aspect_text;
 GLUI_EditText *near_text;
 GLUI_EditText *far_text;
 GLUI_EditText *light_color_text;
-GLUI_EditText *attenuation_text_x;
-GLUI_EditText *attenuation_text_y;
-GLUI_EditText *attenuation_text_z;
+GLUI_EditText *attenuation_text_x, *attenuation_text_y, *attenuation_text_z;
+GLUI_EditText *ambient_text, *diffuse_text, *specular_text;
 
 GLUI_Listbox *list_model;
 GLUI_Checkbox *focus_checkbox;
@@ -1081,10 +1079,10 @@ void handle_menu(int val)
     }
 }
 
-vec3f get_color()
+vec3f get_color(int val)
 {
     vec3f color;
-    switch (current_light_color){
+    switch (val){
         case LightColor::White:
             color = white;
             break;
@@ -1129,30 +1127,32 @@ void handle_update(int val)
         if (scene.lights.size() > light_ind && scene.lights[light_ind] != NULL) {
             
             string type = scene.lights[light_ind]->type;
-            vec3f color = get_color();
-            
+            vec3f color_ambient = get_color(current_ambient);
+            vec3f color_specular = get_color(current_specular);
+            vec3f color_diffuse = get_color(current_diffuse);
+
             if (type.compare("ambient") == 0){
-                scene.lights[light_ind]->ambient = color;
+                scene.lights[light_ind]->ambient = color_ambient;
             }
             else if (type.compare("directional") == 0){
-                scene.lights[light_ind]->ambient = color*0.1f;
-                scene.lights[light_ind]->diffuse = color*0.5f;
-                scene.lights[light_ind]->specular = color;
+                scene.lights[light_ind]->ambient = color_ambient*0.1f;
+                scene.lights[light_ind]->diffuse = color_diffuse*0.5f;
+                scene.lights[light_ind]->specular = color_specular;
             }
             else if (type.compare("point") == 0){
                 vec3f attenuation_vector = {attenuation0,attenuation1,attenuation2};
                 ((pointhdl*)scene.lights[light_ind])->attenuation = attenuation_vector;
-                scene.lights[light_ind]->ambient = color*0.1f;
-                scene.lights[light_ind]->diffuse = color*0.5f;
-                scene.lights[light_ind]->specular = color;
+                scene.lights[light_ind]->ambient = color_ambient*0.1f;
+                scene.lights[light_ind]->diffuse = color_diffuse*0.5f;
+                scene.lights[light_ind]->specular = color_specular;
                 
             }
             else if (type.compare("spot") == 0){
                 vec3f attenuation_vector = {attenuation0,attenuation1,attenuation2};
                 ((spothdl*)scene.lights[light_ind])->attenuation = attenuation_vector;
-                scene.lights[light_ind]->ambient = color*0.1f;
-                scene.lights[light_ind]->diffuse = color*0.5f;
-                scene.lights[light_ind]->specular = color;
+                scene.lights[light_ind]->ambient = color_ambient*0.1f;
+                scene.lights[light_ind]->diffuse = color_diffuse*0.5f;
+                scene.lights[light_ind]->specular = color_specular;
             }
         }
     }
@@ -1179,7 +1179,6 @@ void set_light_info(int obj_ind){
             attenuation_text_y->set_float_val(light->attenuation[1]);
             attenuation_text_z->set_float_val(light->attenuation[2]);
         }
-        
     }
 }
 
@@ -1398,17 +1397,43 @@ void setup_glui() {
     current_lights->add_item(-1, "");
     glui->add_checkbox_to_panel(light_panel, "Render Lights", NULL, 1, toggle_lights);
     light_prop_panel = glui->add_panel_to_panel(light_panel, "Properties");
-    list_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Color", &current_light_color, 1, handle_update);
-    list_light_colors->add_item(LightColor::White, "White");
-    list_light_colors->add_item(LightColor::Red, "Red");
-    list_light_colors->add_item(LightColor::Green, "Green");
-    list_light_colors->add_item(LightColor::Blue, "Blue");
-    list_light_colors->add_item(LightColor::Orange, "Orange");
-    list_light_colors->add_item(LightColor::Violet, "Violet");
-    list_light_colors->add_item(LightColor::Indigo, "Indigo");
-    list_light_colors->add_item(LightColor::Brown, "Brown");
-    list_light_colors->add_item(LightColor::Black, "Black");
-    list_light_colors->add_item(LightColor::Yellow, "Yellow");
+    
+    ambient_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Ambient", &current_ambient, 1, handle_update);
+    ambient_light_colors->add_item(LightColor::White, "White");
+    ambient_light_colors->add_item(LightColor::Red, "Red");
+    ambient_light_colors->add_item(LightColor::Green, "Green");
+    ambient_light_colors->add_item(LightColor::Blue, "Blue");
+    ambient_light_colors->add_item(LightColor::Orange, "Orange");
+    ambient_light_colors->add_item(LightColor::Violet, "Violet");
+    ambient_light_colors->add_item(LightColor::Indigo, "Indigo");
+    ambient_light_colors->add_item(LightColor::Brown, "Brown");
+    ambient_light_colors->add_item(LightColor::Black, "Black");
+    ambient_light_colors->add_item(LightColor::Yellow, "Yellow");
+    
+    diffuse_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Diffuse", &current_diffuse, 1, handle_update);
+    diffuse_light_colors->add_item(LightColor::White, "White");
+    diffuse_light_colors->add_item(LightColor::Red, "Red");
+    diffuse_light_colors->add_item(LightColor::Green, "Green");
+    diffuse_light_colors->add_item(LightColor::Blue, "Blue");
+    diffuse_light_colors->add_item(LightColor::Orange, "Orange");
+    diffuse_light_colors->add_item(LightColor::Violet, "Violet");
+    diffuse_light_colors->add_item(LightColor::Indigo, "Indigo");
+    diffuse_light_colors->add_item(LightColor::Brown, "Brown");
+    diffuse_light_colors->add_item(LightColor::Black, "Black");
+    diffuse_light_colors->add_item(LightColor::Yellow, "Yellow");
+    
+    specular_light_colors = glui->add_listbox_to_panel(light_prop_panel, "Specular", &current_specular, 1, handle_update);
+    specular_light_colors->add_item(LightColor::White, "White");
+    specular_light_colors->add_item(LightColor::Red, "Red");
+    specular_light_colors->add_item(LightColor::Green, "Green");
+    specular_light_colors->add_item(LightColor::Blue, "Blue");
+    specular_light_colors->add_item(LightColor::Orange, "Orange");
+    specular_light_colors->add_item(LightColor::Violet, "Violet");
+    specular_light_colors->add_item(LightColor::Indigo, "Indigo");
+    specular_light_colors->add_item(LightColor::Brown, "Brown");
+    specular_light_colors->add_item(LightColor::Black, "Black");
+    specular_light_colors->add_item(LightColor::Yellow, "Yellow");
+    
     attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (const):", GLUI_EDITTEXT_FLOAT, &attenuation0, 1, handle_update);
     attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power1):", GLUI_EDITTEXT_FLOAT, &attenuation1, 1, handle_update);
     attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power2):", GLUI_EDITTEXT_FLOAT, &attenuation2, 1, handle_update);

@@ -361,19 +361,21 @@ vec3f canvashdl::shade_fragment(vector<float> varying)
 void canvashdl::plot(vec3i xyz, vector<float> varying)
 {
 	// TODO Assignment 1: Plot a pixel, calling the fragment shader.
-    vec3f color = shade_fragment(varying);
     if ((xyz[0] >= 0 && xyz[0] < width) && (xyz[1] >=0 && xyz[1] < height)) {
         
         /* TODO Assignment 2: Compare the z value against the depth buffer and
          * only render if its less. Then set the depth buffer.
          */
         if (xyz[2] < depth_buffer[width*xyz[1]+xyz[0]]){
-            color_buffer[3*(width*xyz[1]+xyz[0])+0] = color[red];
-            color_buffer[3*(width*xyz[1]+xyz[0])+1] = color[green];
-            color_buffer[3*(width*xyz[1]+xyz[0])+2] = color[blue];
+            int index = (width*xyz[1]+xyz[0]);
+            
+            vec3f color = shade_fragment(varying);
+            color_buffer[3*index] = color[red];
+            color_buffer[3*index+1] = color[green];
+            color_buffer[3*index+2] = color[blue];
             
             // Set depth buffer
-            depth_buffer[width*xyz[1]+xyz[0]] = xyz[2];
+            depth_buffer[index] = xyz[2];
         }
     }
 }
@@ -446,7 +448,7 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
             }
             
             // Interpolate varying
-            float t12 = (float)(vp2[0] - xy[0])/(float)(vp2[0] - vp1[0]);
+            float t12 = (float)(vp2[0] - xy[0])/dx;
             xy[2] = (int)(t12*vp1[2] + (1.-t12)*vp2[2]);
             for (int j = 0; j < v1_varying.size(); j++) {
                 v[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
@@ -494,7 +496,7 @@ void canvashdl::plot_line(vec3f v1, vector<float> v1_varying, vec3f v2, vector<f
             }
             
             // Interpolate varying
-            float t12 = (float)(vp2[1] - xy[1])/(float)(vp2[1] - vp1[1]);
+            float t12 = (float)(vp2[1] - xy[1])/dy;
             xy[2] = (int)(t12*vp1[2] + (1.-t12)*vp2[2]);
             for (int j = 0; j < v1_varying.size(); j++) {
                 v[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
@@ -530,7 +532,7 @@ void canvashdl::plot_horizontal_line(vec3i vp1, vector<float> v1_varying, vec3i 
 
     for (int i = 0; i < dx; i++) {
         xy[0]++;
-        t123 = (float)(vp2[0] - xy[0])/(float)(vp2[0] - vp1[0]);
+        t123 = (float)(vp2[0] - xy[0])/dx;
         xy[2] = (int)(t123*vp1[2] + (1.-t123)*vp2[2]);
         for (int j = 0; j < v1_varying.size(); j++) {
             v[j] = t123*v1_varying[j] + (1.-t123)*v2_varying[j];
@@ -568,7 +570,7 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     
     // Variables
     vec3i t2 = s1, t3 = s1;
-    vector<float> t2_varying = v1_varying, t3_varying = v1_varying; // TODO: interpolate
+    vector<float> t2_varying, t3_varying; // TODO: interpolate
     float t12 = 0., t13 = 0.;
     
     int dy2 = abs(s2[1] - s1[1]);
@@ -580,6 +582,12 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     int dy3_sign = sign(s3[1] - s1[1]);
     int dx3 = abs(s3[0] - s1[0]);
     int dx3_sign = sign(s3[0] - s1[0]);
+    
+    if (shade_model == flat || shade_model == none) {
+        t2_varying = t3_varying = ave_varying;
+    } else {
+        t2_varying = t3_varying = v1_varying;
+    }
     
     // Swap values based on if slope > 1
     bool swap2 = false, swap3 = false;
@@ -652,22 +660,16 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
         t3[2] = t13*s1[2] + (1.-t13)*s3[2];
         
         // Plot based on shading model
-        if (shade_model == none || shade_model == flat) {
-            // Plot line between t2 and t3
-            plot_horizontal_line(t2, ave_varying, t3, ave_varying);
-            
-        } else {
+        if (shade_model == gouraud || shade_model == phong) {
             // Interpolate varying
             for (int j = 0; j < t2_varying.size(); j++) {
                 t2_varying[j] = t12*v1_varying[j] + (1.-t12)*v2_varying[j];
                 t3_varying[j] = t13*v1_varying[j] + (1.-t13)*v3_varying[j];
             }
-            // Plot line between t2 and t3
-            plot_horizontal_line(t2, t2_varying, t3, t3_varying);
         }
+        // Plot line between t2 and t3
+        plot_horizontal_line(t2, t2_varying, t3, t3_varying);
     }
-    plot_horizontal_line(s2, v2_varying, s3, v3_varying);
-
 }
 
 
@@ -819,7 +821,7 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
         // Clip line
         vector<vec8f> new_points = clip_line(geometry[indices[i]], geometry[indices[i+1]]);
         
-        if (!new_points.empty()){
+//        if (!new_points.empty()){
         
             // Vertex shader
             for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
@@ -829,14 +831,12 @@ void canvashdl::draw_lines(const vector<vec8f> &geometry, const vector<int> &ind
                 new_geometry.push_back(*iter);
                 new_varying.push_back(varying);
             }
-        }
+//        }
     }
     
-    if (new_geometry.size()){
-        // Plot lines
-        for (int i = 0; i < new_geometry.size(); i+=2) {
-            plot_line(new_geometry[i], new_varying[i], new_geometry[i+1], new_varying[i+1]);
-        }
+    // Plot lines
+    for (int i = 0; i < new_geometry.size(); i+=2) {
+        plot_line(new_geometry[i], new_varying[i], new_geometry[i+1], new_varying[i+1]);
     }
 }
 
@@ -860,29 +860,36 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     vector<int> new_indices;
     vector<vector<float>> new_varying;
     
-    for (int i = 0; i < indices.size() - 2; i += 3) {
+    for (int i = 2; i < indices.size(); i += 3) {
         
         // Clip triangles
-        vector<vec8f> new_points = clip_triangle(geometry[indices[i]], geometry[indices[i+1]], geometry[indices[i+2]]);
+        vector<vec8f> new_points = {geometry[indices[i-2]], geometry[indices[i-1]], geometry[indices[i]]};
         
-        if (new_points.size() == 0){
-            continue;
-        }
-        
-        // Form new triangles (use fanning structure)
-        for (int i = 0; i < new_points.size() - 2; i ++){
-            new_indices.push_back((int)new_geometry.size());
-            new_indices.push_back((int)new_geometry.size() + i + 1);
-            new_indices.push_back((int)new_geometry.size() + i + 2);
-        }
-        
-        // Vertex shader
-        for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
+        for (int i = 0; i < planes.capacity(); i++) {
+            new_points = clip_triangle_against_plane (new_points, planes[i]);
             
-            vector<float> varying;
-            *iter = shade_vertex(*iter, varying);
-            new_geometry.push_back(*iter);
-            new_varying.push_back(varying);
+            if (new_points.size() == 0) {
+                break;
+            }
+        }
+        
+        if (new_points.size()){
+        
+            // Form new triangles (use fanning structure)
+            for (int j = 0; j < new_points.size() - 2; j++){
+                new_indices.push_back((int)new_geometry.size());
+                new_indices.push_back((int)new_geometry.size() + j + 1);
+                new_indices.push_back((int)new_geometry.size() + j + 2);
+            }
+            
+            // Vertex shader
+            for (vector<vec8f>::iterator iter = new_points.begin(); iter != new_points.end(); ++iter) {
+                
+                vector<float> varying;
+                *iter = shade_vertex(*iter, varying);
+                new_geometry.push_back(*iter);
+                new_varying.push_back(varying);
+            }
         }
     }
     
@@ -902,20 +909,20 @@ void canvashdl::draw_triangles(const vector<vec8f> &geometry, const vector<int> 
     }
 }
 
-vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
-{
-    vector<vec8f> clipped_points = {v1,v2,v3};
-    
-    for (int i = 0; i < planes.capacity(); i++) {
-        clipped_points = clip_triangle_against_plane (clipped_points, planes[i]);
-        
-        if (clipped_points.size() == 0) {
-            break;
-        }
-    }
-    
-    return clipped_points;
-}
+//vector<vec8f> canvashdl::clip_triangle(vec8f v1, vec8f v2, vec8f v3)
+//{
+//    vector<vec8f> clipped_points = {v1,v2,v3};
+//    
+//    for (int i = 0; i < planes.capacity(); i++) {
+//        clipped_points = clip_triangle_against_plane (clipped_points, planes[i]);
+//        
+//        if (clipped_points.size() == 0) {
+//            break;
+//        }
+//    }
+//    
+//    return clipped_points;
+//}
 
 // clips a triangle against a single plane
 vector<vec8f> canvashdl::clip_triangle_against_plane (vector<vec8f> triangle_points, plane clipping_plane) {
