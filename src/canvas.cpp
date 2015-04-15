@@ -583,12 +583,14 @@ void canvashdl::plot_half_triangle(vec3i s1, vector<float> v1_varying, vec3i s2,
     int dx3_sign = sign(s3[0] - s1[0]);
     
     if (shade_model == flat || shade_model == none) {
-        t2_varying = t3_varying = ave_varying;
+        t2_varying = ave_varying;
+        t3_varying = ave_varying;
         plot_line(s1, ave_varying, s2, ave_varying);
         plot_line(s2, ave_varying, s3, ave_varying);
         plot_line(s3, ave_varying, s1, ave_varying);
     } else {
-        t2_varying = t3_varying = v1_varying;
+        t2_varying = v1_varying;
+        t3_varying = v1_varying;
         plot_line(s1, v1_varying, s2, v2_varying);
         plot_line(s2, v2_varying, s3, v3_varying);
         plot_line(s3, v3_varying, s1, v1_varying);

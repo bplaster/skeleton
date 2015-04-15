@@ -52,6 +52,7 @@ void directionalhdl::update(canvashdl *canvas)
     canvas->rotate(this->model->orientation[1], vec3f(0.,1.,0.));
     canvas->rotate(this->model->orientation[0], vec3f(1.,0.,0.));
     
+    canvas->update_normal_matrix();
     this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1.,0.,1.);
     
     // Undo transformations
@@ -183,7 +184,8 @@ void spothdl::update(canvashdl *canvas)
     canvas->rotate(this->model->orientation[2], vec3f(0.,0.,1.));
     canvas->rotate(this->model->orientation[1], vec3f(0.,1.,0.));
     canvas->rotate(this->model->orientation[0], vec3f(1.,0.,0.));
-    
+    canvas->update_normal_matrix();
+
     this->position = canvas->matrices[canvashdl::modelview_matrix]*vec4f(0.,0.,0.,1.);
     this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1.,0.,1.);
     
@@ -191,6 +193,7 @@ void spothdl::update(canvashdl *canvas)
     canvas->rotate(-this->model->orientation[1], vec3f(0.,1.,0.));
     canvas->rotate(-this->model->orientation[2], vec3f(0.,0.,1.));
     canvas->translate(-this->model->position);
+
 }
 
 void spothdl::shade(vec3f &ambient, vec3f &diffuse, vec3f &specular, vec3f vertex, vec3f normal, float shininess) const
