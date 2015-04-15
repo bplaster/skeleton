@@ -16,9 +16,9 @@ uniformhdl::uniformhdl()
 	type = "uniform";
 	emission = vec3f(0.0, 0.0, 0.0);
 	ambient = vec3f(0.2, 0.2, 0.2);
-    diffuse = vec3f(1.0, 1.0, 1.0);
+    diffuse = vec3f(0.1, 0.1, 1.0);
     specular = vec3f(1.0, 1.0, 1.0);
-	shininess = 1.0;
+	shininess = 3.0;
 }
 
 uniformhdl::~uniformhdl()
