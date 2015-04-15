@@ -7,6 +7,7 @@
 
 #include "model.h"
 #include "standard.h"
+#include "opengl.h"
 
 modelhdl::modelhdl()
 {
@@ -18,8 +19,8 @@ modelhdl::modelhdl(string filename)
 	load_obj(filename);
     
     string name = "material";
-    materialhdl *material = new uniformhdl();
-    this->material[name] = material;
+//    materialhdl *material = new uniformhdl();
+//    this->material[name] = material;
     
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
         iter->material = name;
@@ -209,21 +210,21 @@ void modelhdl::load_mtl(string filename)
 			{
 				iss >> type;
 				iss >> current_material;
-				if (type == "uniform")
-					material[current_material] = new uniformhdl();
-				else if (type == "non_uniform")
-					material[current_material] = new nonuniformhdl();
+				if (type == "solid")
+					material[current_material] = new solidhdl();
+				else if (type == "brick")
+					material[current_material] = new brickhdl();
 			}
-			else if (command == "Ke" && type == "uniform")
-				iss >> ((uniformhdl*)material[current_material])->emission[0] >> ((uniformhdl*)material[current_material])->emission[1] >> ((uniformhdl*)material[current_material])->emission[2];
-			else if (command == "Ka" && type == "uniform")
-				iss >> ((uniformhdl*)material[current_material])->ambient[0] >> ((uniformhdl*)material[current_material])->ambient[1] >> ((uniformhdl*)material[current_material])->ambient[2];
-			else if (command == "Kd" && type == "uniform")
-				iss >> ((uniformhdl*)material[current_material])->diffuse[0] >> ((uniformhdl*)material[current_material])->diffuse[1] >> ((uniformhdl*)material[current_material])->diffuse[2];
-			else if (command == "Ks" && type == "uniform")
-				iss >> ((uniformhdl*)material[current_material])->specular[0] >> ((uniformhdl*)material[current_material])->specular[1] >> ((uniformhdl*)material[current_material])->specular[2];
-			else if (command == "Ns" && type == "uniform")
-				iss >> ((uniformhdl*)material[current_material])->shininess;
+			else if (command == "Ke" && type == "solid")
+				iss >> ((solidhdl*)material[current_material])->emission[0] >> ((solidhdl*)material[current_material])->emission[1] >> ((solidhdl*)material[current_material])->emission[2];
+			else if (command == "Ka" && type == "solid")
+				iss >> ((solidhdl*)material[current_material])->ambient[0] >> ((solidhdl*)material[current_material])->ambient[1] >> ((solidhdl*)material[current_material])->ambient[2];
+			else if (command == "Kd" && type == "solid")
+				iss >> ((solidhdl*)material[current_material])->diffuse[0] >> ((solidhdl*)material[current_material])->diffuse[1] >> ((solidhdl*)material[current_material])->diffuse[2];
+			else if (command == "Ks" && type == "solid")
+				iss >> ((solidhdl*)material[current_material])->specular[0] >> ((solidhdl*)material[current_material])->specular[1] >> ((solidhdl*)material[current_material])->specular[2];
+			else if (command == "Ns" && type == "solid")
+				iss >> ((solidhdl*)material[current_material])->shininess;
 		}
 	}
 }

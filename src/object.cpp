@@ -1,5 +1,4 @@
 #include "object.h"
-#include "canvas.h"
 #include "core/geometry.h"
 
 rigidhdl::rigidhdl()
@@ -16,10 +15,10 @@ rigidhdl::~rigidhdl()
  *
  * Draw a rigid body.
  */
-void rigidhdl::draw(canvashdl *canvas)
+void rigidhdl::draw()
 {
     // TODO Assignment 1: Send the rigid body geometry to the renderer
-    canvas->draw_triangles(geometry, indices);
+//    canvas->draw_triangles(geometry, indices);
 }
 
 objecthdl::objecthdl()
@@ -58,31 +57,31 @@ objecthdl::~objecthdl()
  * Draw the model. Don't forget to apply the transformations necessary
  * for position, orientation, and scale.
  */
-void objecthdl::draw(canvashdl *canvas)
+void objecthdl::draw(const vector<lighthdl*> &lights)
 {
-	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
-    canvas->translate(position);
-    canvas->scale(vec3f(scale, scale, scale));
-    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
-    
-    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
-        // TODO Assignment 2: Pass the material as a uniform into the renderer
-        canvas->uniform[(*iter).material] = material[(*iter).material];
-        
-        (*iter).draw(canvas);
-        
-        // TODO Assignment 2: clear the material in the uniform list
-        canvas->uniform.erase((*iter).material);
-    }
-    
-    // Undo transformations
-    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
-    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
-    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
-    canvas->translate(-position);
+//	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
+//    canvas->translate(position);
+//    canvas->scale(vec3f(scale, scale, scale));
+//    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+//    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+//    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+//    
+//    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+//        // TODO Assignment 2: Pass the material as a uniform into the renderer
+//        canvas->uniform[(*iter).material] = material[(*iter).material];
+//        
+//        (*iter).draw(canvas);
+//        
+//        // TODO Assignment 2: clear the material in the uniform list
+//        canvas->uniform.erase((*iter).material);
+//    }
+//    
+//    // Undo transformations
+//    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+//    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+//    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+//    canvas->translate(-position);
 
 }
 
@@ -91,17 +90,17 @@ void objecthdl::draw(canvashdl *canvas)
  * Create a representation for the bounding box and
  * render it.
  */
-void objecthdl::draw_bound(canvashdl *canvas)
+void objecthdl::draw_bound()
 {
 	/* TODO Assignment 1: Generate the geometry for the bounding box and send the necessary
 	 * transformations and geometry to the renderer
 	 */
 
-    canvas->translate(position);
-    canvas->scale(vec3f(scale, scale, scale));
-    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+//    canvas->translate(position);
+//    canvas->scale(vec3f(scale, scale, scale));
+//    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+//    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+//    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
     
     vector<vec8f> bound_geometry;
     vector<int> bound_indices;
@@ -152,22 +151,22 @@ void objecthdl::draw_bound(canvashdl *canvas)
     bound_indices.push_back(6);
     bound_indices.push_back(7);
 
-    // Give bound material
-    uniformhdl *bound_material = new uniformhdl();
-    bound_material->emission = vec3f(1.0,1.0,1.0);
-    canvas->uniform["material"] = bound_material;
-
-    // Draw bounding lines
-    canvas->draw_lines(bound_geometry, bound_indices);
-    
-    canvas->uniform.erase("material");
-    
-    // Undo transformations
-    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
-    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
-    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
-    canvas->translate(-position);
+//    // Give bound material
+//    uniformhdl *bound_material = new uniformhdl();
+//    bound_material->emission = vec3f(1.0,1.0,1.0);
+//    canvas->uniform["material"] = bound_material;
+//
+//    // Draw bounding lines
+//    canvas->draw_lines(bound_geometry, bound_indices);
+//    
+//    canvas->uniform.erase("material");
+//    
+//    // Undo transformations
+//    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+//    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+//    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+//    canvas->translate(-position);
 }
 
 /* draw_normals
@@ -176,13 +175,13 @@ void objecthdl::draw_bound(canvashdl *canvas)
  * If face is false, render the vertex normals. Otherwise,
  * calculate the normals for each face and render those.
  */
-void objecthdl::draw_normals(canvashdl *canvas, bool face)
+void objecthdl::draw_normals(bool face)
 {
-    canvas->translate(position);
-    canvas->scale(vec3f(scale, scale, scale));
-    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+//    canvas->translate(position);
+//    canvas->scale(vec3f(scale, scale, scale));
+//    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
+//    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
+//    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
     
 	/* TODO Assignment 1: Generate the geometry to display the normals and send the necessary
 	 * transformations and geometry to the renderer
@@ -212,7 +211,7 @@ void objecthdl::draw_normals(canvashdl *canvas, bool face)
                 indices.push_back(2*i/3 + 1);
             }
             
-            canvas->draw_lines(geometry, indices);
+//            canvas->draw_lines(geometry, indices);
         }
     } else {
         for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
@@ -234,17 +233,17 @@ void objecthdl::draw_normals(canvashdl *canvas, bool face)
                 indices.push_back(2*i+1);
             }
             
-            canvas->draw_lines(geometry, indices);
+//            canvas->draw_lines(geometry, indices);
         }
     }
 
     
-    // Undo transformations
-    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
-    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
-    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
-    canvas->translate(-position);
+//    // Undo transformations
+//    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
+//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
+//    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
+//    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
+//    canvas->translate(-position);
 }
 
 

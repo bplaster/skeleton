@@ -1,4 +1,4 @@
-#include "canvas.h"
+#include "opengl.h"
 
 #ifndef scene_h
 #define scene_h
@@ -15,7 +15,6 @@ struct scenehdl
 	vector<objecthdl*> objects;
 	vector<lighthdl*> lights;
 	vector<camerahdl*> cameras;
-	canvashdl *canvas;
 
 	int active_camera;
 	int active_object;

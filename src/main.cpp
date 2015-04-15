@@ -1,7 +1,6 @@
 #include <OpenGL/OpenGL.h>
 #include <GLUI/GLUI.h>
 #include "standard.h"
-#include "canvas.h"
 #include "scene.h"
 #include "camera.h"
 #include "model.h"
@@ -11,12 +10,16 @@
 #include "light.h"
 
 
-canvashdl canvas(750, 750);
 scenehdl scene;
 
 int mousex = 0, mousey = 0;
 bool bound = false;
 bool menu = false;
+
+int width = 750;
+int height = 750;
+
+string working_directory = "";
 
 namespace manipulate
 {
@@ -78,12 +81,19 @@ bool keys[256];
 
 // GLUI Variables
 int current_manipulation = manipulate::translate;
-int current_polygon = canvashdl::Polygon::line;
-int current_culling = canvashdl::Culling::backface;
+//int current_polygon = canvashdl::Polygon::line;
+//int current_culling = canvashdl::Culling::backface;
+//int current_normal = scenehdl::Normal::none;
+//int current_shading = canvashdl::Shading::none;
+//int current_model;
+//float fovy, aspect, width, height, near, far;
+int current_polygon;
+int current_culling;
 int current_normal = scenehdl::Normal::none;
-int current_shading = canvashdl::Shading::none;
+int current_shading;
 int current_model;
-float fovy, aspect, width, height, near, far;
+float fovy, aspect, cam_width, cam_height, near, far;
+
 float attenuation0, attenuation1, attenuation2;
 float ambient, diffuse, specular;
 int current_ambient, current_specular, current_diffuse;
@@ -140,13 +150,12 @@ void set_light_info(int obj_ind);
 void set_material_info(int obj_ind);
 
 
-void init(string working_directory)
+
+void init()
 {
 	for (int i = 0; i < 256; i++)
 		keys[i] = false;
 
-	canvas.working_directory = working_directory;
-	scene.canvas = &canvas;
 	// TODO Assignment 1: Initialize the Scene as necessary.
     
     // Setup GLUI
@@ -169,177 +178,205 @@ void init(string working_directory)
 
 void displayfunc()
 {
-	canvas.clear_color_buffer();
-	canvas.clear_depth_buffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	scene.draw();
 
-	canvas.swap_buffers();
+	glutSwapBuffers();
 }
 
 void reshapefunc(int w, int h)
 {
-	canvas.viewport(0, 0, w, h);
+	glViewport(0, 0, w, h);
+	width = w;
+	height = h;
 	glutPostRedisplay();
 }
 
 void pmotionfunc(int x, int y)
 {
-    if (bound)
-    {
-//        glutSetMenu(canvas_menu_id);
-        
-        int deltax = x - mousex;
-        int deltay = y - mousey;
-        
-        mousex = x;
-        mousey = y;
-        
-        bool warp = false;
-        if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
-        {
-            mousex = canvas.get_width()/2;
-            warp = true;
-        }
-        
-        if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
-        {
-            mousey = canvas.get_height()/2;
-            warp = true;
-        }
-        
-        if (warp)
-            glutWarpPointer(mousex, mousey);
-        
-        if (scene.active_camera_valid())
-        {
-            scene.cameras[scene.active_camera]->orientation[1] -= (float)deltax/500.0;
-            scene.cameras[scene.active_camera]->orientation[0] -= (float)deltay/500.0;
-        }
-        
-        glutPostRedisplay();
-    }
-    else if (scene.active_camera_valid())
-    {
-        vec3f direction;
-        vec3f position;
-        
-        if (scene.active_camera_valid())
-        {
-            if (scene.cameras[scene.active_camera]->type == "ortho")
-            {
-                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
-                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
-            }
-            else
-            {
-                position = scene.cameras[scene.active_camera]->position;
-                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
-            }
-        }
-        
-        int old_active_object = scene.active_object;
-        scene.active_object = -1;
-        scene.active_light = -1;
-        for (int i = 0; i < scene.objects.size(); i++)
-        {
-            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
-            {
-                bool is_camera = false;
-                bool is_light = false;
-                
-                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
-                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
-                        is_camera = true;
-                
-//                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
-//                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
-//                        is_light = true;
+//    if (bound)
+//    {
+////        glutSetMenu(canvas_menu_id);
+//        
+//        int deltax = x - mousex;
+//        int deltay = y - mousey;
+//        
+//        mousex = x;
+//        mousey = y;
+//        
+//        bool warp = false;
+//        if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
+//        {
+//            mousex = canvas.get_width()/2;
+//            warp = true;
+//        }
+//        
+//        if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
+//        {
+//            mousey = canvas.get_height()/2;
+//            warp = true;
+//        }
+//        
+//        if (warp)
+//            glutWarpPointer(mousex, mousey);
+//        
+//        if (scene.active_camera_valid())
+//        {
+//            scene.cameras[scene.active_camera]->orientation[1] -= (float)deltax/500.0;
+//            scene.cameras[scene.active_camera]->orientation[0] -= (float)deltay/500.0;
+//        }
+//        
+//        glutPostRedisplay();
+//    }
+//    else if (scene.active_camera_valid())
+//    {
+//        vec3f direction;
+//        vec3f position;
+//        
+//        if (scene.active_camera_valid())
+//        {
+//            if (scene.cameras[scene.active_camera]->type == "ortho")
+//            {
+//                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
+//                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
+//            }
+//            else
+//            {
+//                position = scene.cameras[scene.active_camera]->position;
+//                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
+//            }
+//        }
+//        
+//        int old_active_object = scene.active_object;
+//        scene.active_object = -1;
+//        scene.active_light = -1;
+//        for (int i = 0; i < scene.objects.size(); i++)
+//        {
+//            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
+//            {
+//                bool is_camera = false;
+//                bool is_light = false;
+//                
+//                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
+//                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
+//                        is_camera = true;
+//                
+////                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
+////                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
+////                        is_light = true;
+////                    }
+////                }
+//                
+//                if (!is_camera || (is_camera && scene.render_cameras))
+//                {
+//                    vec3f invdir = 1.0f/direction;
+//                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+//                    vec3f origin = position - scene.objects[i]->position;
+//                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+//                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+//                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+//                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+//                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+//                    if ((tmin <= tymax) && (tymin <= tmax))
+//                    {
+//                        if (tymin > tmin)
+//                            tmin = tymin;
+//                        if (tymax < tmax)
+//                            tmax = tymax;
+//                        
+//                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+//                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+//                        
+//                        if ((tmin <= tzmax) && (tzmin <= tmax))
+//                        {
+//                            scene.active_object = i;
+//                            i = scene.objects.size();
+//                        }
 //                    }
 //                }
-                
-                if (!is_camera || (is_camera && scene.render_cameras))
-                {
-                    vec3f invdir = 1.0f/direction;
-                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
-                    vec3f origin = position - scene.objects[i]->position;
-                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
-                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
-                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
-                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
-                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
-                    if ((tmin <= tymax) && (tymin <= tmax))
-                    {
-                        if (tymin > tmin)
-                            tmin = tymin;
-                        if (tymax < tmax)
-                            tmax = tymax;
-                        
-                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
-                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
-                        
-                        if ((tmin <= tzmax) && (tzmin <= tmax))
-                        {
-                            scene.active_object = i;
-                            i = scene.objects.size();
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Draw bounding box for light
-        if (scene.render_lights) {
-            for (int i = 0; i < scene.lights.size(); i++) {
-                if (scene.lights[i]) {
-                    vec3f invdir = 1.0f/direction;
-                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
-                    vec3f origin = position - scene.lights[i]->model->position;
-                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
-                    tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
-                    tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
-                    tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
-                    tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
-                    if ((tmin <= tymax) && (tymin <= tmax))
-                    {
-                        if (tymin > tmin)
-                            tmin = tymin;
-                        if (tymax < tmax)
-                            tmax = tymax;
-                        
-                        tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
-                        tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
-                        
-                        if ((tmin <= tzmax) && (tzmin <= tmax))
-                        {
-                            scene.active_light = i;
-                            i = scene.lights.size();
-                        }
-                    }
-                }
-            }
-            glutPostRedisplay();
-        }
-        
-        if (scene.active_object != old_active_object)
-        {
-            bool is_camera = false;
-            
-            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
-                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
-                    is_camera = true;
-            
-//            glutDetachMenu(GLUT_RIGHT_BUTTON);
-//            if (scene.active_object == -1)
-//                glutSetMenu(canvas_menu_id);
-//            else if (is_camera)
-//                glutSetMenu(camera_menu_id);
-//            else
-//                glutSetMenu(object_menu_id);
-//            glutAttachMenu(GLUT_RIGHT_BUTTON);
-            glutPostRedisplay();
-        }
-    }
+//            }
+//        }
+//        
+//        // Draw bounding box for light
+//        if (scene.render_lights) {
+//            for (int i = 0; i < scene.lights.size(); i++) {
+//                if (scene.lights[i]) {
+//                    vec3f invdir = 1.0f/direction;
+//                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+//                    vec3f origin = position - scene.lights[i]->model->position;
+//                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+//                    tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+//                    tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+//                    tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+//                    tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+//                    if ((tmin <= tymax) && (tymin <= tmax))
+//                    {
+//                        if (tymin > tmin)
+//                            tmin = tymin;
+//                        if (tymax < tmax)
+//                            tmax = tymax;
+//                        
+//                        tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+//                        tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+//                        
+//                        if ((tmin <= tzmax) && (tzmin <= tmax))
+//                        {
+//                            scene.active_light = i;
+//                            i = scene.lights.size();
+//                        }
+//                    }
+//                }
+//            }
+//            glutPostRedisplay();
+//        }
+//        
+//        if (scene.active_object != old_active_object)
+//        {
+//            bool is_camera = false;
+//            
+//            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
+//                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
+//                    is_camera = true;
+//
+//            glutPostRedisplay();
+//        }
+//    }
+    
+	if (bound)
+	{
+		int deltax = x - mousex;
+		int deltay = y - mousey;
+
+		mousex = x;
+		mousey = y;
+
+		bool warp = false;
+		if (mousex > 3*width/4 || mousex < width/4)
+		{
+			mousex = width/2;
+			warp = true;
+		}
+
+		if (mousey > 3*height/4 || mousey < height/4)
+		{
+			mousey = height/2;
+			warp = true;
+		}
+
+		if (warp)
+			glutWarpPointer(mousex, mousey);
+
+		// TODO Assignment 1: Use the mouse delta to change the orientation of the active camera
+
+		glutPostRedisplay();
+	}
+	else if (scene.active_camera_valid())
+	{
+		/* TODO Assignment 1: Figure out which object the mouse pointer is hovering over and make
+		 * that the active object.
+		 */
+	}
 }
 
 void mousefunc(int button, int state, int x, int y)
@@ -367,13 +404,13 @@ void motionfunc(int x, int y)
         {
             if (scene.cameras[scene.active_camera]->type == "ortho")
             {
-                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
+//                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
                 direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
             }
             else
             {
                 position = scene.cameras[scene.active_camera]->position;
-                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
+//                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
             }
         }
         
@@ -452,8 +489,9 @@ void motionfunc(int x, int y)
                 current_manipulation == manipulate::width ||
                 current_manipulation == manipulate::height ||
                 current_manipulation == manipulate::near ||
-                current_manipulation == manipulate::far)
-                scene.cameras[scene.active_camera]->project(&canvas);
+                current_manipulation == manipulate::far) {
+//                scene.cameras[scene.active_camera]->project(&canvas);
+            }
         }
         
         glutPostRedisplay();
@@ -792,8 +830,8 @@ void object_menu(int num)
             if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
                 scene.active_camera = i;
         
-        if (scene.active_camera_valid())
-            scene.cameras[scene.active_camera]->project(&canvas);
+//        if (scene.active_camera_valid())
+//            scene.cameras[scene.active_camera]->project(&canvas);
         
         glutPostRedisplay();
     }
@@ -816,10 +854,10 @@ void object_menu(int num)
 void handle_camera_manip (int val){
     switch (val) {
         case manipulate::fovy :
-            height = fovy;
+            cam_height = fovy;
             break;
         case manipulate::aspect :
-            width = aspect;
+            cam_width = aspect;
             break;
         case manipulate::width :
             
@@ -844,18 +882,18 @@ void handle_camera_manip (int val){
             orthohdl *cam = (orthohdl*)scene.cameras[scene.active_camera];
             cam->near = near;
             cam->far = far;
-            cam->left = -width/2.;
-            cam->right = width/2.;
-            cam->top = height/2.;
-            cam->bottom = -height/2.;
+            cam->left = -cam_width/2.;
+            cam->right = cam_width/2.;
+            cam->top = cam_height/2.;
+            cam->bottom = -cam_height/2.;
         } else if (	type == "frustum") {
             frustumhdl *cam = (frustumhdl*)scene.cameras[scene.active_camera];
             cam->near = near;
             cam->far = far;
-            cam->left = -width/2.;
-            cam->right = width/2.;
-            cam->top = height/2.;
-            cam->bottom = -height/2.;
+            cam->left = -cam_width/2.;
+            cam->right = cam_width/2.;
+            cam->top = cam_height/2.;
+            cam->bottom = -cam_height/2.;
             
         } else if (type == "perspective"){
             perspectivehdl *cam = (perspectivehdl*)scene.cameras[scene.active_camera];
@@ -956,60 +994,60 @@ void create_light (int val){
 }
 
 void handle_polygon (int val){
-    switch (val){
-        case canvashdl::point:
-            current_polygon = canvashdl::point;
-            break;
-        case canvashdl::line:
-            current_polygon = canvashdl::line;
-            break;
-        case canvashdl::fill:
-            current_polygon = canvashdl::fill;
-            break;
-        default:
-            break;
-    }
-    canvas.polygon_mode = (canvashdl::Polygon)current_polygon;
-    glutPostRedisplay();
+//    switch (val){
+//        case canvashdl::point:
+//            current_polygon = canvashdl::point;
+//            break;
+//        case canvashdl::line:
+//            current_polygon = canvashdl::line;
+//            break;
+//        case canvashdl::fill:
+//            current_polygon = canvashdl::fill;
+//            break;
+//        default:
+//            break;
+//    }
+//    canvas.polygon_mode = (canvashdl::Polygon)current_polygon;
+//    glutPostRedisplay();
 }
 
 void handle_shading (int val){
-    switch (val){
-        case canvashdl::Shading::none:
-            current_shading = canvashdl::Shading::none;
-            break;
-        case canvashdl::Shading::flat:
-            current_shading = canvashdl::Shading::flat;
-            break;
-        case canvashdl::Shading::gouraud:
-            current_shading = canvashdl::Shading::gouraud;
-            break;
-        case canvashdl::Shading::phong:
-            current_shading = canvashdl::Shading::phong;
-            break;
-        default:
-            break;
-    }
-    canvas.shade_model = (canvashdl::Shading)current_shading;
-    glutPostRedisplay();
+//    switch (val){
+//        case canvashdl::Shading::none:
+//            current_shading = canvashdl::Shading::none;
+//            break;
+//        case canvashdl::Shading::flat:
+//            current_shading = canvashdl::Shading::flat;
+//            break;
+//        case canvashdl::Shading::gouraud:
+//            current_shading = canvashdl::Shading::gouraud;
+//            break;
+//        case canvashdl::Shading::phong:
+//            current_shading = canvashdl::Shading::phong;
+//            break;
+//        default:
+//            break;
+//    }
+//    canvas.shade_model = (canvashdl::Shading)current_shading;
+//    glutPostRedisplay();
 }
 
 void handle_culling (int val){
-    switch (val){
-        case canvashdl::Culling::disable:
-            current_culling = canvashdl::Culling::disable;
-            break;
-        case canvashdl::Culling::backface:
-            current_culling = canvashdl::Culling::backface;
-            break;
-        case canvashdl::Culling::frontface:
-            current_culling = canvashdl::Culling::frontface;
-            break;
-        default:
-            break;
-    }
-    canvas.culling_mode = (canvashdl::Culling)current_culling;
-    glutPostRedisplay();
+//    switch (val){
+//        case canvashdl::Culling::disable:
+//            current_culling = canvashdl::Culling::disable;
+//            break;
+//        case canvashdl::Culling::backface:
+//            current_culling = canvashdl::Culling::backface;
+//            break;
+//        case canvashdl::Culling::frontface:
+//            current_culling = canvashdl::Culling::frontface;
+//            break;
+//        default:
+//            break;
+//    }
+//    canvas.culling_mode = (canvashdl::Culling)current_culling;
+//    glutPostRedisplay();
 }
 
 void handle_normal (int val){
@@ -1033,17 +1071,17 @@ void handle_normal (int val){
 void handle_material (int val) {
     string name = "material";
     materialhdl *material;
-    switch (current_material) {
-        case Material::Uniform:
-            material = new uniformhdl();
-            break;
-        case Material::NonUniform:
-            material = new nonuniformhdl();
-            break;
-        default:
-            material = new uniformhdl();
-            break;
-    }
+//    switch (current_material) {
+//        case Material::Uniform:
+//            material = new uniformhdl();
+//            break;
+//        case Material::NonUniform:
+//            material = new nonuniformhdl();
+//            break;
+//        default:
+//            material = new uniformhdl();
+//            break;
+//    }
     int obj_ind = current_objects->get_int_val();
     
     if (scene.objects[obj_ind] != NULL && scene.objects.size() > obj_ind) {
@@ -1251,15 +1289,15 @@ void create_menu()
 
     // Add polygon menu items
     int polygon_menu_id = glutCreateMenu(handle_polygon);
-    glutAddMenuEntry("Point",   canvashdl::Polygon::point);
-    glutAddMenuEntry("Line",    canvashdl::Polygon::line);
-    glutAddMenuEntry("Fill",    canvashdl::Polygon::fill);
+//    glutAddMenuEntry("Point",   canvashdl::Polygon::point);
+//    glutAddMenuEntry("Line",    canvashdl::Polygon::line);
+//    glutAddMenuEntry("Fill",    canvashdl::Polygon::fill);
 
     // Add culling menu items
     int culling_menu_id = glutCreateMenu(handle_culling);
-    glutAddMenuEntry("None",    canvashdl::Culling::disable);
-    glutAddMenuEntry("Back",    canvashdl::Culling::backface);
-    glutAddMenuEntry("Front",   canvashdl::Culling::frontface);
+//    glutAddMenuEntry("None",    canvashdl::Culling::disable);
+//    glutAddMenuEntry("Back",    canvashdl::Culling::backface);
+//    glutAddMenuEntry("Front",   canvashdl::Culling::frontface);
     
     // Add normals menu items
     int normals_menu_id = glutCreateMenu(handle_normal);
@@ -1458,26 +1496,26 @@ void setup_glui() {
     glui->add_column(true);
     GLUI_Panel *options_panel = glui->add_panel("Scene Options");
     list_polygon = glui->add_listbox_to_panel(options_panel, "Polygon", &current_polygon, -1, handle_polygon);
-    list_polygon->add_item(canvashdl::Polygon::line,    "Line");
-    list_polygon->add_item(canvashdl::Polygon::point,   "Point");
-    list_polygon->add_item(canvashdl::Polygon::fill,    "Fill");
+//    list_polygon->add_item(canvashdl::Polygon::line,    "Line");
+//    list_polygon->add_item(canvashdl::Polygon::point,   "Point");
+//    list_polygon->add_item(canvashdl::Polygon::fill,    "Fill");
     list_normal = glui->add_listbox_to_panel(options_panel, "Normal", &current_normal, -1, handle_normal);
     list_normal->add_item(scenehdl::Normal::none,       "None");
     list_normal->add_item(scenehdl::Normal::face,       "Face");
     list_normal->add_item(scenehdl::Normal::vertex,     "Vertex");
     list_culling = glui->add_listbox_to_panel(options_panel, "Culling", &current_culling, -1, handle_culling);
-    list_culling->add_item(canvashdl::Culling::backface,    "Back");
-    list_culling->add_item(canvashdl::Culling::frontface,   "Front");
-    list_culling->add_item(canvashdl::Culling::disable,     "None");
+//    list_culling->add_item(canvashdl::Culling::backface,    "Back");
+//    list_culling->add_item(canvashdl::Culling::frontface,   "Front");
+//    list_culling->add_item(canvashdl::Culling::disable,     "None");
     list_manipulation = glui->add_listbox_to_panel(options_panel, "Manipulation", &current_manipulation);
     list_manipulation->add_item(manipulate::translate,"Translate");
     list_manipulation->add_item(manipulate::rotate,   "Rotate");
     list_manipulation->add_item(manipulate::scale,    "Scale");
     list_shading = glui->add_listbox_to_panel(options_panel, "Shading", &current_shading, -1, handle_shading);
-    list_shading->add_item(canvashdl::Shading::none,"None");
-    list_shading->add_item(canvashdl::Shading::flat, "Flat");
-    list_shading->add_item(canvashdl::Shading::gouraud, "Gouraud");
-    list_shading->add_item(canvashdl::Shading::phong, "Phong");
+//    list_shading->add_item(canvashdl::Shading::none,"None");
+//    list_shading->add_item(canvashdl::Shading::flat, "Flat");
+//    list_shading->add_item(canvashdl::Shading::gouraud, "Gouraud");
+//    list_shading->add_item(canvashdl::Shading::phong, "Phong");
     
     glui->add_separator_to_panel(options_panel);
 
@@ -1535,7 +1573,7 @@ int main(int argc, char **argv)
 #endif
 	glutInitDisplayMode(display_mode);
 
-	glutInitWindowSize(750, 750);
+	glutInitWindowSize(width, height);
 	glutInitWindowPosition(0, 0);
 	window_id = glutCreateWindow("Assignment");
 
@@ -1551,10 +1589,12 @@ int main(int argc, char **argv)
 
 	cout << "Status: Using OpenGL " << glGetString(GL_VERSION) << endl;
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-    
-    init(string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/");
 
-	create_menu();
+	working_directory = string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/";
+
+	init();
+
+    create_menu();
 
 	glutReshapeFunc(reshapefunc);
 	glutDisplayFunc(displayfunc);

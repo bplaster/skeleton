@@ -8,7 +8,6 @@
 
 scenehdl::scenehdl()
 {
-	canvas = NULL;
 	active_camera = -1;
 	active_object = -1;
     active_light = -1;
@@ -35,74 +34,74 @@ void scenehdl::draw()
     
     // Set projection matrix
     // TODO: doesn't need to happen every frame
-    canvas->set_matrix(canvashdl::projection_matrix);
-    canvas->load_identity();
-    if (active_camera_valid()) {
-        cameras[active_camera]->project(canvas);
-    }
-    
-    // Set modelview matrix
-    canvas->set_matrix(canvashdl::modelview_matrix);
-    canvas->load_identity();
-    if (active_camera_valid()) {
-        cameras[active_camera]->view(canvas);
-    }
-    
-    // Draw cameras
-    if (render_cameras) {
-        for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); ++iter) {
-            if (*iter) {
-                (*iter)->model->position = (*iter)->position;
-                (*iter)->model->orientation = (*iter)->orientation;
-                (*iter)->model->draw(canvas);
-            }
-        }
-    }
-    
-    /* TODO Assignment 2: Clear the uniform variables and pass the vector of
-     * lights into the renderer as a uniform variable.
-     * TODO Assignment 2: Update the light positions and directions
-     * TODO Assignment 2: Render the lights
-     */
-    
-    canvas->uniform.clear();
-    canvas->uniform["lights"] = &lights;
-    
-    // Draw lights
-    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
-        if (*iter) {
-            if (render_lights){
-                (*iter)->model->draw(canvas);
-            }
-            (*iter)->update(canvas);
-        }
-    }
-    
-    // Bounding box for light
-    if (active_light_valid()) {
-        lights[active_light]->model->draw_bound(canvas);
-    }
-    
-    // Draw objects
-    for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
-        if (*iter) {
-            (*iter)->draw(canvas);
-            switch (render_normals) {
-                case face:
-                    (*iter)->draw_normals(canvas, true);
-                    break;
-                case vertex:
-                    (*iter)->draw_normals(canvas, false);
-                default:
-                    break;
-            }
-        }
-    }
-    
-    // Draw bound
-    if(active_object_valid()){
-        objects[active_object]->draw_bound(canvas);
-    }
+//    canvas->set_matrix(canvashdl::projection_matrix);
+//    canvas->load_identity();
+//    if (active_camera_valid()) {
+//        cameras[active_camera]->project(canvas);
+//    }
+//    
+//    // Set modelview matrix
+//    canvas->set_matrix(canvashdl::modelview_matrix);
+//    canvas->load_identity();
+//    if (active_camera_valid()) {
+//        cameras[active_camera]->view(canvas);
+//    }
+//    
+//    // Draw cameras
+//    if (render_cameras) {
+//        for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); ++iter) {
+//            if (*iter) {
+//                (*iter)->model->position = (*iter)->position;
+//                (*iter)->model->orientation = (*iter)->orientation;
+//                (*iter)->model->draw(canvas);
+//            }
+//        }
+//    }
+//    
+//    /* TODO Assignment 2: Clear the uniform variables and pass the vector of
+//     * lights into the renderer as a uniform variable.
+//     * TODO Assignment 2: Update the light positions and directions
+//     * TODO Assignment 2: Render the lights
+//     */
+//    
+//    canvas->uniform.clear();
+//    canvas->uniform["lights"] = &lights;
+//    
+//    // Draw lights
+//    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+//        if (*iter) {
+//            if (render_lights){
+//                (*iter)->model->draw(canvas);
+//            }
+//            (*iter)->update(canvas);
+//        }
+//    }
+//    
+//    // Bounding box for light
+//    if (active_light_valid()) {
+//        lights[active_light]->model->draw_bound(canvas);
+//    }
+//    
+//    // Draw objects
+//    for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
+//        if (*iter) {
+//            (*iter)->draw(canvas);
+//            switch (render_normals) {
+//                case face:
+//                    (*iter)->draw_normals(canvas, true);
+//                    break;
+//                case vertex:
+//                    (*iter)->draw_normals(canvas, false);
+//                default:
+//                    break;
+//            }
+//        }
+//    }
+//    
+//    // Draw bound
+//    if(active_object_valid()){
+//        objects[active_object]->draw_bound(canvas);
+//    }
 
 }
 

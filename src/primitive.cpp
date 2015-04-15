@@ -84,8 +84,8 @@ boxhdl::boxhdl(float width, float height, float depth)
 
 	// TODO Assignment 2: Set up the material properties for this object
     rigid[0].material = "material";
-    materialhdl *material = new uniformhdl();
-    this->material[rigid[0].material] = material;
+//    materialhdl *material = new uniformhdl();
+//    this->material[rigid[0].material] = material;
     
 }
 
@@ -145,8 +145,8 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 
 	// TODO Assignment 2: Set up the material properties for this object
     rigid[0].material = "material";
-    materialhdl *material = new uniformhdl();
-    this->material[rigid[0].material] = material;
+//    materialhdl *material = new uniformhdl();
+//    this->material[rigid[0].material] = material;
 }
 
 spherehdl::~spherehdl()
@@ -225,8 +225,8 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
     
 	// TODO Assignment 2: Set up the material properties for this object
     rigid[0].material = "material";
-    materialhdl *material = new uniformhdl();
-    this->material[rigid[0].material] = material;
+//    materialhdl *material = new uniformhdl();
+//    this->material[rigid[0].material] = material;
 }
 
 cylinderhdl::~cylinderhdl()
@@ -287,8 +287,8 @@ pyramidhdl::pyramidhdl(float radius, float height, int slices)
     
     // TODO Assignment 2: Set up the material properties for this object
     rigid[0].material = "material";
-    materialhdl *material = new uniformhdl();
-    this->material[rigid[0].material] = material;
+//    materialhdl *material = new uniformhdl();
+//    this->material[rigid[0].material] = material;
     
 }
 

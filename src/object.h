@@ -1,5 +1,6 @@
 #include "core/geometry.h"
 #include "standard.h"
+#include "opengl.h"
 
 #include "material.h"
 
@@ -8,7 +9,7 @@ using namespace core;
 #ifndef object_h
 #define object_h
 
-struct canvashdl;
+struct lighthdl;
 
 /* This represents a rigid body, which
  * is just a group of geometry to be
@@ -28,7 +29,7 @@ struct rigidhdl
 	// TODO Assignment 2: Add a material name here
 	string material;
 
-	void draw(canvashdl *canvas);
+	void draw();
 };
 
 struct objecthdl
@@ -49,9 +50,9 @@ struct objecthdl
 	// (left, right, bottom, top, front, back)
 	vec6f bound;
 
-	void draw(canvashdl *canvas);
-	void draw_bound(canvashdl *canvas);
-	void draw_normals(canvashdl *canvas, bool face = false);
+	void draw(const vector<lighthdl*> &lights);
+	void draw_bound();
+	void draw_normals(bool face = false);
 };
 
 #endif

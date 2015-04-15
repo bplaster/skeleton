@@ -17,7 +17,7 @@ camerahdl::~camerahdl()
 
 }
 
-void camerahdl::view(canvashdl *canvas)
+void camerahdl::view()
 {
 	/* TODO Assignment 1: Do the necessary modelview transformations to move
 	 * the camera into place.
@@ -29,7 +29,7 @@ void camerahdl::view(canvashdl *canvas)
         center = focus->position;
     }
 
-    canvas->look_at(position, center, up);
+//    canvas->look_at(position, center, up);
 
 }
 
@@ -48,10 +48,10 @@ orthohdl::~orthohdl()
 {
 }
 
-void orthohdl::project(canvashdl *canvas)
+void orthohdl::project()
 {
 	// TODO Assignment 1: Use the canvashdl::ortho function to set up an orthographic projection
-    canvas->ortho(left, right, bottom, top, near, far);
+//    canvas->ortho(left, right, bottom, top, near, far);
 }
 
 frustumhdl::frustumhdl()
@@ -70,10 +70,10 @@ frustumhdl::~frustumhdl()
 
 }
 
-void frustumhdl::project(canvashdl *canvas)
+void frustumhdl::project()
 {
 	// TODO Assignment 1: Use the canvashdl::frustum function to set up a perspective projection
-    canvas->frustum(left, right, bottom, top, near, far);
+//    canvas->frustum(left, right, bottom, top, near, far);
 }
 
 perspectivehdl::perspectivehdl()
@@ -90,8 +90,8 @@ perspectivehdl::~perspectivehdl()
 
 }
 
-void perspectivehdl::project(canvashdl *canvas)
+void perspectivehdl::project()
 {
 	// TODO Assignment 1: Use the canvashdl::perspective function to set up a perspective projection
-    canvas->perspective(fovy, aspect, near, far);
+//    canvas->perspective(fovy, aspect, near, far);
 }
