@@ -94,15 +94,18 @@ void modelhdl::load_obj(string filename)
 				load_mtl(mtlname);
 			}
 			else if (command == "g")
-				rigid.push_back(rigidhdl());
-			else if (command == "usemtl")
-			{
+            {
+                rigid.push_back(rigidhdl());
+                if (rigid.size() > 1)
+                        rigid[rigid.size()-1].material = rigid[rigid.size()-2].material;
+                
+            } else if (command == "usemtl") {
 				if (rigid.size() == 0)
 					rigid.push_back(rigidhdl());
 
 				iss >> rigid.back().material;
 			}
-			else
+			else if (command == "v" || command == "vn" || command == "vt" || command == "f")
 			{
 				if (rigid.size() == 0)
 					rigid.push_back(rigidhdl());
