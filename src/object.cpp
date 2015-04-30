@@ -18,7 +18,11 @@ rigidhdl::~rigidhdl()
 void rigidhdl::draw()
 {
     // TODO Assignment 1: Send the rigid body geometry to the renderer
-//    canvas->draw_triangles(geometry, indices);
+//    canvas->draw_triangles(geometry, indices)
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), &geometry, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    
 }
 
 objecthdl::objecthdl()
@@ -59,12 +63,14 @@ objecthdl::~objecthdl()
  */
 void objecthdl::draw(const vector<lighthdl*> &lights)
 {
-//	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
-//    canvas->translate(position);
-//    canvas->scale(vec3f(scale, scale, scale));
-//    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-//    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
+    glTranslatef(position[0], position[1], position[2]);
+    glScalef(scale, scale, scale);
+    glRotatef(orientation[2], 0., 0., 1.);
+    glRotatef(orientation[1], 0., 1., 0.);
+    glRotatef(orientation[0], 1., 0., 0.);
+    
+    
 //    
 //    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
 //        // TODO Assignment 2: Pass the material as a uniform into the renderer
@@ -75,14 +81,13 @@ void objecthdl::draw(const vector<lighthdl*> &lights)
 //        // TODO Assignment 2: clear the material in the uniform list
 //        canvas->uniform.erase((*iter).material);
 //    }
-//    
-//    // Undo transformations
-//    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
-//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
-//    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
-//    canvas->translate(-position);
-
+//
+    // Undo transformations
+    glRotatef(-orientation[0], 1., 0., 0.);
+    glRotatef(-orientation[1], 0., 1., 0.);
+    glRotatef(-orientation[2], 0., 0., 1.);
+    glScalef(1./scale, 1./scale, 1./scale);
+    glTranslatef(-position[0], -position[1], -position[2]);
 }
 
 /* draw_bound
@@ -96,11 +101,10 @@ void objecthdl::draw_bound()
 	 * transformations and geometry to the renderer
 	 */
 
-//    canvas->translate(position);
-//    canvas->scale(vec3f(scale, scale, scale));
-//    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-//    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+    glScalef(scale, scale, scale);
+    glRotatef(orientation[2], 0., 0., 1.);
+    glRotatef(orientation[1], 0., 1., 0.);
+    glRotatef(orientation[0], 1., 0., 0.);
     
     vector<vec8f> bound_geometry;
     vector<int> bound_indices;
@@ -162,11 +166,12 @@ void objecthdl::draw_bound()
 //    canvas->uniform.erase("material");
 //    
 //    // Undo transformations
-//    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
-//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
-//    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
-//    canvas->translate(-position);
+    glRotatef(-orientation[0], 1., 0., 0.);
+    glRotatef(-orientation[1], 0., 1., 0.);
+    glRotatef(-orientation[2], 0., 0., 1.);
+    glScalef(1./scale, 1./scale, 1./scale);
+    glTranslatef(-position[0], -position[1], -position[2]);
+
 }
 
 /* draw_normals
