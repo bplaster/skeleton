@@ -30,6 +30,7 @@ void camerahdl::view()
     }
 
 //    canvas->look_at(position, center, up);
+    gluLookAt(position[0], position[1], position[2], center[0], center[1], center[2], up[0], up[1], up[2]);
 
 }
 
@@ -52,6 +53,7 @@ void orthohdl::project()
 {
 	// TODO Assignment 1: Use the canvashdl::ortho function to set up an orthographic projection
 //    canvas->ortho(left, right, bottom, top, near, far);
+    glOrtho(left, right, bottom, top, near, far);
 }
 
 frustumhdl::frustumhdl()
@@ -74,6 +76,7 @@ void frustumhdl::project()
 {
 	// TODO Assignment 1: Use the canvashdl::frustum function to set up a perspective projection
 //    canvas->frustum(left, right, bottom, top, near, far);
+    glFrustum(left, right, bottom, top, near, far);
 }
 
 perspectivehdl::perspectivehdl()
@@ -94,4 +97,5 @@ void perspectivehdl::project()
 {
 	// TODO Assignment 1: Use the canvashdl::perspective function to set up a perspective projection
 //    canvas->perspective(fovy, aspect, near, far);
+    gluPerspective(fovy, aspect, near, far);
 }

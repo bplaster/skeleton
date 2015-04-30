@@ -34,6 +34,72 @@ void scenehdl::draw()
     
     // Set projection matrix
     // TODO: doesn't need to happen every frame
+    glMatrixMode(GL_PROJECTION_MATRIX);
+    glLoadIdentity();
+    if (active_camera_valid()) {
+        cameras[active_camera]->project();
+    }
+
+    // Set modelview matrix
+    glMatrixMode(GL_MODELVIEW_MATRIX);
+    glLoadIdentity();
+    if (active_camera_valid()) {
+        cameras[active_camera]->view();
+    }
+
+    // Draw cameras
+    if (render_cameras) {
+        for (vector<camerahdl*>::iterator iter = cameras.begin(); iter != cameras.end(); ++iter) {
+            if (*iter) {
+                (*iter)->model->position = (*iter)->position;
+                (*iter)->model->orientation = (*iter)->orientation;
+                (*iter)->model->draw(lights);
+            }
+        }
+    }
+
+    /* TODO Assignment 2: Clear the uniform variables and pass the vector of
+     * lights into the renderer as a uniform variable.
+     * TODO Assignment 2: Update the light positions and directions
+     * TODO Assignment 2: Render the lights
+     */
+
+    // Draw lights
+    for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
+        if (*iter) {
+            if (render_lights){
+                (*iter)->model->draw(lights);
+            }
+            (*iter)->update();
+        }
+    }
+
+    // Bounding box for light
+    if (active_light_valid()) {
+        lights[active_light]->model->draw_bound();
+    }
+
+    // Draw objects
+    for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
+        if (*iter) {
+            (*iter)->draw(lights);
+            switch (render_normals) {
+                case face:
+                    (*iter)->draw_normals(true);
+                    break;
+                case vertex:
+                    (*iter)->draw_normals(false);
+                default:
+                    break;
+            }
+        }
+    }
+    
+    // Draw bound
+    if(active_object_valid()){
+        objects[active_object]->draw_bound();
+    }
+
 //    canvas->set_matrix(canvashdl::projection_matrix);
 //    canvas->load_identity();
 //    if (active_camera_valid()) {
