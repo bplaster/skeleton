@@ -59,6 +59,21 @@ enum Light{
     Directional
 };
 
+enum Culling
+{
+    disable = 0,
+    backface = 1,
+    frontface = 2
+};
+
+enum Shading
+{
+    none = 0,
+    flat = 1,
+    gouraud = 2,
+    phong = 3
+};
+
 enum LightColor {
     White,
     Red,
@@ -73,24 +88,21 @@ enum LightColor {
 };
 
 enum Material {
-    Uniform,
-    NonUniform
+    MatWhite,
+    MatSolid,
+    MatBrick
 };
 
 bool keys[256];
 
 // GLUI Variables
 int current_manipulation = manipulate::translate;
-//int current_polygon = canvashdl::Polygon::line;
-//int current_culling = canvashdl::Culling::backface;
-//int current_normal = scenehdl::Normal::none;
-//int current_shading = canvashdl::Shading::none;
+int current_polygon = GL_FILL;
+int current_culling = Culling::backface;
+int current_normal = scenehdl::Normal::none;
+int current_shading = Shading::none;
 //int current_model;
 //float fovy, aspect, width, height, near, far;
-int current_polygon;
-int current_culling;
-int current_normal = scenehdl::Normal::none;
-int current_shading;
 int current_model;
 float fovy, aspect, cam_width, cam_height, near, far;
 
@@ -830,8 +842,8 @@ void object_menu(int num)
             if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
                 scene.active_camera = i;
         
-//        if (scene.active_camera_valid())
-//            scene.cameras[scene.active_camera]->project(&canvas);
+        if (scene.active_camera_valid())
+            scene.cameras[scene.active_camera]->project();
         
         glutPostRedisplay();
     }
@@ -994,60 +1006,61 @@ void create_light (int val){
 }
 
 void handle_polygon (int val){
-//    switch (val){
-//        case canvashdl::point:
-//            current_polygon = canvashdl::point;
-//            break;
-//        case canvashdl::line:
-//            current_polygon = canvashdl::line;
-//            break;
-//        case canvashdl::fill:
-//            current_polygon = canvashdl::fill;
-//            break;
-//        default:
-//            break;
-//    }
-//    canvas.polygon_mode = (canvashdl::Polygon)current_polygon;
-//    glutPostRedisplay();
+    switch (val){
+        case GL_POINT:
+            current_polygon = GL_POINT;
+            break;
+        case GL_LINE:
+            current_polygon = GL_LINE;
+            break;
+        case GL_FILL:
+            current_polygon = GL_FILL;
+            break;
+        default:
+            break;
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, current_polygon);
+    glutPostRedisplay();
 }
 
 void handle_shading (int val){
-//    switch (val){
-//        case canvashdl::Shading::none:
-//            current_shading = canvashdl::Shading::none;
-//            break;
-//        case canvashdl::Shading::flat:
-//            current_shading = canvashdl::Shading::flat;
-//            break;
-//        case canvashdl::Shading::gouraud:
-//            current_shading = canvashdl::Shading::gouraud;
-//            break;
-//        case canvashdl::Shading::phong:
-//            current_shading = canvashdl::Shading::phong;
-//            break;
-//        default:
-//            break;
-//    }
+    switch (val){
+        case Shading::none:
+            current_shading = Shading::none;
+            break;
+        case Shading::flat:
+            current_shading = Shading::flat;
+            break;
+        case Shading::gouraud:
+            current_shading = Shading::gouraud;
+            break;
+        case Shading::phong:
+            current_shading = Shading::phong;
+            break;
+        default:
+            break;
+    }
 //    canvas.shade_model = (canvashdl::Shading)current_shading;
-//    glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 void handle_culling (int val){
-//    switch (val){
-//        case canvashdl::Culling::disable:
-//            current_culling = canvashdl::Culling::disable;
-//            break;
-//        case canvashdl::Culling::backface:
-//            current_culling = canvashdl::Culling::backface;
-//            break;
-//        case canvashdl::Culling::frontface:
-//            current_culling = canvashdl::Culling::frontface;
-//            break;
-//        default:
-//            break;
-//    }
-//    canvas.culling_mode = (canvashdl::Culling)current_culling;
-//    glutPostRedisplay();
+    switch (val){
+        case Culling::disable:
+            glDisable(GL_CULL_FACE);
+            break;
+        case Culling::backface:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case Culling::frontface:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay();
 }
 
 void handle_normal (int val){
@@ -1071,17 +1084,20 @@ void handle_normal (int val){
 void handle_material (int val) {
     string name = "material";
     materialhdl *material;
-//    switch (current_material) {
-//        case Material::Uniform:
-//            material = new uniformhdl();
-//            break;
-//        case Material::NonUniform:
-//            material = new nonuniformhdl();
-//            break;
-//        default:
-//            material = new uniformhdl();
-//            break;
-//    }
+    switch (current_material) {
+        case Material::MatWhite:
+            material = new whitehdl();
+            break;
+        case Material::MatSolid:
+            material = new solidhdl();
+            break;
+        case Material::MatBrick:
+            material = new brickhdl();
+            break;
+        default:
+            material = new whitehdl();
+            break;
+    }
     int obj_ind = current_objects->get_int_val();
     
     if (scene.objects[obj_ind] != NULL && scene.objects.size() > obj_ind) {
@@ -1100,11 +1116,14 @@ void set_material_info(int obj_ind){
     
     if (scene.objects[obj_ind]->material["material"]) {
         string type = scene.objects[obj_ind]->material["material"]->type;
-        if (type == "uniform") {
-            list_material->set_int_val(Material::Uniform);
+        if (type == "brick") {
+            list_material->set_int_val(Material::MatBrick);
             
-        } else if (	type == "non_uniform") {
-            list_material->set_int_val(Material::NonUniform);
+        } else if (	type == "white") {
+            list_material->set_int_val(Material::MatWhite);
+            
+        } else if ( type == "solid") {
+            list_material->set_int_val(Material::MatSolid);
         }
     }
 }
@@ -1275,29 +1294,21 @@ void create_menu()
     
     // Add camera menu items
     camera_menu_id = glutCreateMenu(create_camera);
-//    glutAddMenuEntry("Fovy", 0);
-//    glutAddMenuEntry("Aspect", 1);
-//    glutAddMenuEntry("Width", 2);
-//    glutAddMenuEntry("Height", 3);
-//    glutAddMenuEntry("Near", 4);
-//    glutAddMenuEntry("Far", 5);
-//    glutAddMenuEntry("Toggle Draw", 6);
-//    glutAddMenuEntry("Clear Focus", 7);
     glutAddMenuEntry("Ortho",       Camera::Ortho);
     glutAddMenuEntry("Frustum",     Camera::Frustum);
     glutAddMenuEntry("Perspective", Camera::Perspective);
 
     // Add polygon menu items
     int polygon_menu_id = glutCreateMenu(handle_polygon);
-//    glutAddMenuEntry("Point",   canvashdl::Polygon::point);
-//    glutAddMenuEntry("Line",    canvashdl::Polygon::line);
-//    glutAddMenuEntry("Fill",    canvashdl::Polygon::fill);
+    glutAddMenuEntry("Point",   GL_POINT);
+    glutAddMenuEntry("Line",    GL_LINE);
+    glutAddMenuEntry("Fill",    GL_FILL);
 
     // Add culling menu items
     int culling_menu_id = glutCreateMenu(handle_culling);
-//    glutAddMenuEntry("None",    canvashdl::Culling::disable);
-//    glutAddMenuEntry("Back",    canvashdl::Culling::backface);
-//    glutAddMenuEntry("Front",   canvashdl::Culling::frontface);
+    glutAddMenuEntry("None",    Culling::disable);
+    glutAddMenuEntry("Back",    Culling::backface);
+    glutAddMenuEntry("Front",   Culling::frontface);
     
     // Add normals menu items
     int normals_menu_id = glutCreateMenu(handle_normal);
@@ -1416,16 +1427,10 @@ void setup_glui() {
     current_objects->add_item(-1, "");
     focus_checkbox = glui->add_checkbox_to_panel(object_panel, "Focus on Object", NULL, 1, focus_object);
     list_material = glui->add_listbox_to_panel(object_panel, "Material", &current_material, -1, handle_material);
-    list_material->add_item(Material::Uniform, "Uniform");
-    list_material->add_item(Material::NonUniform, "Non-uniform");
-//    GLUI_Panel *obj_pos_panel = glui->add_panel_to_panel(object_panel, "Position");
-//    glui->add_edittext_to_panel(obj_pos_panel, "x:");
-//    glui->add_edittext_to_panel(obj_pos_panel, "y:");
-//    glui->add_edittext_to_panel(obj_pos_panel, "z:");
-//    GLUI_Panel *obj_ori_panel = glui->add_panel_to_panel(object_panel, "Orientation");
-//    glui->add_edittext_to_panel(obj_ori_panel, "x:");
-//    glui->add_edittext_to_panel(obj_ori_panel, "y:");
-//    glui->add_edittext_to_panel(obj_ori_panel, "z:");
+    list_material->add_item(Material::MatWhite, "White");
+    list_material->add_item(Material::MatSolid, "Solid");
+    list_material->add_item(Material::MatBrick, "Brick");
+
     glui->add_button_to_panel(object_panel, "Delete", 0, handle_delete);
 
     glui->add_separator_to_panel(scene_panel);
@@ -1475,7 +1480,6 @@ void setup_glui() {
     attenuation_text_x = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (const):", GLUI_EDITTEXT_FLOAT, &attenuation0, 1, handle_update);
     attenuation_text_y = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power1):", GLUI_EDITTEXT_FLOAT, &attenuation1, 1, handle_update);
     attenuation_text_z = glui->add_edittext_to_panel(light_prop_panel, "Attenuation (power2):", GLUI_EDITTEXT_FLOAT, &attenuation2, 1, handle_update);
-//    glui->add_button_to_panel(light_prop_panel, "Update", 1, handle_update);
     glui->add_button_to_panel(light_panel, "Delete", 2, handle_delete);
     
     glui->add_separator_to_panel(scene_panel);
@@ -1496,26 +1500,26 @@ void setup_glui() {
     glui->add_column(true);
     GLUI_Panel *options_panel = glui->add_panel("Scene Options");
     list_polygon = glui->add_listbox_to_panel(options_panel, "Polygon", &current_polygon, -1, handle_polygon);
-//    list_polygon->add_item(canvashdl::Polygon::line,    "Line");
-//    list_polygon->add_item(canvashdl::Polygon::point,   "Point");
-//    list_polygon->add_item(canvashdl::Polygon::fill,    "Fill");
+    list_polygon->add_item(GL_FILL,    "Fill");
+    list_polygon->add_item(GL_LINE,    "Line");
+    list_polygon->add_item(GL_POINT,   "Point");
     list_normal = glui->add_listbox_to_panel(options_panel, "Normal", &current_normal, -1, handle_normal);
     list_normal->add_item(scenehdl::Normal::none,       "None");
     list_normal->add_item(scenehdl::Normal::face,       "Face");
     list_normal->add_item(scenehdl::Normal::vertex,     "Vertex");
     list_culling = glui->add_listbox_to_panel(options_panel, "Culling", &current_culling, -1, handle_culling);
-//    list_culling->add_item(canvashdl::Culling::backface,    "Back");
-//    list_culling->add_item(canvashdl::Culling::frontface,   "Front");
-//    list_culling->add_item(canvashdl::Culling::disable,     "None");
+    list_culling->add_item(Culling::backface,    "Back");
+    list_culling->add_item(Culling::frontface,   "Front");
+    list_culling->add_item(Culling::disable,     "None");
     list_manipulation = glui->add_listbox_to_panel(options_panel, "Manipulation", &current_manipulation);
     list_manipulation->add_item(manipulate::translate,"Translate");
     list_manipulation->add_item(manipulate::rotate,   "Rotate");
     list_manipulation->add_item(manipulate::scale,    "Scale");
     list_shading = glui->add_listbox_to_panel(options_panel, "Shading", &current_shading, -1, handle_shading);
-//    list_shading->add_item(canvashdl::Shading::none,"None");
-//    list_shading->add_item(canvashdl::Shading::flat, "Flat");
-//    list_shading->add_item(canvashdl::Shading::gouraud, "Gouraud");
-//    list_shading->add_item(canvashdl::Shading::phong, "Phong");
+    list_shading->add_item(Shading::none,"None");
+    list_shading->add_item(Shading::flat, "Flat");
+    list_shading->add_item(Shading::gouraud, "Gouraud");
+    list_shading->add_item(Shading::phong, "Phong");
     
     glui->add_separator_to_panel(options_panel);
 
