@@ -8,7 +8,7 @@
 #include "tinyfiledialogs.h"
 #include "core/geometry.h"
 #include "light.h"
-
+//#include <GL/glew.h>
 
 scenehdl scene;
 

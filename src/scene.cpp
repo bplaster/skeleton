@@ -14,6 +14,8 @@ scenehdl::scenehdl()
 	render_normals = none;
 	render_lights = false;
 	render_cameras = false;
+    glGenVertexArraysAPPLE(1, &vertexarray);
+    glGenBuffers(1, &vertexbuffer);
 }
 
 scenehdl::~scenehdl()
@@ -31,6 +33,7 @@ void scenehdl::draw()
 	/* TODO Assignment 1: Draw all of the objects, and
 	 * if enabled, draw the normals and the cameras.
 	 */
+
     
     // Set projection matrix
     // TODO: doesn't need to happen every frame
@@ -53,7 +56,7 @@ void scenehdl::draw()
             if (*iter) {
                 (*iter)->model->position = (*iter)->position;
                 (*iter)->model->orientation = (*iter)->orientation;
-                (*iter)->model->draw(lights);
+                (*iter)->model->draw(lights, vertexbuffer, vertexarray);
             }
         }
     }
@@ -68,7 +71,7 @@ void scenehdl::draw()
     for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
         if (*iter) {
             if (render_lights){
-                (*iter)->model->draw(lights);
+                (*iter)->model->draw(lights, vertexbuffer, vertexarray);
             }
             (*iter)->update();
         }
@@ -82,7 +85,7 @@ void scenehdl::draw()
     // Draw objects
     for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
         if (*iter) {
-            (*iter)->draw(lights);
+            (*iter)->draw(lights, vertexbuffer, vertexarray);
             switch (render_normals) {
                 case face:
                     (*iter)->draw_normals(true);

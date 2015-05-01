@@ -29,7 +29,7 @@ struct rigidhdl
 	// TODO Assignment 2: Add a material name here
 	string material;
 
-	void draw();
+	void draw(GLuint &vertexbuffer, GLuint &vertexarray);
 };
 
 struct objecthdl
@@ -50,7 +50,7 @@ struct objecthdl
 	// (left, right, bottom, top, front, back)
 	vec6f bound;
 
-	void draw(const vector<lighthdl*> &lights);
+	void draw(const vector<lighthdl*> &lights, GLuint &vertexbuffer, GLuint &vertexarray);
 	void draw_bound();
 	void draw_normals(bool face = false);
 };

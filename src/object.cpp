@@ -15,13 +15,23 @@ rigidhdl::~rigidhdl()
  *
  * Draw a rigid body.
  */
-void rigidhdl::draw()
+void rigidhdl::draw(GLuint &vertexbuffer, GLuint &vertexarray)
 {
     // TODO Assignment 1: Send the rigid body geometry to the renderer
 //    canvas->draw_triangles(geometry, indices)
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBindVertexArrayAPPLE(vertexarray);
     glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), &geometry, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+                          0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                          3,                  // size
+                          GL_FLOAT,           // type
+                          GL_FALSE,           // normalized?
+                          5*(sizeof(float)),                  // stride
+                          (void*)0            // array buffer offset
+                          );
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     
 }
 
@@ -61,7 +71,7 @@ objecthdl::~objecthdl()
  * Draw the model. Don't forget to apply the transformations necessary
  * for position, orientation, and scale.
  */
-void objecthdl::draw(const vector<lighthdl*> &lights)
+void objecthdl::draw(const vector<lighthdl*> &lights, GLuint &vertexbuffer, GLuint &vertexarray)
 {
 	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
     glTranslatef(position[0], position[1], position[2]);

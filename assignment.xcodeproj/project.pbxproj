@@ -387,6 +387,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = assignment.build;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.9;
 				SYMROOT = "$(BUILD_DIR)";
 			};
 			name = Debug;
@@ -405,6 +406,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = assignment.build;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.9;
 				SYMROOT = "$(BUILD_DIR)";
 			};
 			name = Release;
