@@ -214,188 +214,163 @@ void reshapefunc(int w, int h)
 
 void pmotionfunc(int x, int y)
 {
-//    if (bound)
-//    {
-////        glutSetMenu(canvas_menu_id);
-//        
-//        int deltax = x - mousex;
-//        int deltay = y - mousey;
-//        
-//        mousex = x;
-//        mousey = y;
-//        
-//        bool warp = false;
-//        if (mousex > 3*canvas.get_width()/4 || mousex < canvas.get_width()/4)
-//        {
-//            mousex = canvas.get_width()/2;
-//            warp = true;
-//        }
-//        
-//        if (mousey > 3*canvas.get_height()/4 || mousey < canvas.get_height()/4)
-//        {
-//            mousey = canvas.get_height()/2;
-//            warp = true;
-//        }
-//        
-//        if (warp)
-//            glutWarpPointer(mousex, mousey);
-//        
-//        if (scene.active_camera_valid())
-//        {
-//            scene.cameras[scene.active_camera]->orientation[1] -= (float)deltax/500.0;
-//            scene.cameras[scene.active_camera]->orientation[0] -= (float)deltay/500.0;
-//        }
-//        
-//        glutPostRedisplay();
-//    }
-//    else if (scene.active_camera_valid())
-//    {
-//        vec3f direction;
-//        vec3f position;
-//        
-//        if (scene.active_camera_valid())
-//        {
-//            if (scene.cameras[scene.active_camera]->type == "ortho")
-//            {
-//                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
-//                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
-//            }
-//            else
-//            {
-//                position = scene.cameras[scene.active_camera]->position;
-//                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
-//            }
-//        }
-//        
-//        int old_active_object = scene.active_object;
-//        scene.active_object = -1;
-//        scene.active_light = -1;
-//        for (int i = 0; i < scene.objects.size(); i++)
-//        {
-//            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
-//            {
-//                bool is_camera = false;
-//                bool is_light = false;
-//                
-//                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
-//                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
-//                        is_camera = true;
-//                
-////                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
-////                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
-////                        is_light = true;
-////                    }
-////                }
-//                
-//                if (!is_camera || (is_camera && scene.render_cameras))
-//                {
-//                    vec3f invdir = 1.0f/direction;
-//                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
-//                    vec3f origin = position - scene.objects[i]->position;
-//                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
-//                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
-//                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
-//                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
-//                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
-//                    if ((tmin <= tymax) && (tymin <= tmax))
-//                    {
-//                        if (tymin > tmin)
-//                            tmin = tymin;
-//                        if (tymax < tmax)
-//                            tmax = tymax;
-//                        
-//                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
-//                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
-//                        
-//                        if ((tmin <= tzmax) && (tzmin <= tmax))
-//                        {
-//                            scene.active_object = i;
-//                            i = scene.objects.size();
-//                        }
+    if (bound)
+    {
+//        glutSetMenu(canvas_menu_id);
+        
+        int deltax = x - mousex;
+        int deltay = y - mousey;
+        
+        mousex = x;
+        mousey = y;
+        
+        bool warp = false;
+        if (mousex > 3*width/4 || mousex < width/4)
+        {
+            mousex = width/2;
+            warp = true;
+        }
+        
+        if (mousey > 3*height/4 || mousey < height/4)
+        {
+            mousey = height/2;
+            warp = true;
+        }
+        
+        if (warp)
+            glutWarpPointer(mousex, mousey);
+        
+        if (scene.active_camera_valid())
+        {
+            scene.cameras[scene.active_camera]->orientation[1] -= (float)deltax/500.0;
+            scene.cameras[scene.active_camera]->orientation[0] -= (float)deltay/500.0;
+        }
+        
+        glutPostRedisplay();
+    }
+    else if (scene.active_camera_valid())
+    {
+        vec3f direction;
+        vec3f position;
+        
+        if (scene.active_camera_valid())
+        {
+            GLdouble projection[16];
+            glGetDoublev(GL_PROJECTION_MATRIX, projection);
+            GLdouble model[16];
+            glGetDoublev(GL_MODELVIEW_MATRIX, model);
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            
+            GLdouble unX, unY, unZ;
+            gluUnProject((float)x, (float)y, 1.0, model, projection, viewport,  &unX, &unY, &unZ);
+
+            if (scene.cameras[scene.active_camera]->type == "ortho")
+            {
+                direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
+                position = {unX, unY, unZ};
+            }
+            else
+            {
+                position = scene.cameras[scene.active_camera]->position;
+                direction = norm(vec3f(unX, -unY, unZ));
+            }
+        }
+        
+        int old_active_object = scene.active_object;
+        scene.active_object = -1;
+        scene.active_light = -1;
+        for (int i = 0; i < scene.objects.size(); i++)
+        {
+            if (scene.objects[i] != NULL && scene.cameras[scene.active_camera]->model != scene.objects[i])
+            {
+                bool is_camera = false;
+                bool is_light = false;
+                
+                for (int j = 0; j < scene.cameras.size() && !is_camera; j++)
+                    if (scene.cameras[j] != NULL && scene.cameras[j]->model == scene.objects[i])
+                        is_camera = true;
+                
+//                for (int j = 0; j < scene.lights.size() && !is_light; j++) {
+//                    if (scene.lights[j] != NULL && scene.lights[j]->model == scene.objects[i]){
+//                        is_light = true;
 //                    }
 //                }
-//            }
-//        }
-//        
-//        // Draw bounding box for light
-//        if (scene.render_lights) {
-//            for (int i = 0; i < scene.lights.size(); i++) {
-//                if (scene.lights[i]) {
-//                    vec3f invdir = 1.0f/direction;
-//                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
-//                    vec3f origin = position - scene.lights[i]->model->position;
-//                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
-//                    tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
-//                    tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
-//                    tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
-//                    tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
-//                    if ((tmin <= tymax) && (tymin <= tmax))
-//                    {
-//                        if (tymin > tmin)
-//                            tmin = tymin;
-//                        if (tymax < tmax)
-//                            tmax = tymax;
-//                        
-//                        tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
-//                        tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
-//                        
-//                        if ((tmin <= tzmax) && (tzmin <= tmax))
-//                        {
-//                            scene.active_light = i;
-//                            i = scene.lights.size();
-//                        }
-//                    }
-//                }
-//            }
-//            glutPostRedisplay();
-//        }
-//        
-//        if (scene.active_object != old_active_object)
-//        {
-//            bool is_camera = false;
-//            
-//            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
-//                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
-//                    is_camera = true;
-//
-//            glutPostRedisplay();
-//        }
-//    }
-    
-	if (bound)
-	{
-		int deltax = x - mousex;
-		int deltay = y - mousey;
+                
+                if (!is_camera || (is_camera && scene.render_cameras))
+                {
+                    vec3f invdir = 1.0f/direction;
+                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+                    vec3f origin = position - scene.objects[i]->position;
+                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+                    tmin = (scene.objects[i]->bound[0 + sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+                    tmax = (scene.objects[i]->bound[0 + 1-sign[0]]*scene.objects[i]->scale - origin[0])*invdir[0];
+                    tymin = (scene.objects[i]->bound[2 + sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+                    tymax = (scene.objects[i]->bound[2 + 1-sign[1]]*scene.objects[i]->scale - origin[1])*invdir[1];
+                    if ((tmin <= tymax) && (tymin <= tmax))
+                    {
+                        if (tymin > tmin)
+                            tmin = tymin;
+                        if (tymax < tmax)
+                            tmax = tymax;
+                        
+                        tzmin = (scene.objects[i]->bound[4 + sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+                        tzmax = (scene.objects[i]->bound[4 + 1-sign[2]]*scene.objects[i]->scale - origin[2])*invdir[2];
+                        
+                        if ((tmin <= tzmax) && (tzmin <= tmax))
+                        {
+                            scene.active_object = i;
+                            i = scene.objects.size();
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Draw bounding box for light
+        if (scene.render_lights) {
+            for (int i = 0; i < scene.lights.size(); i++) {
+                if (scene.lights[i]) {
+                    vec3f invdir = 1.0f/direction;
+                    vec3i sign((int)(invdir[0] < 0), (int)(invdir[1] < 0), (int)(invdir[2] < 0));
+                    vec3f origin = position - scene.lights[i]->model->position;
+                    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+                    tmin = (scene.lights[i]->model->bound[0 + sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+                    tmax = (scene.lights[i]->model->bound[0 + 1-sign[0]]*scene.lights[i]->model->scale - origin[0])*invdir[0];
+                    tymin = (scene.lights[i]->model->bound[2 + sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+                    tymax = (scene.lights[i]->model->bound[2 + 1-sign[1]]*scene.lights[i]->model->scale - origin[1])*invdir[1];
+                    if ((tmin <= tymax) && (tymin <= tmax))
+                    {
+                        if (tymin > tmin)
+                            tmin = tymin;
+                        if (tymax < tmax)
+                            tmax = tymax;
+                        
+                        tzmin = (scene.lights[i]->model->bound[4 + sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+                        tzmax = (scene.lights[i]->model->bound[4 + 1-sign[2]]*scene.lights[i]->model->scale - origin[2])*invdir[2];
+                        
+                        if ((tmin <= tzmax) && (tzmin <= tmax))
+                        {
+                            scene.active_light = i;
+                            i = scene.lights.size();
+                        }
+                    }
+                }
+            }
+            glutPostRedisplay();
+        }
+        
+        if (scene.active_object != old_active_object)
+        {
+            bool is_camera = false;
+            
+            for (int i = 0; i < scene.cameras.size() && !is_camera; i++)
+                if (scene.cameras[i] != NULL && scene.active_object_valid() && scene.cameras[i]->model == scene.objects[scene.active_object])
+                    is_camera = true;
 
-		mousex = x;
-		mousey = y;
-
-		bool warp = false;
-		if (mousex > 3*width/4 || mousex < width/4)
-		{
-			mousex = width/2;
-			warp = true;
-		}
-
-		if (mousey > 3*height/4 || mousey < height/4)
-		{
-			mousey = height/2;
-			warp = true;
-		}
-
-		if (warp)
-			glutWarpPointer(mousex, mousey);
-
-		// TODO Assignment 1: Use the mouse delta to change the orientation of the active camera
-
-		glutPostRedisplay();
-	}
-	else if (scene.active_camera_valid())
-	{
-		/* TODO Assignment 1: Figure out which object the mouse pointer is hovering over and make
-		 * that the active object.
-		 */
-	}
+            glutPostRedisplay();
+        }
+    }
 }
 
 void mousefunc(int button, int state, int x, int y)
@@ -419,18 +394,29 @@ void motionfunc(int x, int y)
         vec3f position;
         vec3f delta;
         
-        if (scene.active_camera_valid())
-        {
+        if (scene.active_camera_valid()){
+            
+            GLdouble projection[16];
+            glGetDoublev(GL_PROJECTION_MATRIX, projection);
+            GLdouble model[16];
+            glGetDoublev(GL_MODELVIEW_MATRIX, model);
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            
+            GLdouble unX, unY, unZ;
+            gluUnProject((float)x, (float)y, 1.0, model, projection, viewport,  &unX, &unY, &unZ);
+            
             if (scene.cameras[scene.active_camera]->type == "ortho")
             {
-//                position = canvas.unproject(canvas.to_window(vec2i(x, y)));
                 direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
+                position = {unX, unY, unZ};
             }
             else
             {
                 position = scene.cameras[scene.active_camera]->position;
-//                direction = norm(canvas.unproject(canvas.to_window(vec2i(x, y))));
+                direction = norm(vec3f(unX, -unY, unZ));
             }
+
         }
         
         // Manipulation Logic
@@ -509,7 +495,7 @@ void motionfunc(int x, int y)
                 current_manipulation == manipulate::height ||
                 current_manipulation == manipulate::near ||
                 current_manipulation == manipulate::far) {
-//                scene.cameras[scene.active_camera]->project(&canvas);
+                scene.cameras[scene.active_camera]->project();
             }
         }
         
