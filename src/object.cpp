@@ -44,7 +44,6 @@ void rigidhdl::draw()
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glUseProgram(2);
 }
 
 objecthdl::objecthdl()
