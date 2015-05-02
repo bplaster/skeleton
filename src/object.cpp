@@ -17,13 +17,12 @@ rigidhdl::~rigidhdl()
  */
 void rigidhdl::draw()
 {
-//    canvas->draw_triangles(geometry, indices)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(3, GL_FLOAT, sizeof(GLfloat)*5, geometry.data());
-    glNormalPointer(GL_FLOAT, sizeof(GLfloat)*5, geometry.data());
-    glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, geometry.data());
+    glVertexPointer(3, GL_FLOAT, sizeof(GLfloat)*8, &geometry);
+    //glNormalPointer(GL_FLOAT, 0, geometry.data() + sizeof(float)*3);
+    //glTexCoordPointer(2, GL_FLOAT, 0, geometry.data() + sizeof(float)*6);
     // Draw the triangles
     glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, indices.data());
     // Clean up

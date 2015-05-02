@@ -24,7 +24,7 @@ struct rigidhdl
 	~rigidhdl();
 
 	vector<vec8f> geometry;
-	vector<int> indices;
+	vector<unsigned int> indices;
     
 	// TODO Assignment 2: Add a material name here
 	string material;
