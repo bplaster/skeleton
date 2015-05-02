@@ -107,7 +107,8 @@ void objecthdl::draw_bound()
 	/* TODO Assignment 1: Generate the geometry for the bounding box and send the necessary
 	 * transformations and geometry to the renderer
 	 */
-
+    
+    glTranslatef(position[0], position[1], position[2]);
     glScalef(scale, scale, scale);
     glRotatef(orientation[2], 0., 0., 1.);
     glRotatef(orientation[1], 0., 1., 0.);
