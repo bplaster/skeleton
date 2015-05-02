@@ -26,6 +26,8 @@ struct lighthdl
 
 	virtual void update() = 0;
 	virtual void apply(string name, GLuint program) = 0;
+    
+    mat4f convert_to_matrix (GLfloat arr[16]);
 };
 
 struct ambienthdl : lighthdl

@@ -35,6 +35,7 @@ void rigidhdl::draw()
     glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &vertices[0][0]);
 //    glNormalPointer(GL_FLOAT, sizeof(vec8f), &geometry + sizeof(float)*3);
 //    glTexCoordPointer(2, GL_FLOAT, sizeof(vec8f), &geometry + sizeof(float)*6);
+
     // Draw the triangles
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, &indices[0]);
     

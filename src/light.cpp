@@ -48,18 +48,19 @@ void directionalhdl::update()
 	 * The easiest thing is to do translations and rotations like you were going to render the object, and
 	 * then just multiply some initial direction vector by the normal matrix.
 	 */
+    glRotatef(this->model->orientation[2], 0., 0., 1.);
+    glRotatef(this->model->orientation[1], 0., 1., 0.);
+    glRotatef(this->model->orientation[0], 1., 0., 0.);
     
-//    canvas->rotate(this->model->orientation[2], vec3f(0.,0.,1.));
-//    canvas->rotate(this->model->orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(this->model->orientation[0], vec3f(1.,0.,0.));
-//    
-//    canvas->update_normal_matrix();
-//    this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1.,0.,1.);
-//    
-//    // Undo transformations
-//    canvas->rotate(-this->model->orientation[0], vec3f(1.,0.,0.));
-//    canvas->rotate(-this->model->orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(-this->model->orientation[2], vec3f(0.,0.,1.));
+    GLfloat modelview[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+    mat4f modelviewmatrix = convert_to_matrix(modelview);
+    mat4f normalmatrix = transpose(inverse(modelviewmatrix));
+    this->direction = normalmatrix*vec4f(0.,-1.,0.,1.);
+    
+    glRotatef(-this->model->orientation[0], 1., 0., 0.);
+    glRotatef(-this->model->orientation[1], 0., 1., 0.);
+    glRotatef(-this->model->orientation[2], 0., 0., 1.);
 }
 
 void directionalhdl::apply(string name, GLuint program)
@@ -112,9 +113,14 @@ void pointhdl::update()
 	 * The easiest thing is to do translations and rotations like you were going to render the object, and
 	 * then just multiply the origin by the modelview matrix.
 	 */
-//    canvas->translate(this->model->position);
-//    this->position = canvas->matrices[canvashdl::modelview_matrix]*vec4f(0.,0.,0.,1.);
-//    canvas->translate(-this->model->position);
+    glTranslatef(this->model->position[0], this->model->position[1], this->model->position[2]);
+    
+    GLfloat modelview[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+    mat4f modelviewmatrix = convert_to_matrix(modelview);
+    this->position = modelviewmatrix*vec4f(0.,0.,0.,1.);
+    
+    glTranslatef(-this->model->position[0], -this->model->position[1], -this->model->position[2]);
 }
 
 void pointhdl::apply(string name, GLuint program)
@@ -183,19 +189,27 @@ void spothdl::update()
 	/* TODO Assignment 2: Update both the direction and position of the light using the position and orientation
 	 * of the attached model. See above.
 	 */
-//    canvas->translate(this->model->position);
-//    canvas->rotate(this->model->orientation[2], vec3f(0.,0.,1.));
-//    canvas->rotate(this->model->orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(this->model->orientation[0], vec3f(1.,0.,0.));
-//    canvas->update_normal_matrix();
+    glTranslatef(this->model->position[0], this->model->position[1], this->model->position[2]);
+    glRotatef(this->model->orientation[2], 0., 0., 1.);
+    glRotatef(this->model->orientation[1], 0., 1., 0.);
+    glRotatef(this->model->orientation[0], 1., 0., 0.);
+    // Need to update normal matrix if necessary
+    
+    GLfloat modelview[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+    mat4f modelviewmatrix = convert_to_matrix(modelview);
+    this->position = modelviewmatrix*vec4f(0.,0.,0.,1.);
+    
+    mat4f normalmatrix = transpose(inverse(modelviewmatrix));
+    this->direction = normalmatrix*vec4f(0.,-1.,0.,1.);
+    
+    glRotatef(-this->model->orientation[0], 1., 0., 0.);
+    glRotatef(-this->model->orientation[1], 0., 1., 0.);
+    glRotatef(-this->model->orientation[2], 0., 0., 1.);
+    glTranslatef(-this->model->position[0], -this->model->position[1], -this->model->position[2]);
 //
 //    this->position = canvas->matrices[canvashdl::modelview_matrix]*vec4f(0.,0.,0.,1.);
 //    this->direction = canvas->matrices[canvashdl::normal_matrix]*vec4f(0.,-1.,0.,1.);
-//    
-//    canvas->rotate(-this->model->orientation[0], vec3f(1.,0.,0.));
-//    canvas->rotate(-this->model->orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(-this->model->orientation[2], vec3f(0.,0.,1.));
-//    canvas->translate(-this->model->position);
 
 }
 
@@ -226,4 +240,16 @@ ambienthdl::~ambienthdl()
 void ambienthdl::apply(string name, GLuint program)
 {
 
+}
+
+mat4f lighthdl::convert_to_matrix (GLfloat arr[16]) {
+    mat4f matrix;
+    
+    for (int i=0; i<4; i++){
+        for (int j=0; j<4; j++){
+            matrix[j][i] = arr[i+j];
+        }
+    }
+    
+    return matrix;
 }
