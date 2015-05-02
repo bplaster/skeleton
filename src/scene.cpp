@@ -14,8 +14,14 @@ scenehdl::scenehdl()
 	render_normals = none;
 	render_lights = false;
 	render_cameras = false;
-    glGenVertexArraysAPPLE(1, &vertexarray);
-    glGenBuffers(1, &vertexbuffer);
+    
+    // Load the shaders
+    GLuint vertex = load_shader_file("res/example.vx", GL_VERTEX_SHADER);
+    GLuint fragment = load_shader_file("res/example.ft", GL_FRAGMENT_SHADER);
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
 }
 
 scenehdl::~scenehdl()
@@ -30,10 +36,6 @@ scenehdl::~scenehdl()
  */
 void scenehdl::draw()
 {
-	/* TODO Assignment 1: Draw all of the objects, and
-	 * if enabled, draw the normals and the cameras.
-	 */
-
     
     // Set projection matrix
     // TODO: doesn't need to happen every frame

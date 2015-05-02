@@ -29,7 +29,7 @@ struct rigidhdl
 	// TODO Assignment 2: Add a material name here
 	string material;
 
-	void draw(GLuint &vertexbuffer, GLuint &vertexarray);
+	void draw();
 };
 
 struct objecthdl

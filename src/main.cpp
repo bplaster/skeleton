@@ -1,3 +1,4 @@
+//#include <GLEW/glew.h>
 #include <OpenGL/OpenGL.h>
 #include <GLUI/GLUI.h>
 #include "standard.h"
@@ -8,7 +9,6 @@
 #include "tinyfiledialogs.h"
 #include "core/geometry.h"
 #include "light.h"
-//#include <GL/glew.h>
 
 scenehdl scene;
 
