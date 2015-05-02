@@ -39,9 +39,7 @@ struct scenehdl
     bool active_light_valid();
 
 	void create_camera();
-    
-    GLuint vertexbuffer;
-    GLuint vertexarray;
+
 };
 
 #endif

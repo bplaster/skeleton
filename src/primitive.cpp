@@ -145,8 +145,8 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 
 	// TODO Assignment 2: Set up the material properties for this object
     rigid[0].material = "material";
-//    materialhdl *material = new uniformhdl();
-//    this->material[rigid[0].material] = material;
+    whitehdl *material = new whitehdl();
+    this->material[rigid[0].material] = material;
 }
 
 spherehdl::~spherehdl()

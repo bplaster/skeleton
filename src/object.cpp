@@ -22,15 +22,16 @@ void rigidhdl::draw()
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glVertexPointer(3, GL_FLOAT, sizeof(GLfloat)*5, geometry.data());
-    glNormalPointer(GL_FLOAT, sizeof(GLfloat)*5, geometry.data()+sizeof(GLfloat)*3);
-    glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, geometry.data()+sizeof(GLfloat)*6);
+    glNormalPointer(GL_FLOAT, sizeof(GLfloat)*5, geometry.data());
+    glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, geometry.data());
     // Draw the triangles
     glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, indices.data());
     // Clean up
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    
+
+    glUseProgram(0);
 }
 
 objecthdl::objecthdl()
@@ -69,7 +70,7 @@ objecthdl::~objecthdl()
  * Draw the model. Don't forget to apply the transformations necessary
  * for position, orientation, and scale.
  */
-void objecthdl::draw(const vector<lighthdl*> &lights, GLuint &vertexbuffer, GLuint &vertexarray)
+void objecthdl::draw(const vector<lighthdl*> &lights)
 {
 	// TODO Assignment 1: Send transformations and geometry to the renderer to draw the object
     glTranslatef(position[0], position[1], position[2]);
@@ -81,11 +82,12 @@ void objecthdl::draw(const vector<lighthdl*> &lights, GLuint &vertexbuffer, GLui
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
         // TODO Assignment 2: Pass the material as a uniform into the renderer
 //        canvas->uniform[(*iter).material] = material[(*iter).material];
-        
+        material[(*iter).material]->apply(lights);
         (*iter).draw();
         
         // TODO Assignment 2: clear the material in the uniform list
 //        canvas->uniform.erase((*iter).material);
+
     }
 
     // Undo transformations

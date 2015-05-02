@@ -2,7 +2,6 @@
 #include "camera.h"
 #include "object.h"
 #include "light.h"
-
 #include "primitive.h"
 #include "model.h"
 
@@ -14,14 +13,7 @@ scenehdl::scenehdl()
 	render_normals = none;
 	render_lights = false;
 	render_cameras = false;
-    
-    // Load the shaders
-    GLuint vertex = load_shader_file("res/example.vx", GL_VERTEX_SHADER);
-    GLuint fragment = load_shader_file("res/example.ft", GL_FRAGMENT_SHADER);
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertex);
-    glAttachShader(program, fragment);
-    glLinkProgram(program);
+
 }
 
 scenehdl::~scenehdl()
@@ -58,7 +50,7 @@ void scenehdl::draw()
             if (*iter) {
                 (*iter)->model->position = (*iter)->position;
                 (*iter)->model->orientation = (*iter)->orientation;
-                (*iter)->model->draw(lights, vertexbuffer, vertexarray);
+                (*iter)->model->draw(lights);
             }
         }
     }
@@ -73,7 +65,7 @@ void scenehdl::draw()
     for (vector<lighthdl*>::iterator iter = lights.begin(); iter != lights.end(); ++iter) {
         if (*iter) {
             if (render_lights){
-                (*iter)->model->draw(lights, vertexbuffer, vertexarray);
+                (*iter)->model->draw(lights);
             }
             (*iter)->update();
         }
@@ -87,7 +79,7 @@ void scenehdl::draw()
     // Draw objects
     for (vector<objecthdl*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
         if (*iter) {
-            (*iter)->draw(lights, vertexbuffer, vertexarray);
+            (*iter)->draw(lights);
             switch (render_normals) {
                 case face:
                     (*iter)->draw_normals(true);

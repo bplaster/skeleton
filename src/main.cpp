@@ -1,4 +1,4 @@
-//#include <GLEW/glew.h>
+
 #include <OpenGL/OpenGL.h>
 #include <GLUI/GLUI.h>
 #include "standard.h"
@@ -146,6 +146,10 @@ GLUI_Checkbox *focus_checkbox;
 GLUI_Panel *cam_prop_panel;
 GLUI_Panel *light_prop_panel;
 
+// OpenGL/GLew
+GLuint vertexbuffer;
+GLuint vertexarray;
+
 // Helper functions
 void create_camera(int val);
 void create_object(int val);
@@ -170,6 +174,7 @@ void init()
 
 	// TODO Assignment 1: Initialize the Scene as necessary.
     
+    
     // Setup GLUI
     setup_glui();
     
@@ -186,6 +191,7 @@ void init()
     
     // Create light
     create_light(Light::Point);
+    
 }
 
 void displayfunc()
@@ -802,8 +808,10 @@ void create_object (int val){
             
             break;
     }
+    
     current_objects->set_int_val(index);
     set_material_info(index);
+    
     glutPostRedisplay();
 }
 
@@ -1040,7 +1048,7 @@ void handle_shading (int val){
         default:
             break;
     }
-//    canvas.shade_model = (canvashdl::Shading)current_shading;
+    
     glutPostRedisplay();
 }
 
@@ -1582,6 +1590,7 @@ int main(int argc, char **argv)
 	window_id = glutCreateWindow("Assignment");
 
 #ifdef __GLEW_H__
+    glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -1590,7 +1599,7 @@ int main(int argc, char **argv)
 	}
 	cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << endl;
 #endif
-
+    
 	cout << "Status: Using OpenGL " << glGetString(GL_VERSION) << endl;
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 

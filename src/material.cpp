@@ -46,6 +46,14 @@ solidhdl::solidhdl()
          * this class. So you only have to initialize them once when the first instance of
          * the class is created.
          */
+        
+//        program = glCreateProgram();
+//        vertex = load_shader_file("res/solid.vx", GL_VERTEX_SHADER);
+//        fragment = load_shader_file("res/solid.ft", GL_FRAGMENT_SHADER);
+//        
+//        glAttachShader(program, vertex);
+//        glAttachShader(program, fragment);
+//        glLinkProgram(program);
     }
 }
 
@@ -158,6 +166,10 @@ solidhdl::~solidhdl()
 void solidhdl::apply(const vector<lighthdl*> &lights)
 {
 	// TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
+    glUseProgram(program);
+    for (int i = 0; i < lights.size(); i++) {
+        lights[i]->apply("brandon", program);
+    }
 }
 
 materialhdl *solidhdl::clone() const
@@ -183,6 +195,15 @@ whitehdl::whitehdl()
 		 * this class. So you only have to initialize them once when the first instance of
 		 * the class is created.
 		 */
+        
+        program = glCreateProgram();
+        vertex = load_shader_file("res/white.vx", GL_VERTEX_SHADER);
+        fragment = load_shader_file("res/white.ft", GL_FRAGMENT_SHADER);
+        
+        glAttachShader(program, vertex);
+        glAttachShader(program, fragment);
+        glLinkProgram(program);
+        
 	}
 }
 
@@ -194,6 +215,7 @@ whitehdl::~whitehdl()
 void whitehdl::apply(const vector<lighthdl*> &lights)
 {
 	glUseProgram(program);
+    
 }
 
 materialhdl *whitehdl::clone() const
@@ -214,6 +236,14 @@ brickhdl::brickhdl()
 		 * this class. So you only have to initialize them once when the first instance of
 		 * the class is created.
 		 */
+        
+        program = glCreateProgram();
+        vertex = load_shader_file("res/brick.vx", GL_VERTEX_SHADER);
+        fragment = load_shader_file("res/brick.ft", GL_FRAGMENT_SHADER);
+        
+        glAttachShader(program, vertex);
+        glAttachShader(program, fragment);
+        glLinkProgram(program);
 	}
 }
 
@@ -225,6 +255,9 @@ brickhdl::~brickhdl()
 void brickhdl::apply(const vector<lighthdl*> &lights)
 {
 	// TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
+    glUseProgram(program);
+    
+    
 }
 
 materialhdl *brickhdl::clone() const
@@ -247,6 +280,13 @@ texturehdl::texturehdl()
 		 * this class. So you only have to initialize them once when the first instance of
 		 * the class is created.
 		 */
+        program = glCreateProgram();
+        vertex = load_shader_file("res/texture.vx", GL_VERTEX_SHADER);
+        fragment = load_shader_file("res/texture.ft", GL_FRAGMENT_SHADER);
+        
+        glAttachShader(program, vertex);
+        glAttachShader(program, fragment);
+        glLinkProgram(program);
 	}
 }
 

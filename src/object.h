@@ -50,7 +50,7 @@ struct objecthdl
 	// (left, right, bottom, top, front, back)
 	vec6f bound;
 
-	void draw(const vector<lighthdl*> &lights, GLuint &vertexbuffer, GLuint &vertexarray);
+	void draw(const vector<lighthdl*> &lights);
 	void draw_bound();
 	void draw_normals(bool face = false);
 };
