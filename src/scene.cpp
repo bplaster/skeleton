@@ -28,7 +28,6 @@ scenehdl::~scenehdl()
  */
 void scenehdl::draw()
 {
-    
     // Set projection matrix
     // TODO: doesn't need to happen every frame
     glMatrixMode(GL_PROJECTION_MATRIX);
@@ -39,6 +38,9 @@ void scenehdl::draw()
 
     // Set modelview matrix
     glMatrixMode(GL_MODELVIEW_MATRIX);
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glLoadIdentity();
     if (active_camera_valid()) {
         cameras[active_camera]->view();
@@ -96,6 +98,8 @@ void scenehdl::draw()
     if(active_object_valid()){
         objects[active_object]->draw_bound();
     }
+    
+    glFlush();
 
 //    canvas->set_matrix(canvashdl::projection_matrix);
 //    canvas->load_identity();
