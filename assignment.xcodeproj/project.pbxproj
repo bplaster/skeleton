@@ -100,6 +100,21 @@
 		C5EE0A791A71524600FAF23F /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		C5EE0A7B1A71524D00FAF23F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		E60B6D2E1A92524000D9CF85 /* GLUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUI.framework; path = ../../../../../../../Library/Frameworks/GLUI.framework; sourceTree = "<group>"; };
+		E64E2A561AF44568008A369E /* libGLEW.1.11.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.11.0.dylib; path = ../../../../../../../usr/local/Cellar/glew/1.11.0/lib/libGLEW.1.11.0.dylib; sourceTree = "<group>"; };
+		E64E2A581AF45B11008A369E /* brick.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = brick.ft; sourceTree = "<group>"; };
+		E64E2A591AF45B11008A369E /* brick.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = brick.vx; sourceTree = "<group>"; };
+		E64E2A5A1AF45B11008A369E /* canvas.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = canvas.ft; sourceTree = "<group>"; };
+		E64E2A5B1AF45B11008A369E /* canvas.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = canvas.vx; sourceTree = "<group>"; };
+		E64E2A5C1AF45B11008A369E /* gouraud.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = gouraud.ft; sourceTree = "<group>"; };
+		E64E2A5D1AF45B11008A369E /* gouraud.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = gouraud.vx; sourceTree = "<group>"; };
+		E64E2A5E1AF45B11008A369E /* light.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = light.glsl; sourceTree = "<group>"; };
+		E64E2A5F1AF45B11008A369E /* phong.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = phong.ft; sourceTree = "<group>"; };
+		E64E2A601AF45B11008A369E /* phong.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = phong.vx; sourceTree = "<group>"; };
+		E64E2A611AF45B11008A369E /* texture.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = texture.ft; sourceTree = "<group>"; };
+		E64E2A621AF45B11008A369E /* texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = texture.png; sourceTree = "<group>"; };
+		E64E2A631AF45B11008A369E /* texture.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = texture.vx; sourceTree = "<group>"; };
+		E64E2A641AF45B11008A369E /* white.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = white.ft; sourceTree = "<group>"; };
+		E64E2A651AF45B11008A369E /* white.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = white.vx; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +134,7 @@
 		C5EE0A1D1A71506700FAF23F = {
 			isa = PBXGroup;
 			children = (
+				E64E2A561AF44568008A369E /* libGLEW.1.11.0.dylib */,
 				E60B6D2E1A92524000D9CF85 /* GLUI.framework */,
 				C5EE0A7B1A71524D00FAF23F /* OpenGL.framework */,
 				C5EE0A791A71524600FAF23F /* GLUT.framework */,
@@ -141,6 +157,20 @@
 		C5EE0A331A71517000FAF23F /* res */ = {
 			isa = PBXGroup;
 			children = (
+				E64E2A581AF45B11008A369E /* brick.ft */,
+				E64E2A591AF45B11008A369E /* brick.vx */,
+				E64E2A5A1AF45B11008A369E /* canvas.ft */,
+				E64E2A5B1AF45B11008A369E /* canvas.vx */,
+				E64E2A5C1AF45B11008A369E /* gouraud.ft */,
+				E64E2A5D1AF45B11008A369E /* gouraud.vx */,
+				E64E2A5E1AF45B11008A369E /* light.glsl */,
+				E64E2A5F1AF45B11008A369E /* phong.ft */,
+				E64E2A601AF45B11008A369E /* phong.vx */,
+				E64E2A611AF45B11008A369E /* texture.ft */,
+				E64E2A621AF45B11008A369E /* texture.png */,
+				E64E2A631AF45B11008A369E /* texture.vx */,
+				E64E2A641AF45B11008A369E /* white.ft */,
+				E64E2A651AF45B11008A369E /* white.vx */,
 				C5EE0A361A71517000FAF23F /* models */,
 			);
 			path = res;
@@ -383,9 +413,24 @@
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/Cellar/glew/1.11.0/include,
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/Cellar/glew/1.11.0/lib,
+				);
 				LD_MAP_FILE_PATH = "assignment.build/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/glew/1.11.0/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = assignment.build;
+				"OTHER_LDFLAGS[arch=*]" = "-lGLEW";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx10.9;
 				SYMROOT = "$(BUILD_DIR)";
@@ -403,6 +448,10 @@
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LD_MAP_FILE_PATH = "assignment.build/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/glew/1.11.0/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OBJROOT = assignment.build;
 				PRODUCT_NAME = "$(TARGET_NAME)";

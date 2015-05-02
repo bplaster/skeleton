@@ -1,4 +1,5 @@
-#include <OpenGL/OpenGL.h>
+#include <GL/glew.h>
+//#include <OpenGL/OpenGL.h>
 #include <GLUI/GLUI.h>
 #include "standard.h"
 #include "scene.h"
@@ -8,7 +9,6 @@
 #include "tinyfiledialogs.h"
 #include "core/geometry.h"
 #include "light.h"
-//#include <GL/glew.h>
 
 scenehdl scene;
 
@@ -146,6 +146,10 @@ GLUI_Checkbox *focus_checkbox;
 GLUI_Panel *cam_prop_panel;
 GLUI_Panel *light_prop_panel;
 
+// OpenGL/GLew
+GLuint vertexbuffer;
+GLuint vertexarray;
+
 // Helper functions
 void create_camera(int val);
 void create_object(int val);
@@ -169,6 +173,7 @@ void init()
 		keys[i] = false;
 
 	// TODO Assignment 1: Initialize the Scene as necessary.
+    
     
     // Setup GLUI
     setup_glui();
@@ -1582,6 +1587,7 @@ int main(int argc, char **argv)
 	window_id = glutCreateWindow("Assignment");
 
 #ifdef __GLEW_H__
+    glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -1590,6 +1596,9 @@ int main(int argc, char **argv)
 	}
 	cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << endl;
 #endif
+    
+    glGenVertexArrays(1, &vertexarray);
+    glGenBuffers(1, &vertexbuffer);
 
 	cout << "Status: Using OpenGL " << glGetString(GL_VERSION) << endl;
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
@@ -1597,6 +1606,8 @@ int main(int argc, char **argv)
 	working_directory = string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/";
 
 	init();
+    scene.vertexarray = vertexarray;
+    scene.vertexbuffer = vertexbuffer;
 
     create_menu();
 

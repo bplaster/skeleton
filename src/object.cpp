@@ -19,20 +19,35 @@ void rigidhdl::draw(GLuint &vertexbuffer, GLuint &vertexarray)
 {
     // TODO Assignment 1: Send the rigid body geometry to the renderer
 //    canvas->draw_triangles(geometry, indices)
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBindVertexArrayAPPLE(vertexarray);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), &geometry, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-                          0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                          3,                  // size
-                          GL_FLOAT,           // type
-                          GL_FALSE,           // normalized?
-                          5*(sizeof(float)),                  // stride
-                          (void*)0            // array buffer offset
-                          );
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+//    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+//    glBindVertexArrayAPPLE(vertexarray);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(geometry), &geometry, GL_STATIC_DRAW);
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(
+//                          0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+//                          3,                  // size
+//                          GL_FLOAT,           // type
+//                          GL_FALSE,           // normalized?
+//                          5*(sizeof(float)),                  // stride
+//                          (void*)0            // array buffer offset
+//                          );
+//    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
+    glVertexPointer(3, GL_FLOAT, sizeof(GLfloat)*5, geometry.data());
+    glNormalPointer(GL_FLOAT, sizeof(GLfloat)*5, geometry.data());
+    glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, geometry.data());
+    
+    // Draw the triangles
+    glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, indices.data());
+    
+    // Clean up
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glUseProgram(0);
 }
 
 objecthdl::objecthdl()
@@ -80,18 +95,16 @@ void objecthdl::draw(const vector<lighthdl*> &lights, GLuint &vertexbuffer, GLui
     glRotatef(orientation[1], 0., 1., 0.);
     glRotatef(orientation[0], 1., 0., 0.);
     
-    
-//    
-//    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
-//        // TODO Assignment 2: Pass the material as a uniform into the renderer
-//        canvas->uniform[(*iter).material] = material[(*iter).material];
-//        
-//        (*iter).draw(canvas);
-//        
-//        // TODO Assignment 2: clear the material in the uniform list
-//        canvas->uniform.erase((*iter).material);
-//    }
-//
+    for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
+        // TODO Assignment 2: Pass the material as a uniform into the renderer
+        //canvas->uniform[(*iter).material] = material[(*iter).material];
+        
+        (*iter).draw(vertexbuffer, vertexarray);
+        
+        // TODO Assignment 2: clear the material in the uniform list
+        //canvas->uniform.erase((*iter).material);
+    }
+
     // Undo transformations
     glRotatef(-orientation[0], 1., 0., 0.);
     glRotatef(-orientation[1], 0., 1., 0.);

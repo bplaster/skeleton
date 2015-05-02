@@ -2,7 +2,6 @@
 #include "camera.h"
 #include "object.h"
 #include "light.h"
-
 #include "primitive.h"
 #include "model.h"
 
@@ -14,8 +13,9 @@ scenehdl::scenehdl()
 	render_normals = none;
 	render_lights = false;
 	render_cameras = false;
-    glGenVertexArraysAPPLE(1, &vertexarray);
-    glGenBuffers(1, &vertexbuffer);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    
 }
 
 scenehdl::~scenehdl()
