@@ -30,21 +30,15 @@ void scenehdl::draw()
 {
     // Set projection matrix
     // TODO: doesn't need to happen every frame
-    glMatrixMode(GL_PROJECTION_MATRIX);
+    glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    
     
     if (active_camera_valid()) {
         cameras[active_camera]->project();
-        GLfloat projection[16];
-
-        glGetFloatv(GL_PROJECTION_MATRIX, projection);
-        cout << endl;
     }
-    
 
     // Set modelview matrix
-    glMatrixMode(GL_MODELVIEW_MATRIX);
+    glMatrixMode(GL_MODELVIEW);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

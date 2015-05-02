@@ -77,6 +77,7 @@ void frustumhdl::project()
 	// TODO Assignment 1: Use the canvashdl::frustum function to set up a perspective projection
 //    canvas->frustum(left, right, bottom, top, near, far);
     glFrustum(left, right, bottom, top, near, far);
+
 }
 
 perspectivehdl::perspectivehdl()

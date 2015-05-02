@@ -17,40 +17,34 @@ rigidhdl::~rigidhdl()
  */
 void rigidhdl::draw()
 {
-    vector<vec8f> vertices;
-    vertices.push_back(vec8f(0.5,0.,4.,0.,0.,0.,0.,0.));
-    vertices.push_back(vec8f(0.,0.5,5.,0.,0.,0.,0.,0.));
-    vertices.push_back(vec8f(0.,0.,5.,0.,0.,0.,0.,0.));
-
-    vector<int> indices;
-    indices.push_back(0);
-    indices.push_back(1);
-    indices.push_back(2);
+//    vector<vec8f> vertices;
+//    vertices.push_back(vec8f(0.5,0.,4.,0.,0.,0.,0.,0.));
+//    vertices.push_back(vec8f(0.,0.5,5.,0.,0.,0.,0.,0.));
+//    vertices.push_back(vec8f(0.,0.,5.,0.,0.,0.,0.,0.));
+//
+//    vector<int> indices;
+//    indices.push_back(0);
+//    indices.push_back(1);
+//    indices.push_back(2);
 
     
     glEnableClientState(GL_VERTEX_ARRAY);
-//    glEnableClientState(GL_NORMAL_ARRAY);
-//    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
-    glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &vertices[0][0]);
-//    glNormalPointer(GL_FLOAT, sizeof(vec8f), &geometry + sizeof(float)*3);
-//    glTexCoordPointer(2, GL_FLOAT, sizeof(vec8f), &geometry + sizeof(float)*6);
+    glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][0]);
+    glNormalPointer(GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][3]);
+    glTexCoordPointer(2, GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][6]);
 
     // Draw the triangles
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, &indices[0]);
-    
-//    glVertexPointer(3, GL_FLOAT, sizeof(vec8f), &geometry);
-//    glNormalPointer(GL_FLOAT, sizeof(vec8f), &geometry + sizeof(float)*3);
-//    glTexCoordPointer(2, GL_FLOAT, sizeof(vec8f), &geometry + sizeof(float)*6);
-//    // Draw the triangles
-//    glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, indices.data());
+    glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, &indices[0]);
     
     // Clean up
     glDisableClientState(GL_VERTEX_ARRAY);
-//    glDisableClientState(GL_NORMAL_ARRAY);
-//    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-//    glUseProgram(0);
+    glUseProgram(2);
 }
 
 objecthdl::objecthdl()
