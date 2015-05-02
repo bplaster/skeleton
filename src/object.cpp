@@ -43,8 +43,6 @@ void rigidhdl::draw()
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glUseProgram(2);
 }
 
 objecthdl::objecthdl()
@@ -176,6 +174,24 @@ void objecthdl::draw_bound()
     
     bound_indices.push_back(6);
     bound_indices.push_back(7);
+    
+    whitehdl *white_material = new whitehdl();
+    const vector<lighthdl*> lights;
+    white_material->apply(lights);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    
+    glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &bound_geometry[0][0]);
+    
+    // Draw the bounds
+    glDrawElements(GL_LINES, (int)bound_indices.size(), GL_UNSIGNED_INT, &bound_indices[0]);
+    
+    // Clean up
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 //    // Give bound material
 //    uniformhdl *bound_material = new uniformhdl();

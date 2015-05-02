@@ -90,7 +90,8 @@ enum LightColor {
 enum Material {
     MatWhite,
     MatSolid,
-    MatBrick
+    MatBrick,
+    MatTexture,
 };
 
 bool keys[256];
@@ -1053,17 +1054,17 @@ void handle_shading (int val){
 }
 
 void handle_culling (int val){
-    switch (val){
+    switch (current_culling){
         case Culling::disable:
             glDisable(GL_CULL_FACE);
             break;
         case Culling::backface:
-            glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
+            glEnable(GL_CULL_FACE);
             break;
         case Culling::frontface:
-            glEnable(GL_CULL_FACE);
             glCullFace(GL_FRONT);
+            glEnable(GL_CULL_FACE);
             break;
         default:
             break;
@@ -1101,6 +1102,9 @@ void handle_material (int val) {
             break;
         case Material::MatBrick:
             material = new brickhdl();
+            break;
+        case Material::MatTexture:
+            material = new texturehdl();
             break;
         default:
             material = new whitehdl();
@@ -1438,6 +1442,7 @@ void setup_glui() {
     list_material->add_item(Material::MatWhite, "White");
     list_material->add_item(Material::MatSolid, "Solid");
     list_material->add_item(Material::MatBrick, "Brick");
+    list_material->add_item(Material::MatTexture, "Texture");
 
     glui->add_button_to_panel(object_panel, "Delete", 0, handle_delete);
 
