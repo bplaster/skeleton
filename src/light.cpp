@@ -206,7 +206,6 @@ void spothdl::apply(string name, GLuint program)
     string lname = "slights[" + name + "].";
     
     // Get all uniform locations
-    GLint sLoc = glGetUniformLocation(program, "slights");
     GLint nLoc = glGetUniformLocation(program, "num_slights");
     
     GLint poLoc = glGetUniformLocation(program, (lname+"position").c_str());
@@ -259,7 +258,7 @@ mat4f lighthdl::convert_to_matrix (GLfloat arr[16]) {
     
     for (int i=0; i<4; i++){
         for (int j=0; j<4; j++){
-            matrix[j][i] = arr[i+j];
+            matrix[j][i] = arr[4*i+j];
         }
     }
     

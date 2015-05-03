@@ -106,9 +106,21 @@ void brickhdl::apply(const vector<lighthdl*> &lights)
 {
 	// TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
     glUseProgram(program);
+    
+    int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
-        lights[i]->apply("brandon", program);
+        if (lights[i]->type == "point") {
+            lights[i]->apply(to_string(pCount), program);
+            pCount++;
+        } else if (lights[i]->type == "spot"){
+            lights[i]->apply(to_string(sCount), program);
+            sCount++;
+        } else if (lights[i]->type == "directional") {
+            lights[i]->apply(to_string(dCount), program);
+            dCount++;
+        }
     }
+
 }
 
 materialhdl *brickhdl::clone() const
@@ -149,6 +161,23 @@ void texturehdl::apply(const vector<lighthdl*> &lights)
 {
 	// TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
     glUseProgram(program);
+    GLint shLoc = glGetUniformLocation(program, "shininess");
+    
+    glUniform1f(shLoc, this->shininess);
+    
+    int pCount = 0, sCount = 0, dCount = 0;
+    for (int i = 0; i < lights.size(); i++) {
+        if (lights[i]->type == "point") {
+            lights[i]->apply(to_string(pCount), program);
+            pCount++;
+        } else if (lights[i]->type == "spot"){
+            lights[i]->apply(to_string(sCount), program);
+            sCount++;
+        } else if (lights[i]->type == "directional") {
+            lights[i]->apply(to_string(dCount), program);
+            dCount++;
+        }
+    }
 
 }
 
@@ -207,6 +236,21 @@ void gouraudhdl::apply(const vector<lighthdl*> &lights)
     glUniform3fv(diLoc, 1, &this->diffuse[0]);
     glUniform3fv(spLoc, 1, &this->specular[0]);
     glUniform1f(shLoc, this->shininess);
+    
+    int pCount = 0, sCount = 0, dCount = 0;
+    for (int i = 0; i < lights.size(); i++) {
+        if (lights[i]->type == "point") {
+            lights[i]->apply(to_string(pCount), program);
+            pCount++;
+        } else if (lights[i]->type == "spot"){
+            lights[i]->apply(to_string(sCount), program);
+            sCount++;
+        } else if (lights[i]->type == "directional") {
+            lights[i]->apply(to_string(dCount), program);
+            dCount++;
+        }
+    }
+
 }
 
 materialhdl *gouraudhdl::clone() const

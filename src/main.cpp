@@ -1606,6 +1606,7 @@ int main(int argc, char **argv)
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     
     glEnable(GL_DEPTH_TEST);
+    glFrontFace(GL_CW);
 
 	working_directory = string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/";
 
