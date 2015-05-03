@@ -429,7 +429,7 @@ void motionfunc(int x, int y)
                 scene.objects[scene.active_object]->position = d*direction + position;
             }
             else if (current_manipulation == manipulate::rotate)
-                scene.objects[scene.active_object]->orientation += vec3f(-(float)deltay/100.0, (float)deltax/100.0, 0.0);
+                scene.objects[scene.active_object]->orientation += vec3f(-(float)deltay/3.0, (float)deltax/3.0, 0.0);
             else if (current_manipulation == manipulate::scale)
                 scene.objects[scene.active_object]->scale += (float)deltay/100.0;
             
@@ -448,7 +448,7 @@ void motionfunc(int x, int y)
                 scene.lights[scene.active_light]->model->position = d*direction + position;
             }
             else if (current_manipulation == manipulate::rotate)
-                scene.lights[scene.active_light]->model->orientation += vec3f(-(float)deltay/100.0, (float)deltax/100.0, 0.0);
+                scene.lights[scene.active_light]->model->orientation += vec3f(-(float)deltay/3.0, (float)deltax/3.0, 0.0);
         }
         
         if (scene.active_camera_valid())
