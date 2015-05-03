@@ -165,12 +165,12 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
 	 */
     rigid.push_back(rigidhdl());
     
-    rigid[0].geometry.push_back(vec8f(0.0, -height/2.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(0.0, -height/2.0, 0.0, 0.0, -1.0, 0.0, (0.0 + radius/2.0)/radius, (0.0 + radius)/2.0*radius));
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
                                           -height/2.0,
                                           radius*sin(2*m_pi*(float)i/(float)slices),
-                                          0.0, -1.0, 0.0, 0.0, 0.0));
+                                          0.0, -1.0, 0.0, (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
@@ -178,7 +178,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           cos(2*m_pi*(float)i/(float)slices),
                                           0.0,
-                                          sin(2*m_pi*(float)i/(float)slices), 0.0, 0.0));
+                                          sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
@@ -186,15 +186,15 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           cos(2*m_pi*(float)i/(float)slices),
                                           0.0,
-                                          sin(2*m_pi*(float)i/(float)slices), 0.0, 0.0));
+                                          sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
                                           height/2.0,
                                           radius*sin(2*m_pi*(float)i/(float)slices),
-                                          0.0, 1.0, 0.0, 0.0, 0.0));
+                                          0.0, 1.0, 0.0, (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0 ));
     
-    rigid[0].geometry.push_back(vec8f(0.0, height/2.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(0.0, height/2.0, 0.0, 0.0, 1.0, 0.0, (0.0 + radius/2.0)/radius, (0.0 + radius)/2*radius));
     
     for (int i = 0; i < slices; i++)
     {
