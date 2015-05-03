@@ -255,20 +255,11 @@ void objecthdl::draw_normals(bool face)
             white_material->apply(lights);
             
             glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            
             glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][0]);
-            
-            // Draw the bounds
+            // Draw the normals
             glDrawElements(GL_LINES, (int)indices.size(), GL_UNSIGNED_INT, &indices[0]);
-            
             // Clean up
             glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-            
-//            canvas->draw_lines(geometry, indices);
         }
     } else {
         for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
@@ -295,19 +286,11 @@ void objecthdl::draw_normals(bool face)
             white_material->apply(lights);
             
             glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            
             glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][0]);
-            
-            // Draw the bounds
+            // Draw the normals
             glDrawElements(GL_LINES, (int)indices.size(), GL_UNSIGNED_INT, &indices[0]);
-            
             // Clean up
             glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//            canvas->draw_lines(geometry, indices);
         }
     }
 
