@@ -125,7 +125,6 @@ void pointhdl::apply(string name, GLuint program)
 {
 	/* TODO Assignment 3: Pass all necessary uniforms to the shaders for point lights.
 	 */
-    
     string lName = "plights[" + name + "].";
 
     GLint nLoc = glGetUniformLocation(program, "num_plights");
