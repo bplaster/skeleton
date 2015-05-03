@@ -109,15 +109,17 @@ void brickhdl::apply(const vector<lighthdl*> &lights)
     
     int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
-        if (lights[i]->type == "point") {
-            lights[i]->apply(to_string(pCount), program);
-            pCount++;
-        } else if (lights[i]->type == "spot"){
-            lights[i]->apply(to_string(sCount), program);
-            sCount++;
-        } else if (lights[i]->type == "directional") {
-            lights[i]->apply(to_string(dCount), program);
-            dCount++;
+        if (lights[i]) {
+            if (lights[i]->type == "point") {
+                lights[i]->apply(to_string(pCount), program);
+                pCount++;
+            } else if (lights[i]->type == "spot"){
+                lights[i]->apply(to_string(sCount), program);
+                sCount++;
+            } else if (lights[i]->type == "directional") {
+                lights[i]->apply(to_string(dCount), program);
+                dCount++;
+            }
         }
     }
 
@@ -167,17 +169,20 @@ void texturehdl::apply(const vector<lighthdl*> &lights)
     
     int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
-        if (lights[i]->type == "point") {
-            lights[i]->apply(to_string(pCount), program);
-            pCount++;
-        } else if (lights[i]->type == "spot"){
-            lights[i]->apply(to_string(sCount), program);
-            sCount++;
-        } else if (lights[i]->type == "directional") {
-            lights[i]->apply(to_string(dCount), program);
-            dCount++;
+        if (lights[i]) {
+            if (lights[i]->type == "point") {
+                lights[i]->apply(to_string(pCount), program);
+                pCount++;
+            } else if (lights[i]->type == "spot"){
+                lights[i]->apply(to_string(sCount), program);
+                sCount++;
+            } else if (lights[i]->type == "directional") {
+                lights[i]->apply(to_string(dCount), program);
+                dCount++;
+            }
         }
     }
+
 
 }
 
@@ -239,15 +244,17 @@ void gouraudhdl::apply(const vector<lighthdl*> &lights)
     
     int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
-        if (lights[i]->type == "point") {
-            lights[i]->apply(to_string(pCount), program);
-            pCount++;
-        } else if (lights[i]->type == "spot"){
-            lights[i]->apply(to_string(sCount), program);
-            sCount++;
-        } else if (lights[i]->type == "directional") {
-            lights[i]->apply(to_string(dCount), program);
-            dCount++;
+        if (lights[i]) {
+            if (lights[i]->type == "point") {
+                lights[i]->apply(to_string(pCount), program);
+                pCount++;
+            } else if (lights[i]->type == "spot"){
+                lights[i]->apply(to_string(sCount), program);
+                sCount++;
+            } else if (lights[i]->type == "directional") {
+                lights[i]->apply(to_string(dCount), program);
+                dCount++;
+            }
         }
     }
 
@@ -314,15 +321,17 @@ void phonghdl::apply(const vector<lighthdl*> &lights)
     
     int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
-        if (lights[i]->type == "point") {
-            lights[i]->apply(to_string(pCount), program);
-            pCount++;
-        } else if (lights[i]->type == "spot"){
-            lights[i]->apply(to_string(sCount), program);
-            sCount++;
-        } else if (lights[i]->type == "directional") {
-            lights[i]->apply(to_string(dCount), program);
-            dCount++;
+        if (lights[i]) {
+            if (lights[i]->type == "point") {
+                lights[i]->apply(to_string(pCount), program);
+                pCount++;
+            } else if (lights[i]->type == "spot"){
+                lights[i]->apply(to_string(sCount), program);
+                sCount++;
+            } else if (lights[i]->type == "directional") {
+                lights[i]->apply(to_string(dCount), program);
+                dCount++;
+            }
         }
     }
 }
