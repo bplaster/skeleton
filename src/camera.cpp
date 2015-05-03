@@ -82,7 +82,7 @@ void frustumhdl::project()
 
 perspectivehdl::perspectivehdl()
 {
-	fovy = m_pi/4.0;
+	fovy = 45.0;
 	aspect = 1.0;
 	near = 2.0;
 	far = 101.0;

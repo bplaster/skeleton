@@ -128,6 +128,11 @@ void pointhdl::apply(string name, GLuint program)
 	/* TODO Assignment 3: Pass all necessary uniforms to the shaders for point lights.
 	 */
     
+    GLint pLoc = glGetUniformLocation(program, "plights");
+    GLint nLoc = glGetUniformLocation(program, "num_plights");
+    
+    
+    
 //    float nDotVP; // normal . light direction
 //    float nDotHV; // normal . light half vector
 //    float pf; // power factor
