@@ -89,7 +89,8 @@ enum LightColor {
 
 enum Material {
     MatWhite,
-    MatSolid,
+    MatGouraud,
+    MatPhong,
     MatBrick,
     MatTexture,
 };
@@ -1083,8 +1084,11 @@ void handle_material (int val) {
         case Material::MatWhite:
             material = new whitehdl();
             break;
-        case Material::MatSolid:
-            material = new solidhdl();
+        case Material::MatGouraud:
+            material = new gouraudhdl();
+            break;
+        case Material::MatPhong:
+            material = new phonghdl();
             break;
         case Material::MatBrick:
             material = new brickhdl();
@@ -1120,8 +1124,14 @@ void set_material_info(int obj_ind){
         } else if (	type == "white") {
             list_material->set_int_val(Material::MatWhite);
             
-        } else if ( type == "solid") {
-            list_material->set_int_val(Material::MatSolid);
+        } else if ( type == "gouraud") {
+            list_material->set_int_val(Material::MatGouraud);
+            
+        } else if ( type == "phong") {
+            list_material->set_int_val(Material::MatPhong);
+            
+        } else if ( type == "texture") {
+            list_material->set_int_val(Material::MatTexture);
         }
     }
 }
@@ -1426,7 +1436,8 @@ void setup_glui() {
     focus_checkbox = glui->add_checkbox_to_panel(object_panel, "Focus on Object", NULL, 1, focus_object);
     list_material = glui->add_listbox_to_panel(object_panel, "Material", &current_material, -1, handle_material);
     list_material->add_item(Material::MatWhite, "White");
-    list_material->add_item(Material::MatSolid, "Solid");
+    list_material->add_item(Material::MatGouraud, "Gouraud");
+    list_material->add_item(Material::MatPhong, "Phong");
     list_material->add_item(Material::MatBrick, "Brick");
     list_material->add_item(Material::MatTexture, "Texture");
 

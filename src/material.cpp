@@ -256,8 +256,9 @@ void brickhdl::apply(const vector<lighthdl*> &lights)
 {
 	// TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
     glUseProgram(program);
-    
-    
+    for (int i = 0; i < lights.size(); i++) {
+        lights[i]->apply("brandon", program);
+    }
 }
 
 materialhdl *brickhdl::clone() const
