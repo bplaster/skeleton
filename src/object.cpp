@@ -180,8 +180,6 @@ void objecthdl::draw_bound()
     white_material->apply(lights);
     
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &bound_geometry[0][0]);
     
@@ -190,8 +188,6 @@ void objecthdl::draw_bound()
     
     // Clean up
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 //    // Give bound material
 //    uniformhdl *bound_material = new uniformhdl();
@@ -220,11 +216,11 @@ void objecthdl::draw_bound()
  */
 void objecthdl::draw_normals(bool face)
 {
-//    canvas->translate(position);
-//    canvas->scale(vec3f(scale, scale, scale));
-//    canvas->rotate(orientation[2], vec3f(0.,0.,1.));
-//    canvas->rotate(orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(orientation[0], vec3f(1.,0.,0.));
+    glTranslatef(position[0], position[1], position[2]);
+    glScalef(scale, scale, scale);
+    glRotatef(orientation[2], 0., 0., 1.);
+    glRotatef(orientation[1], 0., 1., 0.);
+    glRotatef(orientation[0], 1., 0., 0.);
     
 	/* TODO Assignment 1: Generate the geometry to display the normals and send the necessary
 	 * transformations and geometry to the renderer
@@ -254,7 +250,16 @@ void objecthdl::draw_normals(bool face)
                 indices.push_back(2*i/3 + 1);
             }
             
-//            canvas->draw_lines(geometry, indices);
+            whitehdl *white_material = new whitehdl();
+            const vector<lighthdl*> lights;
+            white_material->apply(lights);
+            
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][0]);
+            // Draw the normals
+            glDrawElements(GL_LINES, (int)indices.size(), GL_UNSIGNED_INT, &indices[0]);
+            // Clean up
+            glDisableClientState(GL_VERTEX_ARRAY);
         }
     } else {
         for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
@@ -276,17 +281,26 @@ void objecthdl::draw_normals(bool face)
                 indices.push_back(2*i+1);
             }
             
-//            canvas->draw_lines(geometry, indices);
+            whitehdl *white_material = new whitehdl();
+            const vector<lighthdl*> lights;
+            white_material->apply(lights);
+            
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(3, GL_FLOAT, 8*sizeof(GLfloat), &geometry[0][0]);
+            // Draw the normals
+            glDrawElements(GL_LINES, (int)indices.size(), GL_UNSIGNED_INT, &indices[0]);
+            // Clean up
+            glDisableClientState(GL_VERTEX_ARRAY);
         }
     }
 
     
 //    // Undo transformations
-//    canvas->rotate(-orientation[0], vec3f(1.,0.,0.));
-//    canvas->rotate(-orientation[1], vec3f(0.,1.,0.));
-//    canvas->rotate(-orientation[2], vec3f(0.,0.,1.));
-//    canvas->scale(vec3f(1./scale, 1./scale, 1./scale));
-//    canvas->translate(-position);
+    glRotatef(-orientation[0], 1., 0., 0.);
+    glRotatef(-orientation[1], 0., 1., 0.);
+    glRotatef(-orientation[2], 0., 0., 1.);
+    glScalef(1./scale, 1./scale, 1./scale);
+    glTranslatef(-position[0], -position[1], -position[2]);
 }
 
 
