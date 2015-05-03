@@ -109,7 +109,6 @@ void brickhdl::apply(const vector<lighthdl*> &lights)
     for (int i = 0; i < lights.size(); i++) {
         lights[i]->apply("brandon", program);
     }
-    
 }
 
 materialhdl *brickhdl::clone() const
