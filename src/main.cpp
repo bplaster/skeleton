@@ -268,7 +268,7 @@ void pmotionfunc(int x, int y)
             if (scene.cameras[scene.active_camera]->type == "ortho")
             {
                 direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
-                position = {unX, unY, unZ};
+                position = {unX, -unY, unZ};
             }
             else
             {
@@ -409,7 +409,7 @@ void motionfunc(int x, int y)
             if (scene.cameras[scene.active_camera]->type == "ortho")
             {
                 direction = ror3(vec3f(0.0f, 0.0f, 1.0f), scene.cameras[scene.active_camera]->orientation);
-                position = {unX, unY, unZ};
+                position = {unX, -unY, unZ};
             }
             else
             {
