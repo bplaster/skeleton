@@ -68,22 +68,6 @@ void directionalhdl::apply(string name, GLuint program)
 	/* TODO Assignment 3: Pass all necessary uniforms to the shaders for the directional light.
 	 */
     
-//    float nDotVP; // normal . light direction
-//    float nDotHV; // normal . light half vector
-//    float pf; // power factor
-//    vec3f eye = -vertex;
-//    vec3f VP = norm(this->direction);
-//    vec3f halfVector = norm(VP + eye);
-//    
-//    nDotVP = fmax(0.0, dot(normal, VP));
-//    nDotHV = fmax(0.0, dot(normal, halfVector));
-//    if (nDotVP == 0.0)
-//        pf = 0.0;
-//    else
-//        pf = pow(nDotVP, shininess);
-//    ambient  += this->ambient;
-//    diffuse  += this->diffuse * nDotVP;
-//    specular += this->specular * pf;
 }
 
 pointhdl::pointhdl() : lighthdl(white*0.1f, white*0.5f, white)
@@ -127,41 +111,17 @@ void pointhdl::apply(string name, GLuint program)
 {
 	/* TODO Assignment 3: Pass all necessary uniforms to the shaders for point lights.
 	 */
+    string lname = "plights[" + name + "].";
     
     GLint pLoc = glGetUniformLocation(program, "plights");
+    
     GLint nLoc = glGetUniformLocation(program, "num_plights");
     
-    
-    
-//    float nDotVP; // normal . light direction
-//    float nDotHV; // normal . light half vector
-//    float pf; // power factor
-//    float attenuation; // computed attenuation factor
-//    float d; // distance from surface to light source
-//    vec3f eye = -vertex;
-//    vec3f VP; // direction from surface to light position
-//    vec3f halfVector; // direction of maximum highlights
-//    // Compute vector from surface to light position
-//    VP = this->position - vertex;
-//    // Compute distance between surface and light position
-//    d = mag(VP);
-//    // Normalize the vector from surface to light position
-//    VP = norm(VP);
-//    // Compute attenuation
-//    attenuation = 1.0 / (this->attenuation[0] +
-//                         this->attenuation[1] * d +
-//                         this->attenuation[2] * d * d);
-//    
-//    halfVector = norm(VP + eye);
-//    nDotVP = fmax(0.0, dot(normal, VP));
-//    nDotHV = fmax(0.0, dot(normal, halfVector));
-//    if (nDotVP == 0.0)
-//        pf = 0.0;
-//    else
-//        pf = pow(nDotHV, shininess);
-//    ambient += this->ambient * attenuation;
-//    diffuse += this->diffuse * nDotVP * attenuation;
-//    specular += this->specular * pf * attenuation;
+    GLint poLoc = glGetUniformLocation(program, (lname+"position").c_str());
+    GLint amLoc = glGetUniformLocation(program, (lname+"ambient").c_str());
+    GLint diLoc = glGetUniformLocation(program, (lname+"diffuse").c_str());
+    GLint spLoc = glGetUniformLocation(program, (lname+"specular").c_str());
+    GLint atLoc = glGetUniformLocation(program, (lname+"attenuation").c_str());
 }
 
 spothdl::spothdl() : lighthdl(white*0.1f, white*0.5f, white)
@@ -222,7 +182,33 @@ void spothdl::apply(string name, GLuint program)
 {
 	/* TODO Assignment 3: Pass all necessary uniforms to the shaders for spot lights.
 	 */
+    string lname = "slights[" + name + "].";
     
+    // Get all uniform locations
+    GLint sLoc = glGetUniformLocation(program, "slights");
+    GLint nLoc = glGetUniformLocation(program, "num_slights");
+    
+    GLint poLoc = glGetUniformLocation(program, (lname+"position").c_str());
+    GLint drLoc = glGetUniformLocation(program, (lname+"direction").c_str());
+    
+    GLint amLoc = glGetUniformLocation(program, (lname+"ambient").c_str());
+    GLint diLoc = glGetUniformLocation(program, (lname+"diffuse").c_str());
+    GLint spLoc = glGetUniformLocation(program, (lname+"specular").c_str());
+    
+    GLint atLoc = glGetUniformLocation(program, (lname+"attenuation").c_str());
+    GLint cuLoc = glGetUniformLocation(program, (lname+"cutoff").c_str());
+    GLint exLoc = glGetUniformLocation(program, (lname+"exponent").c_str());
+    
+    // Pass uniform values to shader
+    glUniform1i(nLoc, stoi(name)+1);
+    glUniform3fv(poLoc, 1, &this->position[0]);
+    glUniform3fv(drLoc, 1, &this->direction[0]);
+    glUniform3fv(amLoc, 1, &this->ambient[0]);
+    glUniform3fv(diLoc, 1, &this->diffuse[0]);
+    glUniform3fv(spLoc, 1, &this->specular[0]);
+    glUniform3fv(atLoc, 1, &this->attenuation[0]);
+    glUniform1f(cuLoc, this->cutoff);
+    glUniform1f(exLoc, this->exponent);
 }
 
 ambienthdl::ambienthdl() : lighthdl(white*0.7f, white*0.0f, white*0.0f)
