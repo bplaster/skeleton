@@ -149,6 +149,23 @@ texturehdl::texturehdl()
         vertex = load_shader_file("res/texture.vx", GL_VERTEX_SHADER);
         fragment = load_shader_file("res/texture.ft", GL_FRAGMENT_SHADER);
         
+        //load and decode
+        vector<unsigned char> image;
+        unsigned width, height;
+        unsigned error = lodepng::decode(image, width, height, "res/texture.png");
+        
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        
+        glEnable(GL_TEXTURE_2D);
+        glShadeModel(GL_FLAT);
+
+        
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
         glLinkProgram(program);
@@ -164,9 +181,11 @@ void texturehdl::apply(const vector<lighthdl*> &lights)
 	// TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
     glUseProgram(program);
     GLint shLoc = glGetUniformLocation(program, "shininess");
-    
+    GLint txLoc = glGetUniformLocation(program, "tex");
+
     glUniform1f(shLoc, this->shininess);
-    
+    glUniform1f(txLoc, this->texture);
+
     int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
         if (lights[i]) {

@@ -12,6 +12,8 @@ struct boxhdl : objecthdl
 struct spherehdl : objecthdl
 {
 	spherehdl(float radius, int levels, int slices);
+    float textureS(float x, float z);
+    float textureT(float y);
 	~spherehdl();
 };
 

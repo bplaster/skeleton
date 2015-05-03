@@ -20,8 +20,12 @@ modelhdl::modelhdl(string filename)
     
     string name = "material";
     
+    material[name] = new whitehdl;
+    
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
-        iter->material = name;
+        if (iter->material == "") {
+            iter->material = name;
+        }
     }
 
 }
