@@ -15,9 +15,9 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid[0].indices.reserve(36);
     
     rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 0.0, 0.0, -1.0, 1.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 0.0, 0.0, -1.0, 1.0, 1.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, 0.0, 0.0, -1.0, 0.0, 1.0));
     rigid[0].indices.push_back(0);
     rigid[0].indices.push_back(1);
     rigid[0].indices.push_back(2);
@@ -26,9 +26,9 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid[0].indices.push_back(3);
     
     rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, -1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, -1.0, 0.0, 0.0, 1.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, -1.0, 0.0, 0.0, 1.0, 1.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, -1.0, 0.0, 0.0, 0.0, 1.0));
     rigid[0].indices.push_back(4);
     rigid[0].indices.push_back(5);
     rigid[0].indices.push_back(6);
@@ -37,9 +37,9 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid[0].indices.push_back(7);
     
     rigid[0].geometry.push_back(vec8f(-width/2, -height/2, -depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 0.0, -1.0, 0.0, 1.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 0.0, -1.0, 0.0, 1.0, 1.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, 0.0, -1.0, 0.0, 0.0, 1.0));
     rigid[0].indices.push_back(10);
     rigid[0].indices.push_back(9);
     rigid[0].indices.push_back(8);
@@ -48,9 +48,9 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid[0].indices.push_back(8);
     
     rigid[0].geometry.push_back(vec8f( width/2,  height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 0.0, 0.0, 1.0, 1.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2, -height/2,  depth/2, 0.0, 0.0, 1.0, 1.0, 1.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, 0.0, 0.0, 1.0, 0.0, 1.0));
     rigid[0].indices.push_back(12);
     rigid[0].indices.push_back(13);
     rigid[0].indices.push_back(14);
@@ -59,9 +59,9 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid[0].indices.push_back(15);
     
     rigid[0].geometry.push_back(vec8f( width/2,  height/2,  depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 0.0, 1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2,  depth/2, 0.0, 1.0, 0.0, 1.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(-width/2,  height/2, -depth/2, 0.0, 1.0, 0.0, 1.0, 1.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 0.0, 1.0, 0.0, 0.0, 1.0));
     rigid[0].indices.push_back(16);
     rigid[0].indices.push_back(17);
     rigid[0].indices.push_back(18);
@@ -70,9 +70,9 @@ boxhdl::boxhdl(float width, float height, float depth)
     rigid[0].indices.push_back(19);
     
     rigid[0].geometry.push_back(vec8f( width/2,  height/2,  depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
-    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 1.0, 0.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2,  height/2, -depth/2, 1.0, 0.0, 0.0, 1.0, 0.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2, -depth/2, 1.0, 0.0, 0.0, 1.0, 1.0));
+    rigid[0].geometry.push_back(vec8f( width/2, -height/2,  depth/2, 1.0, 0.0, 0.0, 0.0, 1.0));
     rigid[0].indices.push_back(20);
     rigid[0].indices.push_back(21);
     rigid[0].indices.push_back(22);
@@ -94,6 +94,14 @@ boxhdl::~boxhdl()
 
 }
 
+float spherehdl::textureS(float x, float z){
+    return (atan2(x, z) + M_PI)/(2.*M_PI);
+}
+
+float spherehdl::textureT(float y){
+    return acos(y)/M_PI;
+}
+
 /* spherehdl
  *
  * Generate the geometry and indices required to make a sphere.
@@ -103,7 +111,7 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 	rigid.push_back(rigidhdl());
 
 	rigid[0].geometry.reserve(2 + (levels-1)*slices);
-	rigid[0].geometry.push_back(vec8f(0.0, 0.0, radius, 0.0, 0.0, 1.0, 0.0, 0.0));
+	rigid[0].geometry.push_back(vec8f(0.0, 0.0, radius, 0.0, 0.0, 1.0, textureS(0.0, 1.0), textureT(0.0)));
 	for (int i = 1; i < levels; i++)
 		for (int j = 0; j < slices; j++)
 		{
@@ -111,9 +119,9 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 					  sin(m_pi*(float)i/(float)levels)*sin(2.0*m_pi*(float)j/(float)slices),
 					  cos(m_pi*(float)i/(float)levels));
 			rigid[0].geometry.push_back(vec8f(radius*dir[0], radius*dir[1], radius*dir[2],
-									 dir[0], dir[1], dir[2], 0.0, 0.0));
+									 dir[0], dir[1], dir[2], textureS(dir[0], dir[2]), textureT(dir[1])));
 		}
-	rigid[0].geometry.push_back(vec8f(0.0, 0.0, -radius, 0.0, 0.0, -1.0, 0.0, 0.0));
+	rigid[0].geometry.push_back(vec8f(0.0, 0.0, -radius, 0.0, 0.0, -1.0, textureS(0.0, -1.0), textureT(0.0)));
 
 	for (int i = 0; i < slices; i++)
 	{

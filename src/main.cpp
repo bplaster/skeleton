@@ -1525,11 +1525,6 @@ void setup_glui() {
     list_manipulation->add_item(manipulate::translate,"Translate");
     list_manipulation->add_item(manipulate::rotate,   "Rotate");
     list_manipulation->add_item(manipulate::scale,    "Scale");
-    list_shading = glui->add_listbox_to_panel(options_panel, "Shading", &current_shading, -1, handle_shading);
-    list_shading->add_item(Shading::none,"None");
-    list_shading->add_item(Shading::flat, "Flat");
-    list_shading->add_item(Shading::gouraud, "Gouraud");
-    list_shading->add_item(Shading::phong, "Phong");
     
     glui->add_separator_to_panel(options_panel);
 
@@ -1606,6 +1601,7 @@ int main(int argc, char **argv)
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     
     glEnable(GL_DEPTH_TEST);
+
     glFrontFace(GL_CW);
 
 	working_directory = string(argv[0]).substr(0, string(argv[0]).find_last_of("/\\")) + "/";
