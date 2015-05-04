@@ -93,7 +93,12 @@ void objecthdl::draw(const vector<lighthdl*> &lights)
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
         // TODO Assignment 2: Pass the material as a uniform into the renderer
 //        canvas->uniform[(*iter).material] = material[(*iter).material];
-        material[(*iter).material]->apply(lights);
+        materialhdl *mater = material[(*iter).material];
+        if (!mater) {
+            mater = new whitehdl;
+            (*iter).material = "material";
+        }
+        mater->apply(lights);
         (*iter).draw();
         
         // TODO Assignment 2: clear the material in the uniform list
