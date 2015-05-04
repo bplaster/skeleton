@@ -186,7 +186,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           cos(2*m_pi*(float)i/(float)slices),
                                           0.0,
-                                          sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0));
+                                          sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, 0.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
@@ -194,7 +194,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           cos(2*m_pi*(float)i/(float)slices),
                                           0.0,
-                                          sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0));
+                                          sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, 1.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
@@ -256,12 +256,12 @@ pyramidhdl::pyramidhdl(float radius, float height, int slices)
     float nheight = sqrt(1.0f/(1.0f + (height*height)/(radius*radius)));
     float nlength = height*nheight/radius;
     
-    rigid[0].geometry.push_back(vec8f(0.0, -height/2.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0));
+    rigid[0].geometry.push_back(vec8f(0.0, -height/2.0, 0.0, 0.0, -1.0, 0.0, (0.0 + radius/2.0)/radius, (0.0 + radius)/2.0*radius));
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
                                           -height/2.0,
                                           radius*sin(2*m_pi*(float)i/(float)slices),
-                                          0.0, -1.0, 0.0, 0.0, 0.0));
+                                          0.0, -1.0, 0.0, (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, (sin(2*m_pi*(float)i/(float)slices) + 1.0)/2.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
@@ -269,13 +269,13 @@ pyramidhdl::pyramidhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           nlength*cos(2*m_pi*(float)i/(float)slices),
                                           nheight,
-                                          nlength*sin(2*m_pi*(float)i/(float)slices), 0.0, 0.0));
+                                          nlength*sin(2*m_pi*(float)i/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, 1.0));
     
     for (int i = 0; i < slices; i++)
         rigid[0].geometry.push_back(vec8f(0.0, height/2.0, 0.0,
                                           nlength*cos(2*m_pi*((float)i + 0.5)/(float)slices),
                                           nheight,
-                                          nlength*sin(2*m_pi*((float)i + 0.5)/(float)slices), 0.0, 0.0));
+                                          nlength*sin(2*m_pi*((float)i + 0.5)/(float)slices), (cos(2*m_pi*(float)i/(float)slices) + 1.0)/2.0, 0.0));
     
     for (int i = 0; i < slices; i++)
     {
