@@ -1,0 +1,15 @@
+#include "lights.glsl"
+
+uniform float shininess;
+uniform sampler2D tex;
+
+varying vec3 eye_space_vertex;
+varying vec3 eye_space_normal;
+varying vec2 vTexCoord;
+
+void main()
+{
+    vec3 tex_color = texture2D(tex, vTexCoord).rgb;
+    gl_FragColor = lighting(vec3(0.0), tex_color, tex_color, tex_color, shininess, eye_space_vertex, eye_space_normal);
+}
+
