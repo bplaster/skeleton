@@ -41,6 +41,12 @@
 		1A19B0631AF99AFB0032474E /* lights.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lights.glsl; sourceTree = "<group>"; };
 		1A19B0641AF99C2D0032474E /* nonuniform.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nonuniform.vx; sourceTree = "<group>"; };
 		1A19B0651AF99C380032474E /* nonuniform.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nonuniform.ft; sourceTree = "<group>"; };
+		1A19B0661AF9D7D80032474E /* white.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = white.vx; sourceTree = "<group>"; };
+		1A19B0671AF9D7E50032474E /* white.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = white.ft; sourceTree = "<group>"; };
+		1A19B0681AF9D7F40032474E /* texture.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = texture.vx; sourceTree = "<group>"; };
+		1A19B0691AF9D8020032474E /* texture.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = texture.ft; sourceTree = "<group>"; };
+		1A19B06A1AF9D8C20032474E /* brick.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brick.ft; sourceTree = "<group>"; };
+		1A19B06B1AF9D8CC0032474E /* brick.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brick.vx; sourceTree = "<group>"; };
 		1A2313B21ADF0151000B53D1 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lodepng.cpp; sourceTree = "<group>"; };
 		1A2313B31ADF0151000B53D1 /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
 		1AB69CEA1AB0D5B80008162E /* light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = light.cpp; sourceTree = "<group>"; };
@@ -104,6 +110,10 @@
 		C5EE0A7B1A71524D00FAF23F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		E60B6D2E1A92524000D9CF85 /* GLUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUI.framework; path = ../../../../../../../Library/Frameworks/GLUI.framework; sourceTree = "<group>"; };
 		E64E2A621AF45B11008A369E /* texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = texture.png; sourceTree = "<group>"; };
+		E64FDF511AF9B72A003A9EF4 /* phongs.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phongs.vx; sourceTree = "<group>"; };
+		E64FDF521AF9B76B003A9EF4 /* phongs.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phongs.ft; sourceTree = "<group>"; };
+		E64FDF531AF9B955003A9EF4 /* gourauds.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gourauds.vx; sourceTree = "<group>"; };
+		E64FDF541AF9BB1C003A9EF4 /* gourauds.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gourauds.ft; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,8 +158,18 @@
 				1A19B0631AF99AFB0032474E /* lights.glsl */,
 				1A19B0651AF99C380032474E /* nonuniform.ft */,
 				1A19B0641AF99C2D0032474E /* nonuniform.vx */,
-				E64E2A621AF45B11008A369E /* texture.png */,
+				E64FDF521AF9B76B003A9EF4 /* phongs.ft */,
+				E64FDF511AF9B72A003A9EF4 /* phongs.vx */,
+				1A19B06A1AF9D8C20032474E /* brick.ft */,
+				1A19B06B1AF9D8CC0032474E /* brick.vx */,
+				E64FDF541AF9BB1C003A9EF4 /* gourauds.ft */,
+				E64FDF531AF9B955003A9EF4 /* gourauds.vx */,
 				C5EE0A361A71517000FAF23F /* models */,
+				1A19B0671AF9D7E50032474E /* white.ft */,
+				1A19B0661AF9D7D80032474E /* white.vx */,
+				E64E2A621AF45B11008A369E /* texture.png */,
+				1A19B0691AF9D8020032474E /* texture.ft */,
+				1A19B0681AF9D7F40032474E /* texture.vx */,
 			);
 			path = res;
 			sourceTree = "<group>";

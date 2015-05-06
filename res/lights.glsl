@@ -64,10 +64,10 @@ void point_shade(point light, inout vec3 ambient, inout vec3 diffuse, inout vec3
     vec3 VP = light.position - vertex;  // direction from surface to light position
     float d = length(VP);               // distance from surface to light source
     VP = normalize(VP);                 // Normalize the vector from surface to light position
-    attenuation = 1.0 / (light.attenuation[0] +
-                         light.attenuation[1] * d +
-                         light.attenuation[2] * d * d);
-    float halfVector = normalize(VP + eye);             // direction of maximum highlights
+    float attenuation = 1.0 / (light.attenuation[0] +
+                               light.attenuation[1] * d +
+                               light.attenuation[2] * d * d);
+    vec3 halfVector = normalize(VP + eye);             // direction of maximum highlights
     float nDotVP = max(0.0, dot(normal, VP));           // normal . light direction
     float nDotHV = max(0.0, dot(normal, halfVector));   // normal . light half vector
     if (nDotVP > 0.0) {
@@ -123,6 +123,7 @@ vec4 lighting(vec3 emission, vec3 ambient, vec3 diffuse, vec3 specular, float sh
     
     return vec4(clamp(emission + light_ambient*ambient + light_diffuse*diffuse + light_specular*specular, 0.0, 1.0), 1.0);
 }
+
 
 
 

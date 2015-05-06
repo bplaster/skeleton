@@ -1536,7 +1536,7 @@ void setup_glui() {
     glui->add_separator();
     
     GLUI_Panel *light_panel = glui->add_panel("Create Light");
-    glui->add_button_to_panel(light_panel,    "Ambient",       Light::Ambient,         create_light);
+//    glui->add_button_to_panel(light_panel,    "Ambient",       Light::Ambient,         create_light);
     glui->add_button_to_panel(light_panel,    "Point",     Light::Point,       create_light);
     glui->add_button_to_panel(light_panel,    "Spot", Light::Spot,   create_light);
     glui->add_button_to_panel(light_panel,    "Directional", Light::Directional,   create_light);

@@ -235,8 +235,8 @@ gouraudhdl::gouraudhdl()
          * the class is created.
          */
         program = glCreateProgram();
-        vertex = load_shader_file("res/gouraud.vx", GL_VERTEX_SHADER);
-        fragment = load_shader_file("res/gouraud.ft", GL_FRAGMENT_SHADER);
+        vertex = load_shader_file("res/gourauds.vx", GL_VERTEX_SHADER);
+        fragment = load_shader_file("res/gourauds.ft", GL_FRAGMENT_SHADER);
         
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
@@ -312,8 +312,8 @@ phonghdl::phonghdl()
          * the class is created.
          */
         program = glCreateProgram();
-        vertex = load_shader_file("res/phong.vx", GL_VERTEX_SHADER);
-        fragment = load_shader_file("res/phong.ft", GL_FRAGMENT_SHADER);
+        vertex = load_shader_file("res/phongs.vx", GL_VERTEX_SHADER);
+        fragment = load_shader_file("res/phongs.ft", GL_FRAGMENT_SHADER);
 
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
