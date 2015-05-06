@@ -1,4 +1,4 @@
-#include "light.glsl"
+#include "lights.glsl"
 
 #define M_PI 3.1415926535897932384626433832795
 
@@ -22,5 +22,5 @@ void main()
     nu_diffuse *= (pow(cos(object_space_vertex.x*M_PI*4.),2.) + pow(sin(object_space_vertex.y*M_PI*4.),2.));
     nu_specular *= (pow(cos(object_space_vertex.x*M_PI*4.),2.) + pow(sin(object_space_vertex.y*M_PI*4.),2.));
 
-    gl_FragColor = vec4(lighting(emission, nu_ambient, nu_diffuse, nu_specular, shininess, eye_space_vertex, eye_space_normal), 1.0);
+    gl_FragColor = lighting(emission, nu_ambient, nu_diffuse, nu_specular, shininess, eye_space_vertex, eye_space_normal);
 }
