@@ -115,6 +115,10 @@
 		E64E2A631AF45B11008A369E /* texture.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = texture.vx; sourceTree = "<group>"; };
 		E64E2A641AF45B11008A369E /* white.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = white.ft; sourceTree = "<group>"; };
 		E64E2A651AF45B11008A369E /* white.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = white.vx; sourceTree = "<group>"; };
+		E64FDF511AF9B72A003A9EF4 /* phongs.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phongs.vx; sourceTree = "<group>"; };
+		E64FDF521AF9B76B003A9EF4 /* phongs.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phongs.ft; sourceTree = "<group>"; };
+		E64FDF531AF9B955003A9EF4 /* gourauds.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gourauds.vx; sourceTree = "<group>"; };
+		E64FDF541AF9BB1C003A9EF4 /* gourauds.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gourauds.ft; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +175,10 @@
 				E64E2A631AF45B11008A369E /* texture.vx */,
 				E64E2A641AF45B11008A369E /* white.ft */,
 				E64E2A651AF45B11008A369E /* white.vx */,
+				E64FDF511AF9B72A003A9EF4 /* phongs.vx */,
+				E64FDF521AF9B76B003A9EF4 /* phongs.ft */,
+				E64FDF531AF9B955003A9EF4 /* gourauds.vx */,
+				E64FDF541AF9BB1C003A9EF4 /* gourauds.ft */,
 				C5EE0A361A71517000FAF23F /* models */,
 			);
 			path = res;
