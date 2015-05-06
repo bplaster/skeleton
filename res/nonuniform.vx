@@ -1,0 +1,13 @@
+varying vec3 eye_space_vertex;
+varying vec3 eye_space_normal;
+varying vec3 object_space_vertex;
+
+void main()
+{
+    object_space_vertex = gl_Vertex.xyz;
+    vec4 vertex = gl_ModelViewMatrix*gl_Vertex;
+    eye_space_vertex = vertex.xyz;
+    eye_space_normal = normalize(gl_NormalMatrix*gl_Normal);
+
+    gl_Position = gl_ProjectionMatrix*vertex;
+}

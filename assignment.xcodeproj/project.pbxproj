@@ -38,6 +38,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1A19B0631AF99AFB0032474E /* lights.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lights.glsl; sourceTree = "<group>"; };
+		1A19B0641AF99C2D0032474E /* nonuniform.vx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nonuniform.vx; sourceTree = "<group>"; };
+		1A19B0651AF99C380032474E /* nonuniform.ft */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nonuniform.ft; sourceTree = "<group>"; };
 		1A2313B21ADF0151000B53D1 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lodepng.cpp; sourceTree = "<group>"; };
 		1A2313B31ADF0151000B53D1 /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
 		1AB69CEA1AB0D5B80008162E /* light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = light.cpp; sourceTree = "<group>"; };
@@ -102,8 +105,6 @@
 		E60B6D2E1A92524000D9CF85 /* GLUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUI.framework; path = ../../../../../../../Library/Frameworks/GLUI.framework; sourceTree = "<group>"; };
 		E64E2A581AF45B11008A369E /* brick.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = brick.ft; sourceTree = "<group>"; };
 		E64E2A591AF45B11008A369E /* brick.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = brick.vx; sourceTree = "<group>"; };
-		E64E2A5A1AF45B11008A369E /* canvas.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = canvas.ft; sourceTree = "<group>"; };
-		E64E2A5B1AF45B11008A369E /* canvas.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = canvas.vx; sourceTree = "<group>"; };
 		E64E2A5C1AF45B11008A369E /* gouraud.ft */ = {isa = PBXFileReference; lastKnownFileType = text; path = gouraud.ft; sourceTree = "<group>"; };
 		E64E2A5D1AF45B11008A369E /* gouraud.vx */ = {isa = PBXFileReference; lastKnownFileType = text; path = gouraud.vx; sourceTree = "<group>"; };
 		E64E2A5E1AF45B11008A369E /* light.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = light.glsl; sourceTree = "<group>"; };
@@ -157,8 +158,9 @@
 			children = (
 				E64E2A581AF45B11008A369E /* brick.ft */,
 				E64E2A591AF45B11008A369E /* brick.vx */,
-				E64E2A5A1AF45B11008A369E /* canvas.ft */,
-				E64E2A5B1AF45B11008A369E /* canvas.vx */,
+				1A19B0631AF99AFB0032474E /* lights.glsl */,
+				1A19B0651AF99C380032474E /* nonuniform.ft */,
+				1A19B0641AF99C2D0032474E /* nonuniform.vx */,
 				E64E2A5C1AF45B11008A369E /* gouraud.ft */,
 				E64E2A5D1AF45B11008A369E /* gouraud.vx */,
 				E64E2A5E1AF45B11008A369E /* light.glsl */,

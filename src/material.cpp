@@ -23,6 +23,10 @@ GLuint phonghdl::vertex = 0;
 GLuint phonghdl::fragment = 0;
 GLuint phonghdl::program = 0;
 
+GLuint nonuniformhdl::vertex = 0;
+GLuint nonuniformhdl::fragment = 0;
+GLuint nonuniformhdl::program = 0;
+
 extern string working_directory;
 
 materialhdl::materialhdl()
@@ -358,6 +362,82 @@ void phonghdl::apply(const vector<lighthdl*> &lights)
 materialhdl *phonghdl::clone() const
 {
     phonghdl *result = new phonghdl();
+    result->type = type;
+    result->emission = emission;
+    result->ambient = ambient;
+    result->diffuse = diffuse;
+    result->specular = specular;
+    result->shininess = shininess;
+    return result;
+}
+
+nonuniformhdl::nonuniformhdl()
+{
+    type = "nonuniform";
+    emission = vec3f(0.0, 0.0, 0.0);
+    ambient = vec3f(0.1, 0.1, 0.1);
+    diffuse = vec3f(1.0, 1.0, 1.0);
+    specular = vec3f(1.0, 1.0, 1.0);
+    shininess = 1.0;
+    
+    if (vertex == 0 && fragment == 0 && program == 0)
+    {
+        /* TODO Assignment 3: Load and link the shaders. Keep in mind that vertex, fragment,
+         * and program are static variables meaning they are *shared across all instances of
+         * this class. So you only have to initialize them once when the first instance of
+         * the class is created.
+         */
+        program = glCreateProgram();
+        vertex = load_shader_file("res/nonuniform.vx", GL_VERTEX_SHADER);
+        fragment = load_shader_file("res/nonuniform.ft", GL_FRAGMENT_SHADER);
+        
+        glAttachShader(program, vertex);
+        glAttachShader(program, fragment);
+        glLinkProgram(program);
+    }
+}
+
+nonuniformhdl::~nonuniformhdl()
+{
+    
+}
+
+void nonuniformhdl::apply(const vector<lighthdl*> &lights)
+{
+    // TODO Assignment 3: Apply the shader program and pass it the necessary uniform values
+    glUseProgram(program);
+    GLint emLoc = glGetUniformLocation(program, "emission");
+    GLint amLoc = glGetUniformLocation(program, "ambient");
+    GLint diLoc = glGetUniformLocation(program, "diffuse");
+    GLint spLoc = glGetUniformLocation(program, "specular");
+    GLint shLoc = glGetUniformLocation(program, "shininess");
+    
+    glUniform3fv(emLoc, 1, &this->emission[0]);
+    glUniform3fv(amLoc, 1, &this->ambient[0]);
+    glUniform3fv(diLoc, 1, &this->diffuse[0]);
+    glUniform3fv(spLoc, 1, &this->specular[0]);
+    glUniform1f(shLoc, this->shininess);
+    
+    int pCount = 0, sCount = 0, dCount = 0;
+    for (int i = 0; i < lights.size(); i++) {
+        if (lights[i]) {
+            if (lights[i]->type == "point") {
+                lights[i]->apply(to_string(pCount), program);
+                pCount++;
+            } else if (lights[i]->type == "spot"){
+                lights[i]->apply(to_string(sCount), program);
+                sCount++;
+            } else if (lights[i]->type == "directional") {
+                lights[i]->apply(to_string(dCount), program);
+                dCount++;
+            }
+        }
+    }
+}
+
+materialhdl *nonuniformhdl::clone() const
+{
+    nonuniformhdl *result = new nonuniformhdl();
     result->type = type;
     result->emission = emission;
     result->ambient = ambient;

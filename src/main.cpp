@@ -66,14 +66,6 @@ enum Culling
     frontface = 2
 };
 
-enum Shading
-{
-    none = 0,
-    flat = 1,
-    gouraud = 2,
-    phong = 3
-};
-
 enum LightColor {
     White,
     Red,
@@ -93,6 +85,7 @@ enum Material {
     MatPhong,
     MatBrick,
     MatTexture,
+    MatNonUniform
 };
 
 bool keys[256];
@@ -102,7 +95,6 @@ int current_manipulation = manipulate::translate;
 int current_polygon = GL_FILL;
 int current_culling = Culling::backface;
 int current_normal = scenehdl::Normal::none;
-int current_shading = Shading::none;
 //int current_model;
 //float fovy, aspect, width, height, near, far;
 int current_model;
@@ -124,7 +116,6 @@ GLUI_FileBrowser *file_browser;
 GLUI_Listbox *current_objects;
 GLUI_Listbox *current_cameras;
 GLUI_Listbox *current_lights;
-GLUI_Listbox *list_shading;
 GLUI_Listbox *list_normal;
 GLUI_Listbox *list_culling;
 GLUI_Listbox *list_polygon;
@@ -132,7 +123,6 @@ GLUI_Listbox *list_manipulation;
 GLUI_Listbox *list_material;
 GLUI_Panel *camera_panel;
 GLUI_Panel *light_panel;
-GLUI_Panel *shading_panel;
 GLUI_Listbox *ambient_light_colors, *diffuse_light_colors, *specular_light_colors;
 GLUI_Panel *object_panel;
 GLUI_EditText *fovy_text;
@@ -1019,27 +1009,6 @@ void handle_polygon (int val){
     glutPostRedisplay();
 }
 
-void handle_shading (int val){
-    switch (val){
-        case Shading::none:
-            current_shading = Shading::none;
-            break;
-        case Shading::flat:
-            current_shading = Shading::flat;
-            break;
-        case Shading::gouraud:
-            current_shading = Shading::gouraud;
-            break;
-        case Shading::phong:
-            current_shading = Shading::phong;
-            break;
-        default:
-            break;
-    }
-    
-    glutPostRedisplay();
-}
-
 void handle_culling (int val){
     switch (current_culling){
         case Culling::disable:
@@ -1096,6 +1065,9 @@ void handle_material (int val) {
         case Material::MatTexture:
             material = new texturehdl();
             break;
+        case Material::MatNonUniform:
+            material = new nonuniformhdl();
+            break;
         default:
             material = new whitehdl();
             break;
@@ -1132,6 +1104,9 @@ void set_material_info(int obj_ind){
             
         } else if ( type == "texture") {
             list_material->set_int_val(Material::MatTexture);
+            
+        } else if ( type == "nonuniform") {
+            list_material->set_int_val(Material::MatNonUniform);
         }
     }
 }
@@ -1440,6 +1415,7 @@ void setup_glui() {
     list_material->add_item(Material::MatPhong, "Phong");
     list_material->add_item(Material::MatBrick, "Brick");
     list_material->add_item(Material::MatTexture, "Texture");
+    list_material->add_item(Material::MatNonUniform, "Non Uniform");
 
     glui->add_button_to_panel(object_panel, "Delete", 0, handle_delete);
 

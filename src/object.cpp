@@ -26,7 +26,6 @@ void rigidhdl::draw()
 //    indices.push_back(0);
 //    indices.push_back(1);
 //    indices.push_back(2);
-
     
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
@@ -91,8 +90,7 @@ void objecthdl::draw(const vector<lighthdl*> &lights)
     glRotatef(orientation[0], 1., 0., 0.);
     
     for (vector<rigidhdl>::iterator iter = rigid.begin(); iter != rigid.end(); ++iter) {
-        // TODO Assignment 2: Pass the material as a uniform into the renderer
-//        canvas->uniform[(*iter).material] = material[(*iter).material];
+
         materialhdl *mater = material[(*iter).material];
         if (!mater) {
             mater = new whitehdl;
@@ -100,10 +98,6 @@ void objecthdl::draw(const vector<lighthdl*> &lights)
         }
         mater->apply(lights);
         (*iter).draw();
-        
-        // TODO Assignment 2: clear the material in the uniform list
-//        canvas->uniform.erase((*iter).material);
-
     }
 
     // Undo transformations

@@ -1,0 +1,26 @@
+#include "light.glsl"
+
+#define M_PI 3.1415926535897932384626433832795
+
+uniform vec3 emission;
+uniform vec3 ambient;
+uniform vec3 diffuse;
+uniform vec3 specular;
+uniform float shininess;
+
+varying vec3 eye_space_vertex;
+varying vec3 eye_space_normal;
+varying vec3 object_space_vertex;
+
+void main()
+{
+    vec3 nu_ambient = ambient;
+    vec3 nu_diffuse = diffuse;
+    vec3 nu_specular = specular;
+
+    nu_ambient *= (pow(cos(object_space_vertex.x*M_PI*4.),2.) + pow(sin(object_space_vertex.y*M_PI*4.),2.));
+    nu_diffuse *= (pow(cos(object_space_vertex.x*M_PI*4.),2.) + pow(sin(object_space_vertex.y*M_PI*4.),2.));
+    nu_specular *= (pow(cos(object_space_vertex.x*M_PI*4.),2.) + pow(sin(object_space_vertex.y*M_PI*4.),2.));
+
+    gl_FragColor = vec4(lighting(emission, nu_ambient, nu_diffuse, nu_specular, shininess, eye_space_vertex, eye_space_normal), 1.0);
+}
