@@ -1,0 +1,24 @@
+#version 120
+
+#include "lights.glsl"
+
+varying vec2 brick_coord;
+varying vec3 eye_space_vertex;
+varying vec3 eye_space_normal;
+
+void main(){
+
+    float brick_size = 0.2;
+    vec3 brick_color = vec3(0.7, 0.1, 0.1);
+    vec3 mortar_color = vec3(0.8, 0.8, 0.8);
+    vec2 brick_pct = vec2(0.85, 0.85);
+
+    vec2 interp = brick_coord/brick_size;
+    if (fract(interp.y * 0.5) > 0.5)
+        interp.x += 0.5;
+
+    interp = step(fract(interp), brick_pct);
+    vec3 mixture = mix(mortar_color, brick_color, interp.x*interp.y);
+    gl_FragColor = lighting(vec3(0.0), mixture, mixture, mixture, 1.0, eye_space_vertex, eye_space_normal);
+
+}
