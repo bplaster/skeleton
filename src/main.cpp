@@ -254,6 +254,17 @@ void pmotionfunc(int x, int y)
             glGetIntegerv(GL_VIEWPORT, viewport);
             
             GLdouble unX, unY, unZ;
+            
+            // Get near coordinate of active camera
+            float z;
+            string camera_type = scene.cameras[scene.active_camera]->type;
+            if (camera_type == "ortho") {
+                z = dynamic_cast<orthohdl *>(scene.cameras[scene.active_camera])->near;
+            } else if (camera_type == "frustum") {
+                z = dynamic_cast<frustumhdl *>(scene.cameras[scene.active_camera])->near;
+            } else if (camera_type == "perspective"){
+                z = dynamic_cast<perspectivehdl *>(scene.cameras[scene.active_camera])->near;
+            }
             gluUnProject((float)x, (float)y, 1.0, model, projection, viewport,  &unX, &unY, &unZ);
 
             if (scene.cameras[scene.active_camera]->type == "ortho")

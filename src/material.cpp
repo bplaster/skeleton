@@ -465,6 +465,7 @@ materialhdl *nonuniformhdl::clone() const
     return result;
 }
 
+// Gets rid of additional light information stored in uniform
 void materialhdl::check (int count, string light_type, GLuint program) {
     GLint nLoc;
     string startlName;
