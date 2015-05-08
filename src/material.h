@@ -18,6 +18,8 @@ struct materialhdl
     
     virtual void apply(const vector<lighthdl*> &lights) = 0;
     virtual materialhdl *clone() const = 0;
+    
+    void check (int count, string light_type, GLuint program);
 };
 
 struct whitehdl : materialhdl

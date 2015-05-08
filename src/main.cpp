@@ -1577,6 +1577,7 @@ int main(int argc, char **argv)
 	cout << "Status: Using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
 
     glFrontFace(GL_CW);
 

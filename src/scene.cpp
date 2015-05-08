@@ -28,6 +28,9 @@ scenehdl::~scenehdl()
  */
 void scenehdl::draw()
 {
+    // Refresh shader
+    
+    
     // Set projection matrix
     // TODO: doesn't need to happen every frame
     glMatrixMode(GL_PROJECTION);
@@ -112,4 +115,8 @@ bool scenehdl::active_object_valid()
 bool scenehdl::active_light_valid()
 {
     return (active_light >= 0 && active_light < lights.size() && lights[active_light] != NULL);
+}
+
+void clear_glsl() {
+    
 }

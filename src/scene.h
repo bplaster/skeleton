@@ -39,7 +39,7 @@ struct scenehdl
     bool active_light_valid();
 
 	void create_camera();
-
+    void clear_glsl();
 };
 
 #endif

@@ -77,7 +77,7 @@ void directionalhdl::apply(string name, GLuint program)
     GLint diLoc = glGetUniformLocation(program, (lName+"diffuse").c_str());
     GLint spLoc = glGetUniformLocation(program, (lName+"specular").c_str());
     
-    glUniform1i(nLoc, stoi(name)+1);
+    //glUniform1i(nLoc, stoi(name)+1);
     glUniform3fv(drLoc, 1, &this->direction[0]);
     glUniform3fv(amLoc, 1, &this->ambient[0]);
     glUniform3fv(diLoc, 1, &this->diffuse[0]);
@@ -136,7 +136,7 @@ void pointhdl::apply(string name, GLuint program)
     GLint spLoc = glGetUniformLocation(program, (lName+"specular").c_str());
     GLint atLoc = glGetUniformLocation(program, (lName+"attenuation").c_str());
     
-    glUniform1i(nLoc, stoi(name)+1);
+    //glUniform1i(nLoc, stoi(name)+1);
     glUniform3fv(poLoc, 1, &this->position[0]);
     glUniform3fv(amLoc, 1, &this->ambient[0]);
     glUniform3fv(diLoc, 1, &this->diffuse[0]);
@@ -220,7 +220,7 @@ void spothdl::apply(string name, GLuint program)
     GLint exLoc = glGetUniformLocation(program, (lname+"exponent").c_str());
     
     // Pass uniform values to shader
-    glUniform1i(nLoc, stoi(name)+1);
+    //glUniform1i(nLoc, stoi(name)+1);
     glUniform3fv(poLoc, 1, &this->position[0]);
     glUniform3fv(drLoc, 1, &this->direction[0]);
     glUniform3fv(amLoc, 1, &this->ambient[0]);

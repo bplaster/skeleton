@@ -126,6 +126,10 @@ void brickhdl::apply(const vector<lighthdl*> &lights)
             }
         }
     }
+    
+    check (pCount, "point", program);
+    check (sCount, "spot", program);
+    check (dCount, "directional", program);
 
 }
 
@@ -160,6 +164,8 @@ texturehdl::texturehdl()
         
         glGenTextures(1, &texture);
         
+        // Set to texture slot 0
+        // TODO: Add enum for texture if and when there are multiple textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         
@@ -168,10 +174,6 @@ texturehdl::texturehdl()
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        
-        glEnable(GL_TEXTURE_2D);
-        glShadeModel(GL_FLAT);
-
         
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
@@ -191,7 +193,7 @@ void texturehdl::apply(const vector<lighthdl*> &lights)
     GLint txLoc = glGetUniformLocation(program, "tex");
 
     glUniform1f(shLoc, this->shininess);
-    glUniform1f(txLoc, this->texture);
+    glUniform1f(txLoc, 0);
 
     int pCount = 0, sCount = 0, dCount = 0;
     for (int i = 0; i < lights.size(); i++) {
@@ -208,7 +210,9 @@ void texturehdl::apply(const vector<lighthdl*> &lights)
             }
         }
     }
-
+    check (pCount, "point", program);
+    check (sCount, "spot", program);
+    check (dCount, "directional", program);
 
 }
 
@@ -283,7 +287,10 @@ void gouraudhdl::apply(const vector<lighthdl*> &lights)
             }
         }
     }
-
+    
+    check (pCount, "point", program);
+    check (sCount, "spot", program);
+    check (dCount, "directional", program);
 }
 
 materialhdl *gouraudhdl::clone() const
@@ -360,6 +367,10 @@ void phonghdl::apply(const vector<lighthdl*> &lights)
             }
         }
     }
+    
+    check (pCount, "point", program);
+    check (sCount, "spot", program);
+    check (dCount, "directional", program);
 }
 
 materialhdl *phonghdl::clone() const
@@ -436,6 +447,10 @@ void nonuniformhdl::apply(const vector<lighthdl*> &lights)
             }
         }
     }
+    
+    check (pCount, "point", program);
+    check (sCount, "spot", program);
+    check (dCount, "directional", program);
 }
 
 materialhdl *nonuniformhdl::clone() const
@@ -450,4 +465,86 @@ materialhdl *nonuniformhdl::clone() const
     return result;
 }
 
+void materialhdl::check (int count, string light_type, GLuint program) {
+    GLint nLoc;
+    string startlName;
+    vec3f replace = {0.0,0.0,0.0};
+    
+    if (light_type == "point"){
+        nLoc = glGetUniformLocation(program, "num_plights");
+        startlName = "plights[";
+        int value;
+        glGetUniformiv(program, nLoc, &value);
+        if (value > count) {
+            for (int i=count+1; i<(value+1); i++){
+                string lName = startlName + to_string(i) + "].";
+                GLint poLoc = glGetUniformLocation(program, (lName+"position").c_str());
+                GLint amLoc = glGetUniformLocation(program, (lName+"ambient").c_str());
+                GLint diLoc = glGetUniformLocation(program, (lName+"diffuse").c_str());
+                GLint spLoc = glGetUniformLocation(program, (lName+"specular").c_str());
+                GLint atLoc = glGetUniformLocation(program, (lName+"attenuation").c_str());
+                
+                glUniform3fv(poLoc, 1, &replace[0]);
+                glUniform3fv(amLoc, 1, &replace[0]);
+                glUniform3fv(diLoc, 1, &replace[0]);
+                glUniform3fv(spLoc, 1, &replace[0]);
+                glUniform3fv(atLoc, 1, &replace[0]);
+            }
+        }
 
+    }
+    else if (light_type == "spot") {
+        nLoc = glGetUniformLocation(program, "num_slights");
+        startlName = "slights[";
+        int value;
+        glGetUniformiv(program, nLoc, &value);
+        if (value > count) {
+            for (int i=count+1; i<(value+1); i++){
+                string lname = startlName + to_string(i) + "].";
+                GLint poLoc = glGetUniformLocation(program, (lname+"position").c_str());
+                GLint drLoc = glGetUniformLocation(program, (lname+"direction").c_str());
+                
+                GLint amLoc = glGetUniformLocation(program, (lname+"ambient").c_str());
+                GLint diLoc = glGetUniformLocation(program, (lname+"diffuse").c_str());
+                GLint spLoc = glGetUniformLocation(program, (lname+"specular").c_str());
+                
+                GLint atLoc = glGetUniformLocation(program, (lname+"attenuation").c_str());
+                GLint cuLoc = glGetUniformLocation(program, (lname+"cutoff").c_str());
+                GLint exLoc = glGetUniformLocation(program, (lname+"exponent").c_str());
+                
+                glUniform3fv(poLoc, 1, &replace[0]);
+                glUniform3fv(drLoc, 1, &replace[0]);
+                glUniform3fv(amLoc, 1, &replace[0]);
+                glUniform3fv(diLoc, 1, &replace[0]);
+                glUniform3fv(spLoc, 1, &replace[0]);
+                glUniform3fv(atLoc, 1, &replace[0]);
+                glUniform1f(cuLoc, 0.0);
+                glUniform1f(exLoc, 0.0);
+            }
+        }
+
+    }
+    else if (light_type == "directional") {
+        nLoc = glGetUniformLocation(program, "num_dlights");
+        startlName = "dlights[";
+        int value;
+        glGetUniformiv(program, nLoc, &value);
+        if (value > count) {
+            for (int i=count+1; i<(value+1); i++){
+                string lName = startlName + to_string(i) + "].";
+                GLint drLoc = glGetUniformLocation(program, (lName+"direction").c_str());
+                GLint amLoc = glGetUniformLocation(program, (lName+"ambient").c_str());
+                GLint diLoc = glGetUniformLocation(program, (lName+"diffuse").c_str());
+                GLint spLoc = glGetUniformLocation(program, (lName+"specular").c_str());
+                
+                glUniform3fv(drLoc, 1, &replace[0]);
+                glUniform3fv(amLoc, 1, &replace[0]);
+                glUniform3fv(diLoc, 1, &replace[0]);
+                glUniform3fv(spLoc, 1, &replace[0]);
+            }
+        }
+
+    }
+    
+    glUniform1i(nLoc, count);
+}
