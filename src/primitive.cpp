@@ -186,7 +186,8 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           cos(2*m_pi*(float)i/(float)slices),
                                           0.0,
-                                          sin(2*m_pi*(float)i/(float)slices), (cos(m_pi*(float)i/(float)slices) + 1.0)/2.0, 0.0));
+                                          sin(2*m_pi*(float)i/(float)slices), (float)i/(float)slices, 0.0));
+    
     
     for (int i = 0; i <= slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
@@ -194,7 +195,7 @@ cylinderhdl::cylinderhdl(float radius, float height, int slices)
                                           radius*sin(2*m_pi*(float)i/(float)slices),
                                           cos(2*m_pi*(float)i/(float)slices),
                                           0.0,
-                                          sin(2*m_pi*(float)i/(float)slices), (cos(m_pi*(float)i/(float)slices) + 1.0)/2.0, 1.0));
+                                          sin(2*m_pi*(float)i/(float)slices), (float)i/(float)slices, 1.0));
     
     for (int i = 0; i <= slices; i++)
         rigid[0].geometry.push_back(vec8f(radius*cos(2*m_pi*(float)i/(float)slices),
