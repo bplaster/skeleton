@@ -111,7 +111,7 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 	rigid.push_back(rigidhdl());
 
 	rigid[0].geometry.reserve(2 + (levels-1)*slices);
-	rigid[0].geometry.push_back(vec8f(0.0, 0.0, radius, 0.0, 0.0, 1.0, textureS(0.0, 1.0), textureT(0.0)));
+	rigid[0].geometry.push_back(vec8f(0.0, 0.0, radius, 0.0, 0.0, 1.0, textureS(0.0, 0.0), textureT(1.0)));
 	for (int i = 1; i < levels; i++)
 		for (int j = 0; j <= slices; j++)
 		{
@@ -119,9 +119,9 @@ spherehdl::spherehdl(float radius, int levels, int slices)
 					  sin(m_pi*(float)i/(float)levels)*sin(2.0*m_pi*(float)j/(float)slices),
 					  cos(m_pi*(float)i/(float)levels));
 			rigid[0].geometry.push_back(vec8f(radius*dir[0], radius*dir[1], radius*dir[2],
-									 dir[0], dir[1], dir[2], textureS(dir[0], dir[2]), textureT(dir[1])));
+									 dir[0], dir[1], dir[2], textureS(dir[0], dir[1]), textureT(dir[2])));
 		}
-	rigid[0].geometry.push_back(vec8f(0.0, 0.0, -radius, 0.0, 0.0, -1.0, textureS(0.0, -1.0), textureT(0.0)));
+	rigid[0].geometry.push_back(vec8f(0.0, 0.0, -radius, 0.0, 0.0, -1.0, textureS(0.0, 0.0), textureT(-1.0)));
 
 	for (int i = 0; i < slices; i++)
 	{
